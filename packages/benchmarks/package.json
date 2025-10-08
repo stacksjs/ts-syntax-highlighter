@@ -1,0 +1,21 @@
+{
+  "name": "benchmarks",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Benchmarks for ts-syntax-highlighter",
+  "scripts": {
+    "bench": "bun run src/index.ts",
+    "bench:small": "bun run src/bench-small.ts",
+    "bench:large": "bun run src/bench-large.ts",
+    "bench:cache": "bun run src/bench-cache.ts"
+  },
+  "dependencies": {
+    "ts-syntax-highlighter": "workspace:*"
+  },
+  "devDependencies": {
+    "shiki": "^3.13.0",
+    "highlight.js": "^11.11.1",
+    "mitata": "^1.0.34"
+  }
+}
