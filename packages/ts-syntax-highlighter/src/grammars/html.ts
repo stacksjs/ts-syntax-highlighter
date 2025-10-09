@@ -4,11 +4,20 @@ export const htmlGrammar: Grammar = {
   name: 'HTML',
   scopeName: 'text.html.basic',
   patterns: [
+    { include: '#doctype' },
     { include: '#comments' },
     { include: '#tags' },
     { include: '#entities' },
   ],
   repository: {
+    doctype: {
+      patterns: [
+        {
+          name: 'meta.tag.sgml.doctype.html',
+          match: '<!DOCTYPE[^>]*>',
+        },
+      ],
+    },
     comments: {
       patterns: [
         {
@@ -71,7 +80,7 @@ export const htmlGrammar: Grammar = {
       patterns: [
         {
           name: 'entity.other.attribute-name.html',
-          match: '\\b([a-zA-Z-:]+)',
+          match: '\\b(data-[a-zA-Z0-9-]+|aria-[a-zA-Z0-9-]+|on[a-z]+|[a-zA-Z-:]+)',
         },
         {
           name: 'string.quoted.double.html',

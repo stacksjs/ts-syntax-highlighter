@@ -22,6 +22,7 @@ export const javascriptGrammar: Grammar = {
     'throw': 'keyword.control.js',
     'async': 'keyword.control.js',
     'await': 'keyword.control.js',
+    'yield': 'keyword.control.js',
     // Storage types
     'const': 'storage.type.js',
     'let': 'storage.type.js',
@@ -30,12 +31,16 @@ export const javascriptGrammar: Grammar = {
     'class': 'storage.type.js',
     'extends': 'storage.type.js',
     'static': 'storage.type.js',
+    'get': 'storage.type.js',
+    'set': 'storage.type.js',
     // Operators
     'new': 'keyword.operator.new.js',
     'delete': 'keyword.operator.new.js',
     'typeof': 'keyword.operator.new.js',
     'instanceof': 'keyword.operator.new.js',
     'void': 'keyword.operator.new.js',
+    'in': 'keyword.operator.new.js',
+    'of': 'keyword.operator.new.js',
     // Constants
     'true': 'constant.language.js',
     'false': 'constant.language.js',
@@ -43,15 +48,21 @@ export const javascriptGrammar: Grammar = {
     'undefined': 'constant.language.js',
     'NaN': 'constant.language.js',
     'Infinity': 'constant.language.js',
+    'this': 'constant.language.js',
+    'super': 'constant.language.js',
+    'arguments': 'constant.language.js',
     // Module keywords
     'import': 'keyword.other.js',
     'export': 'keyword.other.js',
     'from': 'keyword.other.js',
     'as': 'keyword.other.js',
+    'with': 'keyword.other.js',
+    'debugger': 'keyword.other.js',
   },
   patterns: [
     { include: '#comments' },     // Must be before operators (// vs /)
     { include: '#strings' },      // Must be before operators
+    { include: '#regex' },        // Must be before operators (/ vs /)
     { include: '#keywords' },     // Very common - prioritize
     { include: '#numbers' },      // Common
     { include: '#functions' },    // Common
@@ -117,11 +128,32 @@ export const javascriptGrammar: Grammar = {
         },
       ],
     },
+    regex: {
+      patterns: [
+        {
+          name: 'string.regexp.js',
+          begin: '(?<=[=(,\\[!&|?{};:])\\s*(\\/)',
+          beginCaptures: {
+            '1': { name: 'punctuation.definition.string.begin.js' },
+          },
+          end: '(\\/)[gimsuvy]*',
+          endCaptures: {
+            '1': { name: 'punctuation.definition.string.end.js' },
+          },
+          patterns: [
+            {
+              name: 'constant.character.escape.js',
+              match: '\\\\.',
+            },
+          ],
+        },
+      ],
+    },
     numbers: {
       patterns: [
         {
           name: 'constant.numeric.js',
-          match: '\\b(0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|\\d+(\\.\\d+)?([eE][+-]?\\d+)?)\\b',
+          match: '\\b(0[xX][0-9a-fA-F_]+|0[bB][01_]+|0[oO][0-7_]+|\\d+(_\\d+)*(\\.\\d+(_\\d+)?)?([eE][+-]?\\d+)?)[nN]?\\b',
         },
       ],
     },
@@ -129,23 +161,23 @@ export const javascriptGrammar: Grammar = {
       patterns: [
         {
           name: 'keyword.control.js',
-          match: '\\b(if|else|switch|case|default|for|while|do|break|continue|return|try|catch|finally|throw|async|await)\\b',
+          match: '\\b(if|else|switch|case|default|for|while|do|break|continue|return|try|catch|finally|throw|async|await|yield)\\b',
         },
         {
           name: 'storage.type.js',
-          match: '\\b(const|let|var|function|class|extends|static|async)\\b',
+          match: '\\b(const|let|var|function|class|extends|static|async|get|set)\\b',
         },
         {
           name: 'keyword.operator.new.js',
-          match: '\\b(new|delete|typeof|instanceof|void)\\b',
+          match: '\\b(new|delete|typeof|instanceof|void|in|of)\\b',
         },
         {
           name: 'constant.language.js',
-          match: '\\b(true|false|null|undefined|NaN|Infinity)\\b',
+          match: '\\b(true|false|null|undefined|NaN|Infinity|this|super|arguments)\\b',
         },
         {
           name: 'keyword.other.js',
-          match: '\\b(import|export|from|as|default)\\b',
+          match: '\\b(import|export|from|as|default|with|debugger)\\b',
         },
       ],
     },

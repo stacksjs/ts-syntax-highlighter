@@ -22,6 +22,7 @@ export const typescriptGrammar: Grammar = {
     'throw': 'keyword.control.ts',
     'async': 'keyword.control.ts',
     'await': 'keyword.control.ts',
+    'yield': 'keyword.control.ts',
     // Storage types
     'const': 'storage.type.ts',
     'let': 'storage.type.ts',
@@ -53,12 +54,19 @@ export const typescriptGrammar: Grammar = {
     'object': 'storage.type.ts',
     'symbol': 'storage.type.ts',
     'bigint': 'storage.type.ts',
+    'get': 'storage.type.ts',
+    'set': 'storage.type.ts',
     // Operators
     'new': 'keyword.operator.new.ts',
     'delete': 'keyword.operator.new.ts',
     'typeof': 'keyword.operator.new.ts',
     'instanceof': 'keyword.operator.new.ts',
     'as': 'keyword.operator.new.ts',
+    'in': 'keyword.operator.new.ts',
+    'of': 'keyword.operator.new.ts',
+    'is': 'keyword.operator.new.ts',
+    'keyof': 'keyword.operator.new.ts',
+    'infer': 'keyword.operator.new.ts',
     // Constants
     'true': 'constant.language.ts',
     'false': 'constant.language.ts',
@@ -68,14 +76,19 @@ export const typescriptGrammar: Grammar = {
     'Infinity': 'constant.language.ts',
     'this': 'constant.language.ts',
     'super': 'constant.language.ts',
+    'arguments': 'constant.language.ts',
     // Module keywords
     'import': 'keyword.other.ts',
     'export': 'keyword.other.ts',
     'from': 'keyword.other.ts',
+    'require': 'keyword.other.ts',
+    'with': 'keyword.other.ts',
+    'debugger': 'keyword.other.ts',
   },
   patterns: [
     { include: '#comments' },     // Must be before operators (// vs /)
     { include: '#strings' },      // Must be before operators
+    { include: '#regex' },        // Must be before operators (/ vs /)
     { include: '#keywords' },     // Very common - prioritize
     { include: '#numbers' },      // Common
     { include: '#functions' },    // Common
@@ -142,11 +155,32 @@ export const typescriptGrammar: Grammar = {
         },
       ],
     },
+    regex: {
+      patterns: [
+        {
+          name: 'string.regexp.ts',
+          begin: '(?<=[=(,\\[!&|?{};:])\\s*(\\/)',
+          beginCaptures: {
+            '1': { name: 'punctuation.definition.string.begin.ts' },
+          },
+          end: '(\\/)[gimsuvy]*',
+          endCaptures: {
+            '1': { name: 'punctuation.definition.string.end.ts' },
+          },
+          patterns: [
+            {
+              name: 'constant.character.escape.ts',
+              match: '\\\\.',
+            },
+          ],
+        },
+      ],
+    },
     numbers: {
       patterns: [
         {
           name: 'constant.numeric.ts',
-          match: '\\b(0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|\\d+(\\.\\d+)?([eE][+-]?\\d+)?)\\b',
+          match: '\\b(0[xX][0-9a-fA-F_]+|0[bB][01_]+|0[oO][0-7_]+|\\d+(_\\d+)*(\\.\\d+(_\\d+)?)?([eE][+-]?\\d+)?)[nN]?\\b',
         },
       ],
     },
@@ -170,23 +204,23 @@ export const typescriptGrammar: Grammar = {
       patterns: [
         {
           name: 'keyword.control.ts',
-          match: '\\b(if|else|switch|case|default|for|while|do|break|continue|return|try|catch|finally|throw|async|await)\\b',
+          match: '\\b(if|else|switch|case|default|for|while|do|break|continue|return|try|catch|finally|throw|async|await|yield)\\b',
         },
         {
           name: 'storage.type.ts',
-          match: '\\b(const|let|var|function|class|extends|implements|static|async|type|interface|enum|namespace|module|declare|public|private|protected|readonly|abstract)\\b',
+          match: '\\b(const|let|var|function|class|extends|implements|static|async|type|interface|enum|namespace|module|declare|public|private|protected|readonly|abstract|get|set)\\b',
         },
         {
           name: 'keyword.operator.new.ts',
-          match: '\\b(new|delete|typeof|instanceof|void|as)\\b',
+          match: '\\b(new|delete|typeof|instanceof|void|as|in|of|is|keyof|infer)\\b',
         },
         {
           name: 'constant.language.ts',
-          match: '\\b(true|false|null|undefined|NaN|Infinity|this|super)\\b',
+          match: '\\b(true|false|null|undefined|NaN|Infinity|this|super|arguments)\\b',
         },
         {
           name: 'keyword.other.ts',
-          match: '\\b(import|export|from|default)\\b',
+          match: '\\b(import|export|from|default|require|with|debugger)\\b',
         },
       ],
     },

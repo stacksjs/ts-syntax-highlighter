@@ -5,6 +5,7 @@ export const cssGrammar: Grammar = {
   scopeName: 'source.css',
   patterns: [
     { include: '#comments' },
+    { include: '#at-rules' },
     { include: '#selectors' },
     { include: '#properties' },
     { include: '#values' },
@@ -20,6 +21,14 @@ export const cssGrammar: Grammar = {
           name: 'comment.block.css',
           begin: '\\/\\*',
           end: '\\*\\/',
+        },
+      ],
+    },
+    'at-rules': {
+      patterns: [
+        {
+          name: 'keyword.control.at-rule.css',
+          match: '@(media|import|charset|namespace|keyframes|font-face|supports|page|document|viewport|counter-style|font-feature-values|property|layer|container)\\b',
         },
       ],
     },
