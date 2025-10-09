@@ -27,7 +27,6 @@
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
-    "postinstall": "bunx git-hooks",
     "dev:docs": "bun --bun vitepress dev docs",
     "build:docs": "bun --bun vitepress build docs",
     "preview:docs": "bun --bun vitepress preview docs",
@@ -42,7 +41,7 @@
     "@types/bun": "^1.2.23",
     "buddy-bot": "^0.9.7",
     "bun-git-hooks": "^0.2.19",
-    "bun-plugin-dtsx": "^0.21.12",
+    "bun-plugin-dtsx": "0.9.5",
     "typescript": "^5.9.3"
   },
   "overrides": {
