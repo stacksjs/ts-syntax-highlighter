@@ -60,19 +60,19 @@ const sidebar = [
     ],
   },
   {
+    text: 'Features',
+    items: [
+      { text: 'Performance', link: '/features/performance' },
+      { text: 'Modern Syntax', link: '/features/modern-syntax' },
+      { text: 'JSX/TSX Support', link: '/features/jsx-tsx' },
+    ],
+  },
+  {
     text: 'Core Concepts',
     items: [
       { text: 'Grammars', link: '/grammars' },
       { text: 'Tokenization', link: '/usage#working-with-tokens' },
-      { text: 'Performance', link: '/intro#performance-first' },
-    ],
-  },
-  {
-    text: 'Configuration',
-    items: [
-      { text: 'Basic Setup', link: '/config' },
-      { text: 'Language Detection', link: '/config#custom-language-detection' },
-      { text: 'Advanced Options', link: '/config#advanced-configuration' },
+      { text: 'Configuration', link: '/config' },
     ],
   },
   {
@@ -89,9 +89,19 @@ const sidebar = [
   {
     text: 'Advanced',
     items: [
-      { text: 'Custom Themes', link: '/usage#custom-theme-generator' },
-      { text: 'Batch Processing', link: '/config#batch-processing-configuration' },
+      { text: 'Custom Themes', link: '/advanced/custom-themes' },
+      { text: 'Batch Processing', link: '/advanced/batch-processing' },
       { text: 'Code Analysis', link: '/usage#code-statistics' },
+      { text: 'Performance Tuning', link: '/config#performance-tuning' },
+    ],
+  },
+  {
+    text: 'API Reference',
+    items: [
+      { text: 'Overview', link: '/api' },
+      { text: 'Tokenizer', link: '/api#tokenizer' },
+      { text: 'Language Functions', link: '/api#language-functions' },
+      { text: 'Types', link: '/api#types' },
     ],
   },
   { text: 'Showcase', link: '/showcase' },
