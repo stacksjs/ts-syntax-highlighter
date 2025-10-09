@@ -8,39 +8,59 @@ Comprehensive benchmarks comparing ts-syntax-highlighter to popular alternatives
 
 ### JavaScript Tokenization
 
-| Library | Time | Speedup |
-|---------|------|---------|
+| Library | Time | Speedup vs ts-syntax-highlighter |
+|---------|------|----------------------------------|
 | **ts-syntax-highlighter (Fast)** | **~0.05ms** | **Baseline** |
+| ts-syntax-highlighter (Sync) | ~0.08ms | 1.6x slower |
 | highlight.js | ~3.8ms | **76x slower** |
 | Prism.js | ~2.1ms | **42x slower** |
-| ts-syntax-highlighter (Sync) | ~0.08ms | 1.6x slower |
 
 ### TypeScript Tokenization
 
-| Library | Time | Speedup |
-|---------|------|---------|
+| Library | Time | Speedup vs ts-syntax-highlighter |
+|---------|------|----------------------------------|
 | **ts-syntax-highlighter (Fast)** | **~0.08ms** | **Baseline** |
+| ts-syntax-highlighter (Sync) | ~0.12ms | 1.5x slower |
 | highlight.js | ~1.0ms | **12x slower** |
 | Prism.js | ~0.6ms | **7.5x slower** |
-| ts-syntax-highlighter (Sync) | ~0.12ms | 1.5x slower |
 
 ### HTML Tokenization
 
-| Library | Time | Speedup |
-|---------|------|---------|
+| Library | Time | Speedup vs ts-syntax-highlighter |
+|---------|------|----------------------------------|
 | **ts-syntax-highlighter (Fast)** | **~0.04ms** | **Baseline** |
+| ts-syntax-highlighter (Sync) | ~0.06ms | 1.5x slower |
 | highlight.js | ~1.2ms | **30x slower** |
 | Prism.js | ~0.8ms | **20x slower** |
-| ts-syntax-highlighter (Sync) | ~0.06ms | 1.5x slower |
 
 ### CSS Tokenization
 
-| Library | Time | Speedup |
-|---------|------|---------|
+| Library | Time | Speedup vs ts-syntax-highlighter |
+|---------|------|----------------------------------|
 | **ts-syntax-highlighter (Fast)** | **~0.03ms** | **Baseline** |
+| ts-syntax-highlighter (Sync) | ~0.05ms | 1.7x slower |
 | highlight.js | ~0.9ms | **30x slower** |
 | Prism.js | ~0.5ms | **17x slower** |
-| ts-syntax-highlighter (Sync) | ~0.05ms | 1.7x slower |
+
+### Summary Table
+
+All languages compared side-by-side:
+
+| Operation | ts-syntax-highlighter (Fast) | highlight.js | Prism.js | Speedup vs highlight.js | Speedup vs Prism.js |
+|-----------|------------------------------|--------------|----------|------------------------|---------------------|
+| JavaScript tokenization | **~0.05ms** | ~3.8ms | ~2.1ms | **76x faster** | **42x faster** |
+| TypeScript tokenization | **~0.08ms** | ~1.0ms | ~0.6ms | **12x faster** | **7.5x faster** |
+| HTML tokenization | **~0.04ms** | ~1.2ms | ~0.8ms | **30x faster** | **20x faster** |
+| CSS tokenization | **~0.03ms** | ~0.9ms | ~0.5ms | **30x faster** | **17x faster** |
+
+### Our Performance Modes
+
+| Operation | Fast Mode (Async) | Sync Mode | Difference |
+|-----------|------------------|-----------|------------|
+| JavaScript tokenization | ~0.05ms | ~0.08ms | 1.6x |
+| TypeScript tokenization | ~0.08ms | ~0.12ms | 1.5x |
+| HTML tokenization | ~0.04ms | ~0.06ms | 1.5x |
+| CSS tokenization | ~0.03ms | ~0.05ms | 1.7x |
 
 ## Performance Characteristics
 
