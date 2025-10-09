@@ -2,7 +2,7 @@ import { bench, group, run } from 'mitata'
 import { createHighlighter } from 'ts-syntax-highlighter'
 import { codeToHtml } from 'shiki'
 import hljs from 'highlight.js'
-import { largeCode, mediumCode, smallCode } from './fixtures'
+import { largeCode, mediumCode, smallCode, mediumHtml, smallHtml, mediumCss, smallCss } from './fixtures'
 
 console.log('🏁 Starting benchmarks...\n')
 
@@ -14,12 +14,12 @@ const tsHighlighter = await createHighlighter({
 
 // Small code benchmarks
 group('Small Code (10 lines)', () => {
-  bench('ts-syntax-highlighter (sync)', () => {
-    tsHighlighter.highlightSync(smallCode, 'javascript')
+  bench('ts-syntax-highlighter (fast)', () => {
+    tsHighlighter.highlightFast(smallCode, 'javascript')
   })
 
-  bench('ts-syntax-highlighter (async)', async () => {
-    await tsHighlighter.highlight(smallCode, 'javascript')
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(smallCode, 'javascript')
   })
 
   bench('shiki', async () => {
@@ -36,12 +36,12 @@ group('Small Code (10 lines)', () => {
 
 // Medium code benchmarks
 group('Medium Code (~50 lines)', () => {
-  bench('ts-syntax-highlighter (sync)', () => {
-    tsHighlighter.highlightSync(mediumCode, 'javascript')
+  bench('ts-syntax-highlighter (fast)', () => {
+    tsHighlighter.highlightFast(mediumCode, 'javascript')
   })
 
-  bench('ts-syntax-highlighter (async)', async () => {
-    await tsHighlighter.highlight(mediumCode, 'javascript')
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(mediumCode, 'javascript')
   })
 
   bench('shiki', async () => {
@@ -58,12 +58,12 @@ group('Medium Code (~50 lines)', () => {
 
 // Large code benchmarks
 group('Large Code (~150 lines)', () => {
-  bench('ts-syntax-highlighter (sync)', () => {
-    tsHighlighter.highlightSync(largeCode, 'javascript')
+  bench('ts-syntax-highlighter (fast)', () => {
+    tsHighlighter.highlightFast(largeCode, 'javascript')
   })
 
-  bench('ts-syntax-highlighter (async)', async () => {
-    await tsHighlighter.highlight(largeCode, 'javascript')
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(largeCode, 'javascript')
   })
 
   bench('shiki', async () => {
@@ -75,6 +75,50 @@ group('Large Code (~150 lines)', () => {
 
   bench('highlight.js', () => {
     hljs.highlight(largeCode, { language: 'javascript' })
+  })
+})
+
+// HTML benchmarks
+group('HTML Highlighting', () => {
+  bench('ts-syntax-highlighter (fast)', () => {
+    tsHighlighter.highlightFast(mediumHtml, 'html')
+  })
+
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(mediumHtml, 'html')
+  })
+
+  bench('shiki', async () => {
+    await codeToHtml(mediumHtml, {
+      lang: 'html',
+      theme: 'github-dark',
+    })
+  })
+
+  bench('highlight.js', () => {
+    hljs.highlight(mediumHtml, { language: 'html' })
+  })
+})
+
+// CSS benchmarks
+group('CSS Highlighting', () => {
+  bench('ts-syntax-highlighter (fast)', () => {
+    tsHighlighter.highlightFast(mediumCss, 'css')
+  })
+
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(mediumCss, 'css')
+  })
+
+  bench('shiki', async () => {
+    await codeToHtml(mediumCss, {
+      lang: 'css',
+      theme: 'github-dark',
+    })
+  })
+
+  bench('highlight.js', () => {
+    hljs.highlight(mediumCss, { language: 'css' })
   })
 })
 

@@ -1,5 +1,6 @@
 import type {
   CacheEntry,
+  FastTokenLine,
   Highlighter as IHighlighter,
   Language,
   Plugin,
@@ -13,6 +14,7 @@ import { getLanguage, languages } from './grammars'
 import { Renderer } from './renderer'
 import { getTheme, themes } from './themes'
 import { Tokenizer } from './tokenizer'
+import { FastTokenizer } from './fast-tokenizer'
 
 export class Highlighter implements IHighlighter {
   private config: SyntaxHighlighterConfig
@@ -128,6 +130,21 @@ export class Highlighter implements IHighlighter {
    */
   async highlight(code: string, lang: string, options: RenderOptions = {}): Promise<RenderedCode> {
     return this.highlightSync(code, lang, options)
+  }
+
+  /**
+   * Ultra-fast highlighting (minimal overhead, no scopes/themes)
+   * Use this when you need highlight.js-level performance and don't need advanced features
+   * Returns minimal token info: just type and content
+   */
+  highlightFast(code: string, lang: string): FastTokenLine[] {
+    const language = this.getLanguageById(lang)
+    if (!language) {
+      throw new Error(`Language "${lang}" not found. Available languages: ${this.getSupportedLanguages().join(', ')}`)
+    }
+
+    const tokenizer = new FastTokenizer(language.grammar)
+    return tokenizer.tokenize(code)
   }
 
   /**

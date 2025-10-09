@@ -30,6 +30,16 @@ export interface TokenLine {
   line: number
 }
 
+// Fast mode tokens (minimal overhead)
+export interface FastToken {
+  type: string
+  content: string
+}
+
+export interface FastTokenLine {
+  tokens: FastToken[]
+}
+
 // Grammar Types
 export interface Grammar {
   name: string

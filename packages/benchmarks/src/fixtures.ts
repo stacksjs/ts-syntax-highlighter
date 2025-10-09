@@ -236,3 +236,111 @@ export function generateLargeCode(lines = 10000): string {
 
   return result.join('\n')
 }
+
+// HTML code samples
+export const smallHtml = `
+<div class="container">
+  <h1>Hello World</h1>
+</div>
+`
+
+export const mediumHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sample Page</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar">
+      <a href="/" class="logo">My Site</a>
+      <ul class="nav-links">
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="content">
+    <article>
+      <h1>Welcome to My Site</h1>
+      <p>This is a sample paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
+      <img src="image.jpg" alt="Sample image" width="600" height="400">
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 My Site. All rights reserved.</p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
+`
+
+// CSS code samples
+export const smallCss = `
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+`
+
+export const mediumCss = `
+/* Reset styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Typography */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.site-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+  }
+}
+`
