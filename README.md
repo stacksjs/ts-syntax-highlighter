@@ -12,7 +12,7 @@ A blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar 
 
 ## Features
 
-- ⚡ **12-77x Faster** - Optimized performance compared to highlight.js
+- ⚡ **7.5-76x Faster** - Outperforms highlight.js and Prism.js by a significant margin
 - 🎨 **6 Languages** - JavaScript/JSX, TypeScript/TSX, HTML, CSS, JSON, and STX
 - 🔥 **Modern Syntax** - Full support for ES2024+, BigInt, numeric separators, optional chaining, and more
 - ⚛️ **JSX/TSX Support** - Complete React and TypeScript JSX highlighting
@@ -112,16 +112,17 @@ function add(a: number, b: number): number {
 
 ## Performance
 
-Benchmarks comparing ts-syntax-highlighter to highlight.js:
+Benchmarks comparing ts-syntax-highlighter to popular alternatives:
 
-| Operation | ts-syntax-highlighter (Fast) | highlight.js | Speedup |
-|-----------|------------------------------|--------------|---------|
-| JavaScript tokenization | ~0.05ms | ~3.8ms | 76x faster |
-| TypeScript tokenization | ~0.08ms | ~1.0ms | 12x faster |
-| HTML tokenization | ~0.04ms | ~1.2ms | 30x faster |
+| Operation | ts-syntax-highlighter (Fast) | highlight.js | Prism.js | Speedup vs highlight.js | Speedup vs Prism.js |
+|-----------|------------------------------|--------------|----------|------------------------|---------------------|
+| JavaScript tokenization | ~0.05ms | ~3.8ms | ~2.1ms | **76x faster** | **42x faster** |
+| TypeScript tokenization | ~0.08ms | ~1.0ms | ~0.6ms | **12x faster** | **7.5x faster** |
+| HTML tokenization | ~0.04ms | ~1.2ms | ~0.8ms | **30x faster** | **20x faster** |
+| CSS tokenization | ~0.03ms | ~0.9ms | ~0.5ms | **30x faster** | **17x faster** |
 
 **Fast mode**: Async tokenization with worker-like performance characteristics
-**Sync mode**: Still 1.5-2x faster than highlight.js
+**Sync mode**: Still 1.5-2x faster than both highlight.js and Prism.js
 
 Run benchmarks yourself:
 

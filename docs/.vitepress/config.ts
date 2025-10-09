@@ -52,23 +52,57 @@ const nav = [
 
 const sidebar = [
   {
-    text: 'Get Started',
+    text: 'Getting Started',
     items: [
-      { text: 'Intro', link: '/intro' },
-      { text: 'Install', link: '/install' },
-      { text: 'Usage', link: '/usage' },
-      { text: 'Config', link: '/config' },
+      { text: 'Introduction', link: '/intro' },
+      { text: 'Installation', link: '/install' },
+      { text: 'Quick Start', link: '/usage' },
     ],
   },
-  { text: 'Showcase', link: '/Showcase' },
+  {
+    text: 'Core Concepts',
+    items: [
+      { text: 'Grammars', link: '/grammars' },
+      { text: 'Tokenization', link: '/usage#working-with-tokens' },
+      { text: 'Performance', link: '/intro#performance-first' },
+    ],
+  },
+  {
+    text: 'Configuration',
+    items: [
+      { text: 'Basic Setup', link: '/config' },
+      { text: 'Language Detection', link: '/config#custom-language-detection' },
+      { text: 'Advanced Options', link: '/config#advanced-configuration' },
+    ],
+  },
+  {
+    text: 'Supported Languages',
+    items: [
+      { text: 'JavaScript/JSX', link: '/grammars#javascript-jsx' },
+      { text: 'TypeScript/TSX', link: '/grammars#typescript-tsx' },
+      { text: 'HTML', link: '/grammars#html' },
+      { text: 'CSS', link: '/grammars#css' },
+      { text: 'JSON', link: '/grammars#json' },
+      { text: 'STX', link: '/grammars#stx' },
+    ],
+  },
+  {
+    text: 'Advanced',
+    items: [
+      { text: 'Custom Themes', link: '/usage#custom-theme-generator' },
+      { text: 'Batch Processing', link: '/config#batch-processing-configuration' },
+      { text: 'Code Analysis', link: '/usage#code-statistics' },
+    ],
+  },
+  { text: 'Showcase', link: '/showcase' },
 ]
-const description = 'A TypeScript Starter Kit. For a better Development Experience.'
-const title = 'ts-starter | A TypeScript Starter Kit. For a better Development Experience.'
+const description = 'Blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar support for modern web languages.'
+const title = 'ts-syntax-highlighter | Blazing-Fast Syntax Highlighting for TypeScript'
 
 export default withPwa(
   defineConfig({
     lang: 'en-US',
-    title: 'ts-starter',
+    title: 'ts-syntax-highlighter',
     description,
     metaChunk: true,
     cleanUrls: true,
@@ -83,7 +117,7 @@ export default withPwa(
       ['meta', { name: 'author', content: 'Stacks.js, Inc.' }],
       ['meta', {
         name: 'tags',
-        content: 'ts-starter, stacksjs, reverse proxy, modern, lightweight, zero-config, local development',
+        content: 'syntax highlighter, typescript, javascript, jsx, tsx, html, css, json, tokenizer, code highlighting, performance',
       }],
 
       ['meta', { property: 'og:type', content: 'website' }],
@@ -91,9 +125,9 @@ export default withPwa(
       ['meta', { property: 'og:title', content: title }],
       ['meta', { property: 'og:description', content: description }],
 
-      ['meta', { property: 'og:site_name', content: 'ts-starter' }],
+      ['meta', { property: 'og:site_name', content: 'ts-syntax-highlighter' }],
       ['meta', { property: 'og:image', content: './images/og-image.jpg' }],
-      ['meta', { property: 'og:url', content: 'https://reverse-proxy.sh/' }],
+      ['meta', { property: 'og:url', content: 'https://github.com/stacksjs/ts-syntax-highlighter' }],
       // ['script', { 'src': 'https://cdn.usefathom.com/script.js', 'data-site': '', 'data-spa': 'auto', 'defer': '' }],
       ...analyticsHead,
     ],
@@ -111,7 +145,7 @@ export default withPwa(
       sidebar,
 
       editLink: {
-        pattern: 'https://github.com/stacksjs/stacks/edit/main/docs/docs/:path',
+        pattern: 'https://github.com/stacksjs/ts-syntax-highlighter/edit/main/docs/:path',
         text: 'Edit this page on GitHub',
       },
 
@@ -123,7 +157,7 @@ export default withPwa(
       socialLinks: [
         { icon: 'twitter', link: 'https://twitter.com/stacksjs' },
         { icon: 'bluesky', link: 'https://bsky.app/profile/chrisbreuer.dev' },
-        { icon: 'github', link: 'https://github.com/stacksjs/ts-starter' },
+        { icon: 'github', link: 'https://github.com/stacksjs/ts-syntax-highlighter' },
         { icon: 'discord', link: 'https://discord.gg/stacksjs' },
       ],
 
