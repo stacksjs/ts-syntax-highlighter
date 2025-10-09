@@ -14,7 +14,11 @@ const tsHighlighter = await createHighlighter({
 
 // Small code benchmarks
 group('Small Code (10 lines)', () => {
-  bench('ts-syntax-highlighter', async () => {
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(smallCode, 'javascript')
+  })
+
+  bench('ts-syntax-highlighter (async)', async () => {
     await tsHighlighter.highlight(smallCode, 'javascript')
   })
 
@@ -32,7 +36,11 @@ group('Small Code (10 lines)', () => {
 
 // Medium code benchmarks
 group('Medium Code (~50 lines)', () => {
-  bench('ts-syntax-highlighter', async () => {
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(mediumCode, 'javascript')
+  })
+
+  bench('ts-syntax-highlighter (async)', async () => {
     await tsHighlighter.highlight(mediumCode, 'javascript')
   })
 
@@ -50,7 +58,11 @@ group('Medium Code (~50 lines)', () => {
 
 // Large code benchmarks
 group('Large Code (~150 lines)', () => {
-  bench('ts-syntax-highlighter', async () => {
+  bench('ts-syntax-highlighter (sync)', () => {
+    tsHighlighter.highlightSync(largeCode, 'javascript')
+  })
+
+  bench('ts-syntax-highlighter (async)', async () => {
     await tsHighlighter.highlight(largeCode, 'javascript')
   })
 

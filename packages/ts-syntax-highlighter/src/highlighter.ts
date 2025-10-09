@@ -75,9 +75,9 @@ export class Highlighter implements IHighlighter {
   }
 
   /**
-   * Highlight code
+   * Highlight code (synchronous, faster for basic use cases)
    */
-  async highlight(code: string, lang: string, options: RenderOptions = {}): Promise<RenderedCode> {
+  highlightSync(code: string, lang: string, options: RenderOptions = {}): RenderedCode {
     const language = this.getLanguageById(lang)
     if (!language) {
       throw new Error(`Language "${lang}" not found. Available languages: ${this.getSupportedLanguages().join(', ')}`)
@@ -121,6 +121,13 @@ export class Highlighter implements IHighlighter {
     const renderer = new Renderer(theme)
 
     return renderer.render(tokens, options)
+  }
+
+  /**
+   * Highlight code (async wrapper for compatibility)
+   */
+  async highlight(code: string, lang: string, options: RenderOptions = {}): Promise<RenderedCode> {
+    return this.highlightSync(code, lang, options)
   }
 
   /**

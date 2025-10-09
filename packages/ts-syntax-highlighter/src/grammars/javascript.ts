@@ -3,14 +3,60 @@ import type { Grammar } from '../types'
 export const javascriptGrammar: Grammar = {
   name: 'JavaScript',
   scopeName: 'source.js',
+  keywords: {
+    // Control keywords
+    'if': 'keyword.control.js',
+    'else': 'keyword.control.js',
+    'switch': 'keyword.control.js',
+    'case': 'keyword.control.js',
+    'default': 'keyword.control.js',
+    'for': 'keyword.control.js',
+    'while': 'keyword.control.js',
+    'do': 'keyword.control.js',
+    'break': 'keyword.control.js',
+    'continue': 'keyword.control.js',
+    'return': 'keyword.control.js',
+    'try': 'keyword.control.js',
+    'catch': 'keyword.control.js',
+    'finally': 'keyword.control.js',
+    'throw': 'keyword.control.js',
+    'async': 'keyword.control.js',
+    'await': 'keyword.control.js',
+    // Storage types
+    'const': 'storage.type.js',
+    'let': 'storage.type.js',
+    'var': 'storage.type.js',
+    'function': 'storage.type.js',
+    'class': 'storage.type.js',
+    'extends': 'storage.type.js',
+    'static': 'storage.type.js',
+    // Operators
+    'new': 'keyword.operator.new.js',
+    'delete': 'keyword.operator.new.js',
+    'typeof': 'keyword.operator.new.js',
+    'instanceof': 'keyword.operator.new.js',
+    'void': 'keyword.operator.new.js',
+    // Constants
+    'true': 'constant.language.js',
+    'false': 'constant.language.js',
+    'null': 'constant.language.js',
+    'undefined': 'constant.language.js',
+    'NaN': 'constant.language.js',
+    'Infinity': 'constant.language.js',
+    // Module keywords
+    'import': 'keyword.other.js',
+    'export': 'keyword.other.js',
+    'from': 'keyword.other.js',
+    'as': 'keyword.other.js',
+  },
   patterns: [
-    { include: '#comments' },
-    { include: '#strings' },
-    { include: '#numbers' },
-    { include: '#keywords' },
-    { include: '#functions' },
+    { include: '#comments' },     // Must be before operators (// vs /)
+    { include: '#strings' },      // Must be before operators
+    { include: '#keywords' },     // Very common - prioritize
+    { include: '#numbers' },      // Common
+    { include: '#functions' },    // Common
     { include: '#operators' },
-    { include: '#punctuation' },
+    { include: '#punctuation' },  // Handled by fast path
   ],
   repository: {
     comments: {

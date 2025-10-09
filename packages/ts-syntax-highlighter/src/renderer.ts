@@ -183,6 +183,11 @@ export class Renderer {
    * Get color settings for token scopes (with caching for performance)
    */
   private getColorForScopes(scopes: string[]): TokenSettings {
+    // Guard against invalid scopes
+    if (!Array.isArray(scopes) || scopes.length === 0) {
+      return {}
+    }
+
     // Create cache key from scopes
     const cacheKey = scopes.join('|')
     const cached = this.colorCache.get(cacheKey)
@@ -219,6 +224,11 @@ export class Renderer {
    * Check if a token scope matches a theme scope
    */
   private scopeMatches(tokenScope: string, themeScope: string): boolean {
+    // Type guard - ensure both are strings
+    if (typeof tokenScope !== 'string' || typeof themeScope !== 'string') {
+      return false
+    }
+
     const tokenParts = tokenScope.split('.')
     const themeParts = themeScope.split('.')
 
@@ -269,6 +279,10 @@ export class Renderer {
       return 'token'
 
     const lastScope = scopes[scopes.length - 1]
+    // Type guard - ensure lastScope is a string
+    if (typeof lastScope !== 'string')
+      return 'token'
+
     const className = lastScope.replace(/\./g, '-')
     return `token ${className}`
   }
@@ -486,7 +500,7 @@ export class Renderer {
       .map(line =>
         line.tokens
           .map(token => {
-            const type = token.type.toLowerCase()
+            const type = typeof token.type === 'string' ? token.type.toLowerCase() : 'text'
             const color = ansiColors[type] || ansiColors.reset
             return `${color}${token.content}${ansiColors.reset}`
           })

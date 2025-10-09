@@ -37,6 +37,11 @@ export interface Grammar {
   patterns: GrammarPattern[]
   repository?: Record<string, GrammarRule>
   injections?: Record<string, GrammarRule>
+  keywords?: KeywordTable
+}
+
+export interface KeywordTable {
+  [keyword: string]: string // keyword -> scope name
 }
 
 export interface GrammarPattern {

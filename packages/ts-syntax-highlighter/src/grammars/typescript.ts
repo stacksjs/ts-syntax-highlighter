@@ -3,15 +3,85 @@ import type { Grammar } from '../types'
 export const typescriptGrammar: Grammar = {
   name: 'TypeScript',
   scopeName: 'source.ts',
+  keywords: {
+    // Control keywords
+    'if': 'keyword.control.ts',
+    'else': 'keyword.control.ts',
+    'switch': 'keyword.control.ts',
+    'case': 'keyword.control.ts',
+    'default': 'keyword.control.ts',
+    'for': 'keyword.control.ts',
+    'while': 'keyword.control.ts',
+    'do': 'keyword.control.ts',
+    'break': 'keyword.control.ts',
+    'continue': 'keyword.control.ts',
+    'return': 'keyword.control.ts',
+    'try': 'keyword.control.ts',
+    'catch': 'keyword.control.ts',
+    'finally': 'keyword.control.ts',
+    'throw': 'keyword.control.ts',
+    'async': 'keyword.control.ts',
+    'await': 'keyword.control.ts',
+    // Storage types
+    'const': 'storage.type.ts',
+    'let': 'storage.type.ts',
+    'var': 'storage.type.ts',
+    'function': 'storage.type.ts',
+    'class': 'storage.type.ts',
+    'extends': 'storage.type.ts',
+    'implements': 'storage.type.ts',
+    'static': 'storage.type.ts',
+    'type': 'storage.type.ts',
+    'interface': 'storage.type.ts',
+    'enum': 'storage.type.ts',
+    'namespace': 'storage.type.ts',
+    'module': 'storage.type.ts',
+    'declare': 'storage.type.ts',
+    'public': 'storage.type.ts',
+    'private': 'storage.type.ts',
+    'protected': 'storage.type.ts',
+    'readonly': 'storage.type.ts',
+    'abstract': 'storage.type.ts',
+    // Built-in types
+    'string': 'storage.type.ts',
+    'number': 'storage.type.ts',
+    'boolean': 'storage.type.ts',
+    'any': 'storage.type.ts',
+    'void': 'storage.type.ts',
+    'never': 'storage.type.ts',
+    'unknown': 'storage.type.ts',
+    'object': 'storage.type.ts',
+    'symbol': 'storage.type.ts',
+    'bigint': 'storage.type.ts',
+    // Operators
+    'new': 'keyword.operator.new.ts',
+    'delete': 'keyword.operator.new.ts',
+    'typeof': 'keyword.operator.new.ts',
+    'instanceof': 'keyword.operator.new.ts',
+    'as': 'keyword.operator.new.ts',
+    // Constants
+    'true': 'constant.language.ts',
+    'false': 'constant.language.ts',
+    'null': 'constant.language.ts',
+    'undefined': 'constant.language.ts',
+    'NaN': 'constant.language.ts',
+    'Infinity': 'constant.language.ts',
+    'this': 'constant.language.ts',
+    'super': 'constant.language.ts',
+    // Module keywords
+    'import': 'keyword.other.ts',
+    'export': 'keyword.other.ts',
+    'from': 'keyword.other.ts',
+  },
   patterns: [
-    { include: '#comments' },
-    { include: '#strings' },
-    { include: '#numbers' },
+    { include: '#comments' },     // Must be before operators (// vs /)
+    { include: '#strings' },      // Must be before operators
+    { include: '#keywords' },     // Very common - prioritize
+    { include: '#numbers' },      // Common
+    { include: '#functions' },    // Common
     { include: '#types' },
-    { include: '#keywords' },
-    { include: '#functions' },
     { include: '#operators' },
-    { include: '#punctuation' },
+    { include: '#punctuation' },  // Handled by fast path
   ],
   repository: {
     comments: {
