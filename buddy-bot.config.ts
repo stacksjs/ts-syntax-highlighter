@@ -3,7 +3,7 @@ import type { BuddyBotConfig } from 'buddy-bot'
 const config: BuddyBotConfig = {
   repository: {
     owner: 'stacksjs',
-    name: 'ts-starter-monorepo',
+    name: 'ts-syntax-highlighter',
     provider: 'github',
     // Uses GITHUB_TOKEN by default
   },

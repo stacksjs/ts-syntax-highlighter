@@ -1,22 +1,22 @@
 {
-  "name": "ts-starter-monorepo",
+  "name": "ts-syntax-highlighter",
   "type": "module",
   "version": "0.0.0",
   "description": "Like our `ts-starter`, but optimized for monorepos.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
-  "homepage": "https://github.com/stacksjs/ts-starter-monorepo#readme",
+  "homepage": "https://github.com/stacksjs/ts-syntax-highlighter#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stacksjs/ts-starter-monorepo.git"
+    "url": "git+https://github.com/stacksjs/ts-syntax-highlighter.git"
   },
   "bugs": {
-    "url": "https://github.com/stacksjs/ts-starter-monorepo/issues"
+    "url": "https://github.com/stacksjs/ts-syntax-highlighter/issues"
   },
   "keywords": [
     "monorepo",
     "ts-starter",
-    "ts-starter-monorepo",
+    "ts-syntax-highlighter",
     "template"
   ],
   "exports": {
@@ -31,7 +31,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "ts-starter-monorepo": "./dist/bin/cli.js"
+    "ts-syntax-highlighter": "./dist/bin/cli.js"
   },
   "files": [
     "README.md",

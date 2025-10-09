@@ -6,7 +6,7 @@
 <!-- [![npm downloads][npm-downloads-src]][npm-downloads-href] -->
 <!-- [![Codecov][codecov-src]][codecov-href] -->
 
-# ts-starter-monorepo
+# ts-syntax-highlighter
 
 This is an opinionated TypeScript Starter kit to help kick-start development of your next Bun package.
 
@@ -50,7 +50,7 @@ bun test
 
 ## Changelog
 
-Please see our [releases](https://github.com/stackjs/ts-starter-monorepo/releases) page for more information on what has changed recently.
+Please see our [releases](https://github.com/stackjs/ts-syntax-highlighter/releases) page for more information on what has changed recently.
 
 ## Contributing
 
@@ -60,7 +60,7 @@ Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 
 For help, discussion about best practices, or any other conversation that would benefit from being searchable:
 
-[Discussions on GitHub](https://github.com/stacksjs/ts-starter-monorepo/discussions)
+[Discussions on GitHub](https://github.com/stacksjs/ts-syntax-highlighter/discussions)
 
 For casual chit-chat with others using this package:
 
@@ -86,10 +86,10 @@ The MIT License (MIT). Please see [LICENSE](LICENSE.md) for more information.
 Made with 💙
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/ts-starter-monorepo?style=flat-square
-[npm-version-href]: https://npmjs.com/package/ts-starter-monorepo
-[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/ts-starter-monorepo/ci.yml?style=flat-square&branch=main
-[github-actions-href]: https://github.com/stacksjs/ts-starter-monorepo/actions?query=workflow%3Aci
+[npm-version-src]: https://img.shields.io/npm/v/ts-syntax-highlighter?style=flat-square
+[npm-version-href]: https://npmjs.com/package/ts-syntax-highlighter
+[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/ts-syntax-highlighter/ci.yml?style=flat-square&branch=main
+[github-actions-href]: https://github.com/stacksjs/ts-syntax-highlighter/actions?query=workflow%3Aci
 
-<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/ts-starter-monorepo/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/stacksjs/ts-starter-monorepo -->
+<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/ts-syntax-highlighter/main?style=flat-square
+[codecov-href]: https://codecov.io/gh/stacksjs/ts-syntax-highlighter -->
