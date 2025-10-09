@@ -350,5 +350,5 @@ Performance is continuously monitored:
 ## Next Steps
 
 - Learn about [Modern Syntax Support](/features/modern-syntax)
-- Explore [Dual Tokenization Modes](/features/dual-modes)
+- Explore [Dual Tokenization Modes](/config#tokenization-modes)
 - Check out [Usage Examples](/usage)

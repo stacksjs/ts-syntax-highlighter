@@ -467,5 +467,5 @@ const html = highlightWithTheme(code, 'javascript', draculaTheme)
 ## Next Steps
 
 - Learn about [Batch Processing](/advanced/batch-processing)
-- Explore [Code Analysis](/advanced/code-analysis)
-- Check out [Performance Optimization](/advanced/performance-optimization)
+- Explore [Code Analysis](/usage#code-statistics)
+- Check out [Performance Tuning](/config#performance-tuning)

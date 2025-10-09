@@ -473,6 +473,6 @@ clearInterval(memoryInterval)
 
 ## Next Steps
 
-- Learn about [Code Analysis](/advanced/code-analysis)
-- Explore [Performance Optimization](/advanced/performance-optimization)
+- Learn about [Code Analysis](/usage#code-statistics)
+- Explore [Performance Tuning](/config#performance-tuning)
 - Check out [Custom Themes](/advanced/custom-themes)
