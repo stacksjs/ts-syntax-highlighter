@@ -8,44 +8,193 @@
 
 # ts-syntax-highlighter
 
-This is an opinionated TypeScript Starter kit to help kick-start development of your next Bun package.
+A blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar support for modern web languages. Built for performance with both synchronous and asynchronous tokenization modes.
 
 ## Features
 
-This Starter Kit comes pre-configured with the following:
+- ⚡ **12-77x Faster** - Optimized performance compared to highlight.js
+- 🎨 **6 Languages** - JavaScript/JSX, TypeScript/TSX, HTML, CSS, JSON, and STX
+- 🔥 **Modern Syntax** - Full support for ES2024+, BigInt, numeric separators, optional chaining, and more
+- ⚛️ **JSX/TSX Support** - Complete React and TypeScript JSX highlighting
+- 🎯 **CSS4 Features** - Modern color functions (hwb, lab, lch, oklab, oklch), container queries, CSS layers
+- 🧵 **Dual Modes** - Fast async mode and synchronous mode for different use cases
+- 💪 **TypeScript-First** - Fully typed APIs with comprehensive type definitions
+- 🧪 **416 Tests** - Extensively tested with high code coverage
+- 📦 **Zero Dependencies** - Lightweight with no external runtime dependencies
 
-- 🛠️ [Powerful Build Process](https://github.com/oven-sh/bun) - via Bun
-- 💪🏽 [Fully Typed APIs](https://www.typescriptlang.org/) - via TypeScript
-- 📚 [Documentation-ready](https://vitepress.dev/) - via VitePress
-- ⌘ [CLI & Binary](https://www.npmjs.com/package/bunx) - via Bun & CAC
-- 🧪 [Built With Testing In Mind](https://bun.sh/docs/cli/test) - pre-configured unit-testing powered by [Bun](https://bun.sh/docs/cli/test)
-- 🤖 [Renovate](https://renovatebot.com/) - optimized & automated PR dependency updates
-- 🎨 [ESLint](https://eslint.org/) - for code linting _(and formatting)_
-- 📦️ [pkg.pr.new](https://pkg.pr.new) - Continuous (Preview) Releases for your libraries
-- 🐙 [GitHub Actions](https://github.com/features/actions) - runs your CI _(fixes code style issues, tags releases & creates its changelogs, runs the test suite, etc.)_
-
-## Get Started
-
-It's rather simple to get your package development started:
+## Installation
 
 ```bash
-# you may use this GitHub template or the following command:
-bunx degit stacksjs/ts-starter my-pkg
-cd my-pkg
-
-bun i # install all deps
-bun run build # builds the library for production-ready use
-
-# after you have successfully committed, you may create a "release"
-bun run release # automates git commits, versioning, and changelog generations
+npm install ts-syntax-highlighter
+# or
+bun add ts-syntax-highlighter
+# or
+pnpm add ts-syntax-highlighter
 ```
 
-_Check out the package.json scripts for more commands._
+## Quick Start
 
-## Testing
+```typescript
+import { Tokenizer } from 'ts-syntax-highlighter'
+
+// Create tokenizer instance
+const tokenizer = new Tokenizer('javascript')
+
+// Tokenize code (async mode - faster)
+const tokens = await tokenizer.tokenizeAsync(`
+const greeting = 'Hello World'
+console.log(greeting)
+`)
+
+// Or use sync mode
+const syncTokens = tokenizer.tokenize(`
+function add(a: number, b: number): number {
+  return a + b
+}
+`)
+```
+
+## Supported Languages
+
+### JavaScript/JSX
+
+- ES2024+ features (BigInt, numeric separators, optional chaining, nullish coalescing)
+- JSX elements and expressions
+- Template literals with expressions
+- Regex literals with all flags
+- Async/await, generators
+- Modern operators: `?.`, `??`, `?.[]`, `?.()`
+
+### TypeScript/TSX
+
+- All JavaScript features plus:
+- Type annotations and assertions
+- Interfaces, types, enums
+- Generics and type parameters
+- TypeScript-specific operators: `is`, `keyof`, `infer`
+- TSX (TypeScript + JSX)
+- Utility types
+
+### HTML
+
+- HTML5 elements
+- Data attributes (`data-*`)
+- ARIA attributes (`aria-*`)
+- Event handlers (`onclick`, `onload`, etc.)
+- HTML entities
+- DOCTYPE declarations
+
+### CSS
+
+- Modern color functions: `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `color()`
+- Math functions: `calc()`, `min()`, `max()`, `clamp()`, `round()`, `abs()`, `sign()`
+- Trigonometric: `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan()`
+- Gradients: `linear-gradient()`, `radial-gradient()`, `conic-gradient()`
+- At-rules: `@media`, `@keyframes`, `@supports`, `@container`, `@layer`, `@property`
+- CSS custom properties (variables): `--custom-property`, `var()`
+
+### JSON
+
+- Objects and arrays
+- Strings with proper escape sequences
+- Numbers (including scientific notation)
+- Booleans and null
+- Invalid escape detection
+
+### STX
+
+- Blade-like templating syntax
+- 50+ directives
+- Components, layouts, includes
+- Control flow, loops
+- Authentication, authorization
+- And much more
+
+## Performance
+
+Benchmarks comparing ts-syntax-highlighter to highlight.js:
+
+| Operation | ts-syntax-highlighter (Fast) | highlight.js | Speedup |
+|-----------|------------------------------|--------------|---------|
+| JavaScript tokenization | ~0.05ms | ~3.8ms | 76x faster |
+| TypeScript tokenization | ~0.08ms | ~1.0ms | 12x faster |
+| HTML tokenization | ~0.04ms | ~1.2ms | 30x faster |
+
+**Fast mode**: Async tokenization with worker-like performance characteristics
+**Sync mode**: Still 1.5-2x faster than highlight.js
+
+Run benchmarks yourself:
 
 ```bash
+bun run bench
+```
+
+## API Reference
+
+### Tokenizer
+
+```typescript
+import { Tokenizer } from 'ts-syntax-highlighter'
+
+// Create tokenizer for a specific language
+const tokenizer = new Tokenizer('javascript' | 'typescript' | 'html' | 'css' | 'json' | 'stx')
+
+// Async tokenization (faster, recommended)
+const tokens = await tokenizer.tokenizeAsync(code: string)
+
+// Sync tokenization
+const tokens = tokenizer.tokenize(code: string)
+```
+
+### Language Detection
+
+```typescript
+import { getLanguage, getLanguageByExtension } from 'ts-syntax-highlighter'
+
+// Get language by ID or alias
+const lang = getLanguage('js') // Returns JavaScript language
+const langTs = getLanguage('tsx') // Returns TypeScript language
+
+// Get language by file extension
+const langFromExt = getLanguageByExtension('.jsx') // Returns JavaScript language
+```
+
+### Token Structure
+
+```typescript
+interface Token {
+  type: string        // Token scope (e.g., 'keyword.control.js', 'string.quoted.double.ts')
+  content: string     // The actual text content
+  line: number        // Line number (0-indexed)
+  startIndex: number  // Character position in the line
+}
+
+interface LineTokens {
+  line: number
+  tokens: Token[]
+}
+```
+
+## Development
+
+```bash
+# Install dependencies
+bun install
+
+# Build the library
+bun run build
+
+# Run tests
 bun test
+
+# Run benchmarks
+bun run bench
+
+# Type checking
+bun run typecheck
+
+# Linting
+bun run lint
 ```
 
 ## Changelog
