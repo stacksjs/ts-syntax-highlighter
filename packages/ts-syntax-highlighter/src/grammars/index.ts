@@ -2,6 +2,7 @@ import type { Language } from '../types'
 import { cssGrammar } from './css'
 import { htmlGrammar } from './html'
 import { javascriptGrammar } from './javascript'
+import { jsonGrammar } from './json'
 import { stxGrammar } from './stx'
 import { typescriptGrammar } from './typescript'
 
@@ -9,15 +10,15 @@ export const languages: Language[] = [
   {
     id: 'javascript',
     name: 'JavaScript',
-    aliases: ['js'],
-    extensions: ['.js', '.mjs', '.cjs'],
+    aliases: ['js', 'jsx'],
+    extensions: ['.js', '.jsx', '.mjs', '.cjs'],
     grammar: javascriptGrammar,
   },
   {
     id: 'typescript',
     name: 'TypeScript',
-    aliases: ['ts'],
-    extensions: ['.ts', '.mts', '.cts'],
+    aliases: ['ts', 'tsx'],
+    extensions: ['.ts', '.tsx', '.mts', '.cts'],
     grammar: typescriptGrammar,
   },
   {
@@ -33,6 +34,13 @@ export const languages: Language[] = [
     aliases: [],
     extensions: ['.css'],
     grammar: cssGrammar,
+  },
+  {
+    id: 'json',
+    name: 'JSON',
+    aliases: [],
+    extensions: ['.json', '.jsonc'],
+    grammar: jsonGrammar,
   },
   {
     id: 'stx',
@@ -62,4 +70,5 @@ export * from './javascript'
 export * from './typescript'
 export * from './html'
 export * from './css'
+export * from './json'
 export * from './stx'

@@ -62,6 +62,7 @@ export const javascriptGrammar: Grammar = {
   patterns: [
     { include: '#comments' },     // Must be before operators (// vs /)
     { include: '#strings' },      // Must be before operators
+    { include: '#jsx' },          // JSX elements
     { include: '#regex' },        // Must be before operators (/ vs /)
     { include: '#keywords' },     // Very common - prioritize
     { include: '#numbers' },      // Common
@@ -125,6 +126,58 @@ export const javascriptGrammar: Grammar = {
               match: '\\\\.',
             },
           ],
+        },
+      ],
+    },
+    jsx: {
+      patterns: [
+        {
+          name: 'meta.tag.jsx',
+          begin: '<([A-Z][a-zA-Z0-9]*|[a-z][a-zA-Z0-9-]*)',
+          beginCaptures: {
+            '0': { name: 'punctuation.definition.tag.begin.jsx' },
+            '1': { name: 'entity.name.tag.jsx' },
+          },
+          end: '(/?>)',
+          endCaptures: {
+            '1': { name: 'punctuation.definition.tag.end.jsx' },
+          },
+          patterns: [
+            {
+              name: 'entity.other.attribute-name.jsx',
+              match: '[a-zA-Z_:][a-zA-Z0-9_:.-]*',
+            },
+            {
+              name: 'meta.embedded.expression.jsx',
+              begin: '\\{',
+              end: '\\}',
+              patterns: [
+                { include: '$self' },
+              ],
+            },
+            {
+              name: 'string.quoted.double.jsx',
+              begin: '"',
+              end: '"',
+            },
+            {
+              name: 'string.quoted.single.jsx',
+              begin: '\'',
+              end: '\'',
+            },
+          ],
+        },
+        {
+          name: 'meta.tag.jsx',
+          begin: '(</)([A-Z][a-zA-Z0-9]*|[a-z][a-zA-Z0-9-]*)',
+          beginCaptures: {
+            '1': { name: 'punctuation.definition.tag.begin.jsx' },
+            '2': { name: 'entity.name.tag.jsx' },
+          },
+          end: '(>)',
+          endCaptures: {
+            '1': { name: 'punctuation.definition.tag.end.jsx' },
+          },
         },
       ],
     },

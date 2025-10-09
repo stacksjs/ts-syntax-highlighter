@@ -8,6 +8,8 @@ export const cssGrammar: Grammar = {
     { include: '#at-rules' },
     { include: '#selectors' },
     { include: '#properties' },
+    { include: '#functions' },
+    { include: '#variables' },
     { include: '#values' },
     { include: '#strings' },
     { include: '#numbers' },
@@ -102,7 +104,23 @@ export const cssGrammar: Grammar = {
         },
         {
           name: 'support.function.color.css',
-          match: '\\b(rgb|rgba|hsl|hsla)\\s*\\(',
+          match: '\\b(rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color)\\s*\\(',
+        },
+      ],
+    },
+    functions: {
+      patterns: [
+        {
+          name: 'support.function.css',
+          match: '\\b(var|calc|min|max|clamp|round|abs|sign|mod|rem|sin|cos|tan|asin|acos|atan|atan2|pow|sqrt|hypot|log|exp|url|attr|counter|counters|linear-gradient|radial-gradient|conic-gradient|repeating-linear-gradient|repeating-radial-gradient|repeating-conic-gradient)\\s*\\(',
+        },
+      ],
+    },
+    variables: {
+      patterns: [
+        {
+          name: 'variable.other.custom-property.css',
+          match: '--[a-zA-Z0-9_-]+',
         },
       ],
     },

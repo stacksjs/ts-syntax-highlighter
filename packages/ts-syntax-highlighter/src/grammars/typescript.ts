@@ -88,6 +88,7 @@ export const typescriptGrammar: Grammar = {
   patterns: [
     { include: '#comments' },     // Must be before operators (// vs /)
     { include: '#strings' },      // Must be before operators
+    { include: '#jsx' },          // JSX/TSX elements
     { include: '#regex' },        // Must be before operators (/ vs /)
     { include: '#keywords' },     // Very common - prioritize
     { include: '#numbers' },      // Common
@@ -152,6 +153,58 @@ export const typescriptGrammar: Grammar = {
               match: '\\\\.',
             },
           ],
+        },
+      ],
+    },
+    jsx: {
+      patterns: [
+        {
+          name: 'meta.tag.tsx',
+          begin: '<([A-Z][a-zA-Z0-9]*|[a-z][a-zA-Z0-9-]*)',
+          beginCaptures: {
+            '0': { name: 'punctuation.definition.tag.begin.tsx' },
+            '1': { name: 'entity.name.tag.tsx' },
+          },
+          end: '(/?>)',
+          endCaptures: {
+            '1': { name: 'punctuation.definition.tag.end.tsx' },
+          },
+          patterns: [
+            {
+              name: 'entity.other.attribute-name.tsx',
+              match: '[a-zA-Z_:][a-zA-Z0-9_:.-]*',
+            },
+            {
+              name: 'meta.embedded.expression.tsx',
+              begin: '\\{',
+              end: '\\}',
+              patterns: [
+                { include: '$self' },
+              ],
+            },
+            {
+              name: 'string.quoted.double.tsx',
+              begin: '"',
+              end: '"',
+            },
+            {
+              name: 'string.quoted.single.tsx',
+              begin: '\'',
+              end: '\'',
+            },
+          ],
+        },
+        {
+          name: 'meta.tag.tsx',
+          begin: '(</)([A-Z][a-zA-Z0-9]*|[a-z][a-zA-Z0-9-]*)',
+          beginCaptures: {
+            '1': { name: 'punctuation.definition.tag.begin.tsx' },
+            '2': { name: 'entity.name.tag.tsx' },
+          },
+          end: '(>)',
+          endCaptures: {
+            '1': { name: 'punctuation.definition.tag.end.tsx' },
+          },
         },
       ],
     },
