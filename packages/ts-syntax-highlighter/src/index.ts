@@ -4,7 +4,7 @@ export * from './detect'
 export * from './dual-theme'
 // Language and theme exports
 export * from './grammars'
-export * from './highlighter'
+export { createHighlighter, Highlighter } from './highlighter'
 
 // Plugin exports
 export * from './plugins'

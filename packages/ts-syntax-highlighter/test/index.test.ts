@@ -83,7 +83,9 @@ describe('my awesome package', () => {
     consoleSpy.mockRestore()
   })
 
-  it.todo('should implement this test later')
+  it.todo('should implement this test later', () => {
+    // TODO: implement this test
+  })
 
   it.skip('should skip this test', () => {
     // This test will be skipped

@@ -31,7 +31,7 @@ export async function* highlightStream(
     for (let j = 0; j < chunk.length; j++) {
       const tokenLine = tokenizer.tokenizeLine(chunk[j], i + j + 1, prevStack)
       tokenLines.push(tokenLine)
-      prevStack = tokenizer.scopeStack
+      prevStack = tokenizer.getScopeStack()
     }
 
     // For streaming, we'd render each chunk
@@ -71,7 +71,7 @@ export class BatchHighlighter {
       for (let j = 0; j < batch.length; j++) {
         const tokenLine = tokenizer.tokenizeLine(batch[j], i + j + 1, prevStack)
         tokenLines.push(tokenLine)
-        prevStack = tokenizer.scopeStack
+        prevStack = tokenizer.getScopeStack()
       }
 
       yield tokenLines

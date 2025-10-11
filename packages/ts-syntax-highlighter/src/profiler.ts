@@ -57,7 +57,13 @@ export class Profiler {
     return [...this.entries]
   }
 
-  getStats() {
+  getStats(): Record<string, {
+    count: number
+    total: number
+    avg: number
+    min: number
+    max: number
+  }> {
     const grouped = new Map<string, number[]>()
 
     for (const entry of this.entries) {
@@ -119,4 +125,4 @@ export class Profiler {
 }
 
 // Global profiler instance
-export const profiler = new Profiler(false)
+export const profiler: Profiler = new Profiler(false)

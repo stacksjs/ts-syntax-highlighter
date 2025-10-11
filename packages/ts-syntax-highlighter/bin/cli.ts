@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 import { readFileSync, writeFileSync } from 'node:fs'
 import process from 'node:process'
+import { CLI } from '@stacksjs/clapp'
 import { version } from '../package.json'
 import { getLanguage } from '../src/grammars'
 import { createHighlighter } from '../src/highlighter'
 import { getTheme } from '../src/themes'
-import { CLI } from '@stacksjs/clapp'
 
 const cli = new CLI('syntax')
 

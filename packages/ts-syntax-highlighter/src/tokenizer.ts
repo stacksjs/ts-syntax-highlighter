@@ -686,4 +686,11 @@ export class Tokenizer {
     const parts = scopeName.split('.')
     return parts[parts.length - 1] || 'text'
   }
+
+  /**
+   * Get the current scope stack (for streaming/batching)
+   */
+  getScopeStack(): ScopeStack[] {
+    return this.scopeStack
+  }
 }
