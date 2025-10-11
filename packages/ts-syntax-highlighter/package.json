@@ -67,10 +67,8 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "bunfig": "^0.10.1"
-  },
-  "overrides": {
-    "unconfig": "0.3.10"
+    "@stacksjs/clapp": "^0.2.0",
+    "bunfig": "^0.15.0"
   },
   "lint-staged": {
     "*.{js,ts}": "bunx --bun eslint . --fix"

@@ -52,19 +52,23 @@ ${selector}[data-theme="dark"] .syntax,
 export class DualThemeRenderer {
   private lightRenderer: Renderer
   private darkRenderer: Renderer
+  private lightTheme: Theme
+  private darkTheme: Theme
   private selector: string
 
   constructor(lightTheme: Theme, darkTheme: Theme, selector = 'html') {
     this.lightRenderer = new Renderer(lightTheme)
     this.darkRenderer = new Renderer(darkTheme)
+    this.lightTheme = lightTheme
+    this.darkTheme = darkTheme
     this.selector = selector
   }
 
   render(tokens: TokenLine[], options: RenderOptions = {}): RenderedCode {
     return renderDualTheme(tokens, {
       ...options,
-      lightTheme: this.lightRenderer.theme,
-      darkTheme: this.darkRenderer.theme,
+      lightTheme: this.lightTheme,
+      darkTheme: this.darkTheme,
       selector: this.selector,
     })
   }

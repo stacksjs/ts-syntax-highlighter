@@ -5,8 +5,9 @@ import { version } from '../package.json'
 import { getLanguage } from '../src/grammars'
 import { createHighlighter } from '../src/highlighter'
 import { getTheme } from '../src/themes'
+import { CLI } from '@stacksjs/clapp'
 
-const cli = new CAC('syntax')
+const cli = new CLI('syntax')
 
 interface HighlightOptions {
   theme?: string
