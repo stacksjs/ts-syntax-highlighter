@@ -16,10 +16,8 @@ A blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar 
 - 🎨 **6 Languages** - JavaScript/JSX, TypeScript/TSX, HTML, CSS, JSON, and STX
 - 🔥 **Modern Syntax** - Full support for ES2024+, BigInt, numeric separators, optional chaining, and more
 - ⚛️ **JSX/TSX Support** - Complete React and TypeScript JSX highlighting
-- 🎯 **CSS4 Features** - Modern color functions (hwb, lab, lch, oklab, oklch), container queries, CSS layers
-- 🧵 **Dual Modes** - Fast async mode and synchronous mode for different use cases
+- 🎯 **CSS4 Features** - Modern color functions _(hwb, lab, lch, oklab, oklch)_, container queries, CSS layers
 - 💪 **TypeScript-First** - Fully typed APIs with comprehensive type definitions
-- 🧪 **416 Tests** - Extensively tested with high code coverage
 - 📦 **Zero Dependencies** - Lightweight with no external runtime dependencies
 
 ## Installation
