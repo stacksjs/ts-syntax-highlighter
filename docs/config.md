@@ -19,9 +19,9 @@ const tokenizer = new Tokenizer('javascript') // or 'typescript', 'html', 'css',
 You can use language aliases for convenience:
 
 ```typescript
-const jsTokenizer = new Tokenizer('js')   // Alias for 'javascript'
+const jsTokenizer = new Tokenizer('js') // Alias for 'javascript'
 const jsxTokenizer = new Tokenizer('jsx') // Also returns JavaScript grammar
-const tsTokenizer = new Tokenizer('ts')   // Alias for 'typescript'
+const tsTokenizer = new Tokenizer('ts') // Alias for 'typescript'
 const tsxTokenizer = new Tokenizer('tsx') // Also returns TypeScript grammar
 ```
 
@@ -69,7 +69,8 @@ function detectLanguage(filename: string) {
   const ext = filename.split('.').pop()
   if (ext) {
     const lang = getLanguageByExtension(`.${ext}`)
-    if (lang) return lang.id
+    if (lang)
+      return lang.id
   }
 
   // Fallback to default
@@ -108,7 +109,7 @@ const comments = tokens.flatMap(line =>
 ### Custom Token Processing
 
 ```typescript
-import type { Token, LineTokens } from 'ts-syntax-highlighter'
+import type { LineTokens, Token } from 'ts-syntax-highlighter'
 
 function processTokens(tokens: LineTokens[]) {
   return tokens.map(line => ({
@@ -123,24 +124,29 @@ function processTokens(tokens: LineTokens[]) {
 }
 
 function categorizeToken(token: Token): string {
-  if (token.type.includes('keyword')) return 'keyword'
-  if (token.type.includes('string')) return 'literal'
-  if (token.type.includes('comment')) return 'comment'
-  if (token.type.includes('function')) return 'identifier'
+  if (token.type.includes('keyword'))
+    return 'keyword'
+  if (token.type.includes('string'))
+    return 'literal'
+  if (token.type.includes('comment'))
+    return 'comment'
+  if (token.type.includes('function'))
+    return 'identifier'
   return 'other'
 }
 
 function getColorForType(type: string): string {
   // Map token types to colors
   const colorMap: Record<string, string> = {
-    'keyword': '#C586C0',
-    'string': '#CE9178',
-    'comment': '#6A9955',
-    'function': '#DCDCAA',
+    keyword: '#C586C0',
+    string: '#CE9178',
+    comment: '#6A9955',
+    function: '#DCDCAA',
   }
 
   for (const [key, color] of Object.entries(colorMap)) {
-    if (type.includes(key)) return color
+    if (type.includes(key))
+      return color
   }
 
   return '#D4D4D4' // default
@@ -171,12 +177,13 @@ async function batchTokenize(
     const batch = files.slice(i, i + config.concurrency)
 
     const batchResults = await Promise.all(
-      batch.map(async file => {
+      batch.map(async (file) => {
         try {
           const code = await fs.promises.readFile(file, 'utf-8')
           const tokens = await tokenizer.tokenizeAsync(code)
           return { file, tokens, error: null }
-        } catch (error) {
+        }
+        catch (error) {
           config.onError?.(file, error as Error)
           return { file, tokens: null, error: error as Error }
         }
@@ -184,7 +191,8 @@ async function batchTokenize(
     )
 
     batchResults.forEach(({ file, tokens }) => {
-      if (tokens) results.set(file, tokens)
+      if (tokens)
+        results.set(file, tokens)
     })
 
     completed += batch.length
@@ -309,8 +317,8 @@ const hasErrors = allTokens.some(token => token.type.includes('invalid'))
 ### Node.js
 
 ```typescript
-import { Tokenizer } from 'ts-syntax-highlighter'
 import fs from 'node:fs/promises'
+import { Tokenizer } from 'ts-syntax-highlighter'
 
 const tokenizer = new Tokenizer('typescript')
 const code = await fs.readFile('file.ts', 'utf-8')
@@ -353,25 +361,25 @@ ts-syntax-highlighter exports comprehensive type definitions:
 
 ```typescript
 import type {
-  Token,
-  LineTokens,
   Grammar,
   Language,
+  LineTokens,
+  Token,
   Tokenizer,
 } from 'ts-syntax-highlighter'
 
 // Token interface
 interface Token {
-  type: string        // Scope name
-  content: string     // Token text
-  line: number        // Line number
-  startIndex: number  // Position in line
+  type: string // Scope name
+  content: string // Token text
+  line: number // Line number
+  startIndex: number // Position in line
 }
 
 // Line tokens interface
 interface LineTokens {
-  line: number        // Line number
-  tokens: Token[]     // Tokens on this line
+  line: number // Line number
+  tokens: Token[] // Tokens on this line
 }
 
 // Language interface

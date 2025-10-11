@@ -8,12 +8,12 @@ ts-syntax-highlighter uses TextMate-style scope names to classify tokens:
 
 ```typescript
 // Example token scopes
-'keyword.control.js'              // if, for, while, return
-'storage.type.js'                 // const, let, var, function
-'string.quoted.double.js'         // "string"
-'constant.numeric.js'             // 42, 3.14
-'entity.name.function.js'         // function names
-'comment.line.double-slash.js'    // // comments
+'keyword.control.js' // if, for, while, return
+'storage.type.js' // const, let, var, function
+'string.quoted.double.js' // "string"
+'constant.numeric.js' // 42, 3.14
+'entity.name.function.js' // function names
+'comment.line.double-slash.js' // // comments
 ```
 
 ## Scope Hierarchy
@@ -53,8 +53,8 @@ function extractScopes(code: string, language: string): Set<string> {
   const tokens = tokenizer.tokenize(code)
   const scopes = new Set<string>()
 
-  tokens.forEach(line => {
-    line.tokens.forEach(token => {
+  tokens.forEach((line) => {
+    line.tokens.forEach((token) => {
       scopes.add(token.type)
     })
   })
@@ -138,34 +138,46 @@ const lightPalette: ThemePalette = {
 ```typescript
 function scopeToColor(scope: string, palette: ThemePalette): string {
   // Keyword scopes
-  if (scope.includes('keyword.control')) return palette.keyword
-  if (scope.includes('keyword.operator')) return palette.operator
+  if (scope.includes('keyword.control'))
+    return palette.keyword
+  if (scope.includes('keyword.operator'))
+    return palette.operator
 
   // Storage scopes
-  if (scope.includes('storage.type')) return palette.storage
+  if (scope.includes('storage.type'))
+    return palette.storage
 
   // String scopes
-  if (scope.includes('string.quoted')) return palette.string
-  if (scope.includes('string.template')) return palette.string
+  if (scope.includes('string.quoted'))
+    return palette.string
+  if (scope.includes('string.template'))
+    return palette.string
 
   // Number scopes
-  if (scope.includes('constant.numeric')) return palette.number
+  if (scope.includes('constant.numeric'))
+    return palette.number
 
   // Function scopes
-  if (scope.includes('entity.name.function')) return palette.function
+  if (scope.includes('entity.name.function'))
+    return palette.function
 
   // Comment scopes
-  if (scope.includes('comment')) return palette.comment
+  if (scope.includes('comment'))
+    return palette.comment
 
   // Type scopes
-  if (scope.includes('entity.name.type')) return palette.type
-  if (scope.includes('storage.type')) return palette.type
+  if (scope.includes('entity.name.type'))
+    return palette.type
+  if (scope.includes('storage.type'))
+    return palette.type
 
   // Constant scopes
-  if (scope.includes('constant.language')) return palette.constant
+  if (scope.includes('constant.language'))
+    return palette.constant
 
   // Variable scopes
-  if (scope.includes('variable')) return palette.variable
+  if (scope.includes('variable'))
+    return palette.variable
 
   // Default
   return palette.foreground
@@ -185,7 +197,7 @@ function generateThemeCSS(palette: ThemePalette, scopes: Set<string>): string {
   css += `}\n\n`
 
   // Generate rules for each scope
-  Array.from(scopes).sort().forEach(scope => {
+  Array.from(scopes).sort().forEach((scope) => {
     const className = scope.replace(/\./g, '-')
     const color = scopeToColor(scope, palette)
 
@@ -211,8 +223,8 @@ fs.writeFileSync('theme.css', css)
 
 ```typescript
 const vscDarkTheme = {
-  background: '#1e1e1e',
-  foreground: '#d4d4d4',
+  'background': '#1e1e1e',
+  'foreground': '#d4d4d4',
 
   // Comments
   'comment.line': '#6a9955',
@@ -258,8 +270,8 @@ const vscDarkTheme = {
 
 ```typescript
 const githubLightTheme = {
-  background: '#ffffff',
-  foreground: '#24292e',
+  'background': '#ffffff',
+  'foreground': '#24292e',
 
   // Comments
   'comment.line': '#6a737d',
@@ -320,14 +332,15 @@ function highlightWithTheme(
   html += `border-radius: 4px;`
   html += '"><code>'
 
-  tokens.forEach(line => {
-    line.tokens.forEach(token => {
+  tokens.forEach((line) => {
+    line.tokens.forEach((token) => {
       const color = findColorForScope(token.type, theme)
       const escaped = escapeHtml(token.content)
 
       if (color) {
         html += `<span style="color: ${color}">${escaped}</span>`
-      } else {
+      }
+      else {
         html += escaped
       }
     })
@@ -343,13 +356,15 @@ function findColorForScope(
   theme: Record<string, string>
 ): string | null {
   // Exact match
-  if (theme[scope]) return theme[scope]
+  if (theme[scope])
+    return theme[scope]
 
   // Partial match (most specific first)
   const parts = scope.split('.')
   for (let i = parts.length; i > 0; i--) {
     const partial = parts.slice(0, i).join('.')
-    if (theme[partial]) return theme[partial]
+    if (theme[partial])
+      return theme[partial]
   }
 
   return null
@@ -373,8 +388,8 @@ function highlightWithClasses(code: string, language: string): string {
 
   let html = '<pre><code>'
 
-  tokens.forEach(line => {
-    line.tokens.forEach(token => {
+  tokens.forEach((line) => {
+    line.tokens.forEach((token) => {
       const className = token.type.replace(/\./g, '-')
       const escaped = escapeHtml(token.content)
       html += `<span class="${className}">${escaped}</span>`
@@ -419,12 +434,16 @@ const advancedTheme: Record<string, TokenStyle> = {
 
 function applyAdvancedStyle(scope: string): string {
   const style = advancedTheme[scope]
-  if (!style) return ''
+  if (!style)
+    return ''
 
   let css = `color: ${style.color};`
-  if (style.fontWeight) css += ` font-weight: ${style.fontWeight};`
-  if (style.fontStyle) css += ` font-style: ${style.fontStyle};`
-  if (style.textDecoration) css += ` text-decoration: ${style.textDecoration};`
+  if (style.fontWeight)
+    css += ` font-weight: ${style.fontWeight};`
+  if (style.fontStyle)
+    css += ` font-style: ${style.fontStyle};`
+  if (style.textDecoration)
+    css += ` text-decoration: ${style.textDecoration};`
 
   return css
 }
@@ -436,9 +455,12 @@ function applyAdvancedStyle(scope: string): string {
 function getSemanticColor(token: Token, context: Context): string {
   // Color based on context
   if (token.type.includes('variable')) {
-    if (context.isParameter) return '#9cdcfe'
-    if (context.isConstant) return '#4fc1ff'
-    if (context.isGlobal) return '#4ec9b0'
+    if (context.isParameter)
+      return '#9cdcfe'
+    if (context.isConstant)
+      return '#4fc1ff'
+    if (context.isGlobal)
+      return '#4ec9b0'
     return '#9cdcfe'
   }
 
@@ -452,12 +474,12 @@ function getSemanticColor(token: Token, context: Context): string {
 
 ```typescript
 import {
-  vscDarkTheme,
-  githubLightTheme,
   draculaTheme,
+  githubLightTheme,
   monokaiTheme,
   solarizedDarkTheme,
-  solarizedLightTheme
+  solarizedLightTheme,
+  vscDarkTheme
 } from 'ts-syntax-highlighter/themes'
 
 // Apply theme

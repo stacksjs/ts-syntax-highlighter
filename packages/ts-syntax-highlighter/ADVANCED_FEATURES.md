@@ -13,8 +13,8 @@ const highlighter = await createHighlighter()
 
 const result = await highlighter.highlight(code, 'javascript', {
   lineNumbers: true,
-  addedLines: [2, 5, 6],      // Green background with + indicator
-  removedLines: [3],            // Red background with - indicator
+  addedLines: [2, 5, 6], // Green background with + indicator
+  removedLines: [3], // Red background with - indicator
 })
 ```
 
@@ -24,8 +24,8 @@ Draw attention to specific lines while dimming others:
 
 ```typescript
 const result = await highlighter.highlight(code, 'javascript', {
-  focusLines: [3, 4, 5],        // These lines stay clear
-  dimLines: [1, 2, 6, 7],       // These lines are dimmed
+  focusLines: [3, 4, 5], // These lines stay clear
+  dimLines: [1, 2, 6, 7], // These lines are dimmed
 })
 ```
 
@@ -61,8 +61,7 @@ Annotation types:
 Support both light and dark modes automatically:
 
 ```typescript
-import { renderDualTheme } from 'ts-syntax-highlighter'
-import { githubLight, githubDark } from 'ts-syntax-highlighter'
+import { githubDark, githubLight, renderDualTheme } from 'ts-syntax-highlighter'
 
 const highlighter = await createHighlighter()
 const tokens = (await highlighter.highlight(code, 'javascript')).tokens
@@ -174,7 +173,7 @@ const result = await highlighter.highlight(code, 'javascript', {
 })
 
 // Add JavaScript to handle copying:
-document.querySelectorAll('[data-copy]').forEach(button => {
+document.querySelectorAll('[data-copy]').forEach((button) => {
   button.addEventListener('click', async () => {
     const code = button.nextElementSibling.textContent
     await navigator.clipboard.writeText(code)
@@ -256,9 +255,9 @@ const result = await highlighter.highlight(code, 'javascript', {
 })
 
 // Get all outputs
-console.log(result.html)  // HTML markup
-console.log(result.css)   // Themed CSS
-console.log(result.ansi)  // Terminal output
+console.log(result.html) // HTML markup
+console.log(result.css) // Themed CSS
+console.log(result.ansi) // Terminal output
 ```
 
 ### Performance Tips

@@ -160,15 +160,15 @@
 // Before (Shiki)
 import { getHighlighter } from 'shiki'
 
+// After (ts-syntax-highlighter)
+import { createHighlighter } from 'ts-syntax-highlighter'
+
 const highlighter = await getHighlighter({
   theme: 'github-dark',
   langs: ['javascript', 'typescript'],
 })
 
 const html = highlighter.codeToHtml(code, { lang: 'javascript' })
-
-// After (ts-syntax-highlighter)
-import { createHighlighter } from 'ts-syntax-highlighter'
 
 const highlighter = await createHighlighter({
   theme: 'github-dark',

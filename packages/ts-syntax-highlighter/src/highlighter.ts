@@ -8,13 +8,12 @@ import type {
   RenderOptions,
   SyntaxHighlighterConfig,
   Theme,
-  TokenLine,
 } from './types'
+import { FastTokenizer } from './fast-tokenizer'
 import { getLanguage, languages } from './grammars'
 import { Renderer } from './renderer'
 import { getTheme, themes } from './themes'
 import { Tokenizer } from './tokenizer'
-import { FastTokenizer } from './fast-tokenizer'
 
 export class Highlighter implements IHighlighter {
   private config: SyntaxHighlighterConfig

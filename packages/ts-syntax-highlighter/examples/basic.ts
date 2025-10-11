@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createHighlighter, highlight } from '../src'
 
 async function basicExample() {

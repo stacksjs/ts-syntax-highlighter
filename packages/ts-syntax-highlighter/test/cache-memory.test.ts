@@ -113,8 +113,7 @@ describe('Cache and Memory', () => {
 
       // Rapid cache hits
       const promises = Array.from({ length: 100 }, () =>
-        highlighter.highlight(code, 'javascript'),
-      )
+        highlighter.highlight(code, 'javascript'))
 
       const results = await Promise.all(promises)
       expect(results.length).toBe(100)
@@ -126,8 +125,7 @@ describe('Cache and Memory', () => {
 
       // Create 100 different code snippets
       const promises = Array.from({ length: 100 }, (_, i) =>
-        highlighter.highlight(`const x${i} = ${i};`, 'javascript'),
-      )
+        highlighter.highlight(`const x${i} = ${i};`, 'javascript'))
 
       await Promise.all(promises)
       expect(highlighter.getCacheSize()).toBe(100)
@@ -214,7 +212,7 @@ describe('Cache and Memory', () => {
 
     it('should handle very long single line caching', async () => {
       const highlighter = await createHighlighter({ cache: true })
-      const longLine = 'const x = ' + '"a"'.repeat(5000) + ';'
+      const longLine = `const x = ${'"a"'.repeat(5000)};`
 
       await highlighter.highlight(longLine, 'javascript')
       await highlighter.highlight(longLine, 'javascript')
@@ -345,13 +343,12 @@ describe('Cache and Memory', () => {
 
       // Concurrent cache reads
       const promises = Array.from({ length: 50 }, () =>
-        highlighter.highlight(code, 'javascript'),
-      )
+        highlighter.highlight(code, 'javascript'))
 
       const results = await Promise.all(promises)
 
       expect(results.length).toBe(50)
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.html).toBeDefined()
       })
       expect(highlighter.getCacheSize()).toBe(1)
@@ -362,8 +359,7 @@ describe('Cache and Memory', () => {
 
       // Concurrent writes of different code
       const promises = Array.from({ length: 50 }, (_, i) =>
-        highlighter.highlight(`const x${i} = ${i};`, 'javascript'),
-      )
+        highlighter.highlight(`const x${i} = ${i};`, 'javascript'))
 
       const results = await Promise.all(promises)
 

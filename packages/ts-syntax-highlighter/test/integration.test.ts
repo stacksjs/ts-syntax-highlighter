@@ -290,7 +290,7 @@ a:hover {
       const results = await Promise.all(promises)
 
       expect(results.length).toBe(4)
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toBeDefined()
         expect(result.html).toBeDefined()
       })
@@ -470,8 +470,7 @@ a:hover {
 
       // Concurrent cache hits
       const promises = Array.from({ length: 100 }, () =>
-        highlighter.highlight(code, 'javascript'),
-      )
+        highlighter.highlight(code, 'javascript'))
 
       const start = performance.now()
       const results = await Promise.all(promises)

@@ -80,8 +80,8 @@ Retrieves a language by its ID, alias, or extension.
 **Example**:
 ```typescript
 const js = getLanguage('javascript')
-const jsx = getLanguage('jsx')  // Returns JavaScript
-const ts = getLanguage('ts')    // Returns TypeScript
+const jsx = getLanguage('jsx') // Returns JavaScript
+const ts = getLanguage('ts') // Returns TypeScript
 ```
 
 ### getLanguageByExtension()
@@ -117,7 +117,7 @@ Array of all supported languages.
 import { languages } from 'ts-syntax-highlighter'
 
 console.log(languages.length) // 6
-languages.forEach(lang => {
+languages.forEach((lang) => {
   console.log(`${lang.name}: ${lang.id}`)
 })
 ```
@@ -130,10 +130,10 @@ Represents a single token in the source code.
 
 ```typescript
 interface Token {
-  type: string        // Scope name (e.g., 'keyword.control.js')
-  content: string     // The actual text content
-  line: number        // Line number (0-indexed)
-  startIndex: number  // Character position in the line (0-indexed)
+  type: string // Scope name (e.g., 'keyword.control.js')
+  content: string // The actual text content
+  line: number // Line number (0-indexed)
+  startIndex: number // Character position in the line (0-indexed)
 }
 ```
 
@@ -167,8 +167,8 @@ Represents all tokens on a single line.
 
 ```typescript
 interface LineTokens {
-  line: number        // Line number (0-indexed)
-  tokens: Token[]     // Array of tokens on this line
+  line: number // Line number (0-indexed)
+  tokens: Token[] // Array of tokens on this line
 }
 ```
 
@@ -195,11 +195,11 @@ Represents a supported language.
 
 ```typescript
 interface Language {
-  id: string            // Unique identifier
-  name: string          // Display name
-  aliases?: string[]    // Alternative identifiers
+  id: string // Unique identifier
+  name: string // Display name
+  aliases?: string[] // Alternative identifiers
   extensions?: string[] // File extensions
-  grammar: Grammar      // Grammar definition
+  grammar: Grammar // Grammar definition
 }
 ```
 
@@ -250,9 +250,9 @@ const grammar: Grammar = {
   name: 'JavaScript',
   scopeName: 'source.js',
   keywords: {
-    'const': 'storage.type.js',
-    'let': 'storage.type.js',
-    'var': 'storage.type.js'
+    const: 'storage.type.js',
+    let: 'storage.type.js',
+    var: 'storage.type.js'
   },
   patterns: [
     { include: '#keywords' },
@@ -407,21 +407,25 @@ function processTokens(tokens: LineTokens[]): ProcessedToken[][] {
 }
 
 function categorize(token: Token): string {
-  if (token.type.includes('keyword')) return 'keyword'
-  if (token.type.includes('string')) return 'literal'
-  if (token.type.includes('comment')) return 'comment'
+  if (token.type.includes('keyword'))
+    return 'keyword'
+  if (token.type.includes('string'))
+    return 'literal'
+  if (token.type.includes('comment'))
+    return 'comment'
   return 'other'
 }
 
 function getColor(token: Token): string {
   const colorMap: Record<string, string> = {
-    'keyword': '#C586C0',
-    'string': '#CE9178',
-    'comment': '#6A9955'
+    keyword: '#C586C0',
+    string: '#CE9178',
+    comment: '#6A9955'
   }
 
   for (const [key, color] of Object.entries(colorMap)) {
-    if (token.type.includes(key)) return color
+    if (token.type.includes(key))
+      return color
   }
 
   return '#D4D4D4'
@@ -431,7 +435,7 @@ function getColor(token: Token): string {
 ## Error Handling
 
 ```typescript
-import { Tokenizer, getLanguage } from 'ts-syntax-highlighter'
+import { getLanguage, Tokenizer } from 'ts-syntax-highlighter'
 
 function safeTokenize(code: string, languageId: string): LineTokens[] {
   // Check if language exists
@@ -443,7 +447,8 @@ function safeTokenize(code: string, languageId: string): LineTokens[] {
   try {
     const tokenizer = new Tokenizer(languageId)
     return tokenizer.tokenize(code)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Tokenization failed:', error)
     return []
   }
@@ -462,7 +467,8 @@ async function safeTokenizeAsync(
   try {
     const tokenizer = new Tokenizer(languageId)
     return await tokenizer.tokenizeAsync(code)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Tokenization failed:', error)
     return []
   }
@@ -481,7 +487,8 @@ const results = await Promise.all(
 // ✅ Use async for large files
 if (code.length > 1000) {
   tokens = await tokenizer.tokenizeAsync(code)
-} else {
+}
+else {
   tokens = tokenizer.tokenize(code)
 }
 
@@ -501,10 +508,10 @@ for (const line of tokens) {
 
 ```typescript
 import type {
-  Token,
-  LineTokens,
-  Language,
   Grammar,
+  Language,
+  LineTokens,
+  Token,
   Tokenizer
 } from 'ts-syntax-highlighter'
 

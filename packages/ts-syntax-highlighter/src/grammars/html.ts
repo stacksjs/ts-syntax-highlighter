@@ -10,7 +10,7 @@ export const htmlGrammar: Grammar = {
     { include: '#entities' },
   ],
   repository: {
-    doctype: {
+    'doctype': {
       patterns: [
         {
           name: 'meta.tag.sgml.doctype.html',
@@ -18,7 +18,7 @@ export const htmlGrammar: Grammar = {
         },
       ],
     },
-    comments: {
+    'comments': {
       patterns: [
         {
           name: 'comment.block.html',
@@ -27,20 +27,20 @@ export const htmlGrammar: Grammar = {
         },
       ],
     },
-    tags: {
+    'tags': {
       patterns: [
         {
           name: 'meta.tag.html',
           begin: '(<)(script|style|template)\\b',
           beginCaptures: {
-            '1': { name: 'punctuation.definition.tag.begin.html' },
-            '2': { name: 'entity.name.tag.html' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.html' },
           },
           end: '(</)(\\2)(>)',
           endCaptures: {
-            '1': { name: 'punctuation.definition.tag.begin.html' },
-            '2': { name: 'entity.name.tag.html' },
-            '3': { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.html' },
+            3: { name: 'punctuation.definition.tag.end.html' },
           },
           patterns: [
             { include: '#tag-stuff' },
@@ -50,13 +50,13 @@ export const htmlGrammar: Grammar = {
           name: 'meta.tag.html',
           begin: '(<)([a-zA-Z0-9:-]+)',
           beginCaptures: {
-            '1': { name: 'punctuation.definition.tag.begin.html' },
-            '2': { name: 'entity.name.tag.html' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.html' },
           },
           end: '(/>)|(>)',
           endCaptures: {
-            '1': { name: 'punctuation.definition.tag.end.html' },
-            '2': { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.end.html' },
+            2: { name: 'punctuation.definition.tag.end.html' },
           },
           patterns: [
             { include: '#tag-stuff' },
@@ -66,12 +66,12 @@ export const htmlGrammar: Grammar = {
           name: 'meta.tag.html',
           begin: '(</)([a-zA-Z0-9:-]+)',
           beginCaptures: {
-            '1': { name: 'punctuation.definition.tag.begin.html' },
-            '2': { name: 'entity.name.tag.html' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.html' },
           },
           end: '(>)',
           endCaptures: {
-            '1': { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.end.html' },
           },
         },
       ],
@@ -94,7 +94,7 @@ export const htmlGrammar: Grammar = {
         },
       ],
     },
-    entities: {
+    'entities': {
       patterns: [
         {
           name: 'constant.character.entity.html',

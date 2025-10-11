@@ -231,7 +231,7 @@ export function generateLargeCode(lines = 10000): string {
   const result: string[] = []
   for (let i = 0; i < lines; i++) {
     const template = templates[i % templates.length]
-    result.push(template.replace(/{N}/g, String(i)))
+    result.push(template.replace(/\{N\}/g, String(i)))
   }
 
   return result.join('\n')

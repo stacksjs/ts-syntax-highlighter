@@ -16,8 +16,8 @@ When processing multiple files, batch processing provides:
 ### Processing Multiple Files
 
 ```typescript
-import { Tokenizer } from 'ts-syntax-highlighter'
 import fs from 'node:fs/promises'
+import { Tokenizer } from 'ts-syntax-highlighter'
 
 async function processFiles(files: string[], language: string) {
   const tokenizer = new Tokenizer(language)
@@ -44,7 +44,7 @@ async function processFilesParallel(files: string[], language: string) {
   const tokenizer = new Tokenizer(language)
 
   const results = await Promise.all(
-    files.map(async file => {
+    files.map(async (file) => {
       const code = await fs.readFile(file, 'utf-8')
       const tokens = await tokenizer.tokenizeAsync(code)
       return { file, tokens }
@@ -74,13 +74,15 @@ async function processWithConcurrency(
 
   async function processNext(): Promise<void> {
     const file = queue.shift()
-    if (!file) return
+    if (!file)
+      return
 
     try {
       const code = await fs.readFile(file, 'utf-8')
       const tokens = await tokenizer.tokenizeAsync(code)
       results.set(file, tokens)
-    } catch (error) {
+    }
+    catch (error) {
       console.error(`Failed to process ${file}:`, error)
       results.set(file, null)
     }
@@ -129,13 +131,14 @@ async function batchProcess(
     const batch = files.slice(i, i + config.concurrency)
 
     const batchResults = await Promise.all(
-      batch.map(async file => {
+      batch.map(async (file) => {
         try {
           const code = await fs.readFile(file, 'utf-8')
           const tokens = await tokenizer.tokenizeAsync(code)
           config.onSuccess?.(file)
           return { file, tokens, error: null }
-        } catch (error) {
+        }
+        catch (error) {
           config.onError?.(file, error as Error)
           return { file, tokens: null, error: error as Error }
         }
@@ -183,12 +186,13 @@ async function processWithRetry(
     try {
       const code = await fs.readFile(file, 'utf-8')
       return await tokenizer.tokenizeAsync(code)
-    } catch (error) {
+    }
+    catch (error) {
       lastError = error as Error
       if (attempt < maxRetries - 1) {
         // Wait before retry (exponential backoff)
         await new Promise(resolve =>
-          setTimeout(resolve, Math.pow(2, attempt) * 100)
+          setTimeout(resolve, 2 ** attempt * 100)
         )
       }
     }
@@ -205,11 +209,12 @@ async function batchProcessWithRetry(
   const tokenizer = new Tokenizer(language)
   const results = new Map()
 
-  const promises = files.map(async file => {
+  const promises = files.map(async (file) => {
     try {
       const tokens = await processWithRetry(file, tokenizer, maxRetries)
       results.set(file, { success: true, tokens })
-    } catch (error) {
+    }
+    catch (error) {
       results.set(file, { success: false, error: error as Error })
     }
   })
@@ -315,7 +320,7 @@ async function processInChunks(
     const chunk = files.slice(i, i + chunkSize)
 
     const chunkResults = await Promise.all(
-      chunk.map(async file => {
+      chunk.map(async (file) => {
         const code = await fs.readFile(file, 'utf-8')
         return {
           file,
@@ -327,7 +332,8 @@ async function processInChunks(
     allResults.push(...chunkResults)
 
     // Force garbage collection between chunks
-    if (global.gc) global.gc()
+    if (global.gc)
+      global.gc()
   }
 
   return allResults
@@ -352,7 +358,7 @@ async function processProject(
 
   // Group by language
   const byLanguage = new Map<string, string[]>()
-  files.forEach(file => {
+  files.forEach((file) => {
     const ext = file.split('.').pop()
     const lang = ext === 'ts' || ext === 'tsx' ? 'typescript' : 'javascript'
 
@@ -413,8 +419,8 @@ async function generateStats(files: string[], language: string): Promise<Stats> 
     stats.totalFiles++
     stats.totalLines += tokens.length
 
-    tokens.forEach(line => {
-      line.tokens.forEach(token => {
+    tokens.forEach((line) => {
+      line.tokens.forEach((token) => {
         stats.totalTokens++
 
         // Count by type

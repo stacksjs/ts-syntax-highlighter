@@ -1,3 +1,4 @@
+import type { Token, TokenLine } from '../src/types'
 import { describe, expect, it } from 'bun:test'
 import {
   applyLineTransformers,
@@ -9,7 +10,6 @@ import {
   createLinkTransformer,
   createTokenHighlighter,
 } from '../src/transformers'
-import type { Token, TokenLine } from '../src/types'
 
 describe('Transformers and Plugins', () => {
   const mockTokens: TokenLine[] = [
@@ -477,8 +477,8 @@ describe('Transformers and Plugins', () => {
       const transformer = createTokenHighlighter(() => true, '#fff')
       const result = applyTokenTransformers(mockTokens, [transformer])
 
-      result.forEach(line => {
-        line.tokens.forEach(token => {
+      result.forEach((line) => {
+        line.tokens.forEach((token) => {
           expect(token.highlighted).toBe(true)
         })
       })
@@ -650,14 +650,14 @@ describe('Transformers and Plugins', () => {
       }
 
       const transformer = createTokenHighlighter(t =>
-        t.scopes.some(s => s === 'scope50'),
+        t.scopes.includes('scope50'),
       )
 
       expect(transformer.shouldTransform(token)).toBe(true)
     })
 
     it('should handle transformers with complex predicates', () => {
-      const transformer = createBlurTransformer(token => {
+      const transformer = createBlurTransformer((token) => {
         const hasSecret = token.content.toLowerCase().includes('secret')
         const hasKey = token.content.toLowerCase().includes('key')
         const hasPassword = token.scopes.some(s => s.includes('password'))

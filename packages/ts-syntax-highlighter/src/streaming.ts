@@ -1,5 +1,4 @@
-import type { Language, RenderOptions, RenderedCode, TokenLine } from './types'
-import { Renderer } from './renderer'
+import type { Language, RenderOptions, TokenLine } from './types'
 import { Tokenizer } from './tokenizer'
 
 export interface StreamChunk {
@@ -19,7 +18,7 @@ export async function* highlightStream(
 ): AsyncGenerator<StreamChunk> {
   const lines = code.split('\n')
   const tokenizer = new Tokenizer(language.grammar)
-  const theme = options.theme || 'github-dark'
+  const _theme = options.theme || 'github-dark'
 
   // We need a theme object, so this is simplified
   // In real usage, you'd pass a proper theme
@@ -32,7 +31,7 @@ export async function* highlightStream(
     for (let j = 0; j < chunk.length; j++) {
       const tokenLine = tokenizer.tokenizeLine(chunk[j], i + j + 1, prevStack)
       tokenLines.push(tokenLine)
-      prevStack = tokenizer['scopeStack']
+      prevStack = tokenizer.scopeStack
     }
 
     // For streaming, we'd render each chunk
@@ -57,10 +56,10 @@ export class BatchHighlighter {
     this.batchSize = batchSize
   }
 
-  async *processBatches(
+  async* processBatches(
     lines: string[],
     language: Language,
-    options: RenderOptions = {},
+    _options: RenderOptions = {},
   ): AsyncGenerator<TokenLine[]> {
     const tokenizer = new Tokenizer(language.grammar)
     let prevStack: any
@@ -72,7 +71,7 @@ export class BatchHighlighter {
       for (let j = 0; j < batch.length; j++) {
         const tokenLine = tokenizer.tokenizeLine(batch[j], i + j + 1, prevStack)
         tokenLines.push(tokenLine)
-        prevStack = tokenizer['scopeStack']
+        prevStack = tokenizer.scopeStack
       }
 
       yield tokenLines

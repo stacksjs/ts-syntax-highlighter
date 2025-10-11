@@ -134,6 +134,7 @@ describe('Grammars', () => {
     })
 
     it('should tokenize template literals', () => {
+      // eslint-disable-next-line no-template-curly-in-string
       const code = '`Hello ${name}`'
       const tokens = tokenizer.tokenize(code)
 

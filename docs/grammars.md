@@ -65,7 +65,13 @@ const tokens = tokenizer.tokenize('const x = 42')
 const element = <div className="container">Hello</div>
 
 // JSX with expressions
-const greeting = <h1>Hello, {name}!</h1>
+const greeting = (
+  <h1>
+    Hello,
+    {name}
+    !
+  </h1>
+)
 
 // JSX components
 const app = <MyComponent prop={value} />

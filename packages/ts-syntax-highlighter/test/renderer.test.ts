@@ -1,9 +1,9 @@
+import type { TokenLine } from '../src/types'
 import { describe, expect, it } from 'bun:test'
+import { Renderer } from '../src/renderer'
 import { githubDark } from '../src/themes/github-dark'
 import { githubLight } from '../src/themes/github-light'
 import { nord } from '../src/themes/nord'
-import { Renderer } from '../src/renderer'
-import type { TokenLine } from '../src/types'
 
 describe('Renderer', () => {
   const mockTokens: TokenLine[] = [
@@ -733,7 +733,8 @@ describe('Renderer', () => {
       const result = renderer.render(mockTokens)
 
       // ANSI color codes start with \x1b[
-      expect(result.ansi).toMatch(/\x1b\[/)
+      // eslint-disable-next-line no-control-regex
+      expect(result.ansi).toMatch(/\x1B\[/)
     })
 
     it('should reset ANSI codes properly', () => {
@@ -741,7 +742,8 @@ describe('Renderer', () => {
       const result = renderer.render(mockTokens)
 
       // Should contain reset code
-      expect(result.ansi).toMatch(/\x1b\[0m/)
+      // eslint-disable-next-line no-control-regex
+      expect(result.ansi).toMatch(/\x1B\[0m/)
     })
   })
 

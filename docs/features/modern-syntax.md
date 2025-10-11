@@ -157,8 +157,8 @@ class Container<T> {
 }
 
 interface Repository<T> {
-  find(id: string): Promise<T>
-  save(entity: T): Promise<void>
+  find: (id: string) => Promise<T>
+  save: (entity: T) => Promise<void>
 }
 ```
 
@@ -235,7 +235,13 @@ const withProps = (
 ### JSX Expressions
 
 ```jsx
-const greeting = <h1>Hello, {name}!</h1>
+const greeting = (
+  <h1>
+    Hello,
+    {name}
+    !
+  </h1>
+)
 
 const conditional = (
   <div>

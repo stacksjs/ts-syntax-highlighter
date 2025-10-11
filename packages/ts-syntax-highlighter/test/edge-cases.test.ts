@@ -29,7 +29,7 @@ describe('Edge Cases', () => {
 
     it('should handle very long single line (10KB)', async () => {
       const highlighter = await createHighlighter()
-      const longCode = 'const x = ' + '"a"'.repeat(3000) + ';'
+      const longCode = `const x = ${'"a"'.repeat(3000)};`
       const result = await highlighter.highlight(longCode, 'javascript')
 
       expect(result).toBeDefined()
@@ -387,12 +387,11 @@ describe('Edge Cases', () => {
       const code = 'const x = 1;'
 
       const promises = Array.from({ length: 100 }, () =>
-        highlighter.highlight(code, 'javascript'),
-      )
+        highlighter.highlight(code, 'javascript'))
 
       const results = await Promise.all(promises)
       expect(results.length).toBe(100)
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toBeDefined()
       })
     })

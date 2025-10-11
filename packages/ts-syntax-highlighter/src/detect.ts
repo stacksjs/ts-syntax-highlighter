@@ -16,8 +16,8 @@ export function detectLanguage(code: string): Language | undefined {
     javascript: [
       /(?:const|let|var)\s+\w+/,
       /function\s+\w+/,
-      /=>\s*{/,
-      /import\s+.*from/,
+      /=>\s*\{/,
+      /import\s+(?:\S.*)?from/,
       /export\s+(?:default|const|function)/,
     ],
     html: [
@@ -28,9 +28,9 @@ export function detectLanguage(code: string): Language | undefined {
       /<div[>\s]/i,
     ],
     css: [
-      /\.\w+\s*{/,
-      /#\w+\s*{/,
-      /[a-z-]+:\s*[^;]+;/,
+      /\.\w+\s*\{/,
+      /#\w+\s*\{/,
+      /[a-z-]+:[^;]+;/,
       /@media\s+/,
       /@keyframes\s+/,
     ],
@@ -38,7 +38,7 @@ export function detectLanguage(code: string): Language | undefined {
       /@if\s*\(/,
       /@foreach\s*\(/,
       /@extends\s*\(/,
-      /{{.*}}/,
+      /\{\{.*\}\}/,
       /@section\s*\(/,
     ],
   }

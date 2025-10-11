@@ -26,11 +26,11 @@ export const stxGrammar: Grammar = {
           name: 'meta.embedded.block.stx.unescaped',
           begin: '(?<!@)\\{\\{\\{',
           beginCaptures: {
-            '0': { name: 'punctuation.section.embedded.begin.stx' },
+            0: { name: 'punctuation.section.embedded.begin.stx' },
           },
           end: '\\}\\}\\}',
           endCaptures: {
-            '0': { name: 'punctuation.section.embedded.end.stx' },
+            0: { name: 'punctuation.section.embedded.end.stx' },
           },
           contentName: 'source.ts.embedded.stx',
         },
@@ -39,11 +39,11 @@ export const stxGrammar: Grammar = {
           name: 'meta.embedded.block.stx.escaped',
           begin: '(?<![@{])\\{\\{',
           beginCaptures: {
-            '0': { name: 'punctuation.section.embedded.begin.stx' },
+            0: { name: 'punctuation.section.embedded.begin.stx' },
           },
           end: '\\}\\}',
           endCaptures: {
-            '0': { name: 'punctuation.section.embedded.end.stx' },
+            0: { name: 'punctuation.section.embedded.end.stx' },
           },
           contentName: 'source.ts.embedded.stx',
         },
@@ -52,11 +52,11 @@ export const stxGrammar: Grammar = {
           name: 'meta.embedded.block.stx.raw',
           begin: '(?<!@)\\{!!',
           beginCaptures: {
-            '0': { name: 'punctuation.section.embedded.begin.stx' },
+            0: { name: 'punctuation.section.embedded.begin.stx' },
           },
           end: '!!\\}',
           endCaptures: {
-            '0': { name: 'punctuation.section.embedded.end.stx' },
+            0: { name: 'punctuation.section.embedded.end.stx' },
           },
           contentName: 'source.ts.embedded.stx',
         },
@@ -134,11 +134,11 @@ export const stxGrammar: Grammar = {
           name: 'keyword.control.markdown.stx',
           begin: '@markdown\\b',
           beginCaptures: {
-            '0': { name: 'keyword.control.markdown.stx' },
+            0: { name: 'keyword.control.markdown.stx' },
           },
           end: '@endmarkdown\\b',
           endCaptures: {
-            '0': { name: 'keyword.control.markdown.stx' },
+            0: { name: 'keyword.control.markdown.stx' },
           },
           contentName: 'text.html.markdown.embedded.stx',
         },
@@ -157,11 +157,11 @@ export const stxGrammar: Grammar = {
           name: 'meta.embedded.block.ts',
           begin: '@ts\\b',
           beginCaptures: {
-            '0': { name: 'keyword.control.stx' },
+            0: { name: 'keyword.control.stx' },
           },
           end: '@endts\\b',
           endCaptures: {
-            '0': { name: 'keyword.control.stx' },
+            0: { name: 'keyword.control.stx' },
           },
           contentName: 'source.ts',
         },
@@ -170,11 +170,11 @@ export const stxGrammar: Grammar = {
           name: 'meta.embedded.block.js',
           begin: '@js\\b',
           beginCaptures: {
-            '0': { name: 'keyword.control.stx' },
+            0: { name: 'keyword.control.stx' },
           },
           end: '@endjs\\b',
           endCaptures: {
-            '0': { name: 'keyword.control.stx' },
+            0: { name: 'keyword.control.stx' },
           },
           contentName: 'source.js',
         },
@@ -183,11 +183,11 @@ export const stxGrammar: Grammar = {
           name: 'meta.embedded.block.raw',
           begin: '@(raw|verbatim)\\b',
           beginCaptures: {
-            '0': { name: 'keyword.control.stx' },
+            0: { name: 'keyword.control.stx' },
           },
           end: '@end(raw|verbatim)\\b',
           endCaptures: {
-            '0': { name: 'keyword.control.stx' },
+            0: { name: 'keyword.control.stx' },
           },
           contentName: 'string.unquoted.raw',
         },
@@ -198,19 +198,19 @@ export const stxGrammar: Grammar = {
         },
       ],
     },
-    html: {
+    'html': {
       patterns: [
         {
           name: 'meta.tag.html',
           begin: '<([a-zA-Z0-9:-]+)',
           beginCaptures: {
-            '0': { name: 'punctuation.definition.tag.begin.html' },
-            '1': { name: 'entity.name.tag.html' },
+            0: { name: 'punctuation.definition.tag.begin.html' },
+            1: { name: 'entity.name.tag.html' },
           },
           end: '(/>)|(>)',
           endCaptures: {
-            '1': { name: 'punctuation.definition.tag.end.html' },
-            '2': { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.end.html' },
+            2: { name: 'punctuation.definition.tag.end.html' },
           },
           patterns: [
             {
@@ -239,12 +239,12 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.html',
           begin: '(</)([a-zA-Z0-9:-]+)',
           beginCaptures: {
-            '1': { name: 'punctuation.definition.tag.begin.html' },
-            '2': { name: 'entity.name.tag.html' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.html' },
           },
           end: '(>)',
           endCaptures: {
-            '1': { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.end.html' },
           },
         },
         {

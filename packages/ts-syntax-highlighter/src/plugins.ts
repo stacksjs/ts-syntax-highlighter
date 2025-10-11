@@ -20,7 +20,7 @@ export const lineHighlighterPlugin: Plugin = {
  * Example plugin: Focus transformer
  * Dims lines that are not in focus
  */
-export function createFocusPlugin(focusLines: number[]): Plugin {
+export function createFocusPlugin(_focusLines: number[]): Plugin {
   return {
     name: 'focus',
     transformers: [

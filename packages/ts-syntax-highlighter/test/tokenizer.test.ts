@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
+import { cssGrammar } from '../src/grammars/css'
 import { javascriptGrammar } from '../src/grammars/javascript'
 import { typescriptGrammar } from '../src/grammars/typescript'
-import { cssGrammar } from '../src/grammars/css'
 import { Tokenizer } from '../src/tokenizer'
 
 describe('Tokenizer', () => {
@@ -45,7 +45,7 @@ describe('Tokenizer', () => {
 
     it('should handle very long lines', () => {
       const tokenizer = new Tokenizer(javascriptGrammar)
-      const longLine = 'const x = ' + '"a"'.repeat(1000) + ';'
+      const longLine = `const x = ${'"a"'.repeat(1000)};`
       const tokens = tokenizer.tokenize(longLine)
 
       expect(tokens).toBeDefined()
@@ -68,7 +68,7 @@ describe('Tokenizer', () => {
 
     it('should tokenize single-quoted strings', () => {
       const tokenizer = new Tokenizer(javascriptGrammar)
-      const code = "const str = 'hello world';"
+      const code = 'const str = \'hello world\';'
       const tokens = tokenizer.tokenize(code)
 
       const hasString = tokens[0].tokens.some(
@@ -90,6 +90,7 @@ describe('Tokenizer', () => {
 
     it('should tokenize template literals', () => {
       const tokenizer = new Tokenizer(javascriptGrammar)
+      // eslint-disable-next-line no-template-curly-in-string
       const code = 'const msg = `Hello ${name}`;'
       const tokens = tokenizer.tokenize(code)
 
@@ -430,7 +431,7 @@ describe('Tokenizer', () => {
         'const arr = [1, 2, 3];',
       ]
 
-      codes.forEach(code => {
+      codes.forEach((code) => {
         const tokens = tokenizer.tokenize(code)
         expect(tokens).toBeDefined()
       })

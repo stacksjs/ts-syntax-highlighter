@@ -73,7 +73,7 @@ export function createBlurTransformer(
  * Link transformer - converts URLs to clickable links
  */
 export function createLinkTransformer(): TokenTransformer {
-  const urlRegex = /https?:\/\/[^\s]+/
+  const urlRegex = /https?:\/\/\S+/
   return {
     name: 'link',
     shouldTransform: (token: Token) => urlRegex.test(token.content),
@@ -127,7 +127,7 @@ export function applyTokenTransformers(
 ): TokenLine[] {
   return tokens.map(line => ({
     ...line,
-    tokens: line.tokens.map(token => {
+    tokens: line.tokens.map((token) => {
       let transformedToken = token
       for (const transformer of transformers) {
         if (transformer.shouldTransform(token)) {

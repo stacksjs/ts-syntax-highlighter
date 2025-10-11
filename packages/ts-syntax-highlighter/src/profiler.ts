@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 interface ProfileEntry {
   name: string
   duration: number

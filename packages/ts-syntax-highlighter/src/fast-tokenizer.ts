@@ -10,38 +10,38 @@ const QUOTE = 16
 const WHITESPACE = 32
 
 // Initialize lookup table (done once at module load)
-for (let i = 65; i <= 90; i++) CHAR_TYPE[i] = LETTER  // A-Z
+for (let i = 65; i <= 90; i++) CHAR_TYPE[i] = LETTER // A-Z
 for (let i = 97; i <= 122; i++) CHAR_TYPE[i] = LETTER // a-z
-CHAR_TYPE[95] = LETTER  // _
-CHAR_TYPE[36] = LETTER  // $
-for (let i = 48; i <= 57; i++) CHAR_TYPE[i] = DIGIT   // 0-9
-CHAR_TYPE[43] = OPERATOR  // +
-CHAR_TYPE[45] = OPERATOR  // -
-CHAR_TYPE[42] = OPERATOR  // *
-CHAR_TYPE[47] = OPERATOR  // /
-CHAR_TYPE[61] = OPERATOR  // =
-CHAR_TYPE[33] = OPERATOR  // !
-CHAR_TYPE[60] = OPERATOR  // <
-CHAR_TYPE[62] = OPERATOR  // >
-CHAR_TYPE[38] = OPERATOR  // &
+CHAR_TYPE[95] = LETTER // _
+CHAR_TYPE[36] = LETTER // $
+for (let i = 48; i <= 57; i++) CHAR_TYPE[i] = DIGIT // 0-9
+CHAR_TYPE[43] = OPERATOR // +
+CHAR_TYPE[45] = OPERATOR // -
+CHAR_TYPE[42] = OPERATOR // *
+CHAR_TYPE[47] = OPERATOR // /
+CHAR_TYPE[61] = OPERATOR // =
+CHAR_TYPE[33] = OPERATOR // !
+CHAR_TYPE[60] = OPERATOR // <
+CHAR_TYPE[62] = OPERATOR // >
+CHAR_TYPE[38] = OPERATOR // &
 CHAR_TYPE[124] = OPERATOR // |
-CHAR_TYPE[37] = OPERATOR  // %
-CHAR_TYPE[63] = OPERATOR  // ?
-CHAR_TYPE[58] = OPERATOR  // :
-CHAR_TYPE[46] = OPERATOR  // .
+CHAR_TYPE[37] = OPERATOR // %
+CHAR_TYPE[63] = OPERATOR // ?
+CHAR_TYPE[58] = OPERATOR // :
+CHAR_TYPE[46] = OPERATOR // .
 CHAR_TYPE[123] = PUNCTUATION // {
 CHAR_TYPE[125] = PUNCTUATION // }
-CHAR_TYPE[40] = PUNCTUATION  // (
-CHAR_TYPE[41] = PUNCTUATION  // )
-CHAR_TYPE[91] = PUNCTUATION  // [
-CHAR_TYPE[93] = PUNCTUATION  // ]
-CHAR_TYPE[59] = PUNCTUATION  // ;
-CHAR_TYPE[44] = PUNCTUATION  // ,
-CHAR_TYPE[34] = QUOTE  // "
-CHAR_TYPE[39] = QUOTE  // '
-CHAR_TYPE[96] = QUOTE  // `
+CHAR_TYPE[40] = PUNCTUATION // (
+CHAR_TYPE[41] = PUNCTUATION // )
+CHAR_TYPE[91] = PUNCTUATION // [
+CHAR_TYPE[93] = PUNCTUATION // ]
+CHAR_TYPE[59] = PUNCTUATION // ;
+CHAR_TYPE[44] = PUNCTUATION // ,
+CHAR_TYPE[34] = QUOTE // "
+CHAR_TYPE[39] = QUOTE // '
+CHAR_TYPE[96] = QUOTE // `
 CHAR_TYPE[32] = WHITESPACE // space
-CHAR_TYPE[9] = WHITESPACE  // tab
+CHAR_TYPE[9] = WHITESPACE // tab
 CHAR_TYPE[10] = WHITESPACE // newline
 CHAR_TYPE[13] = WHITESPACE // carriage return
 
@@ -111,7 +111,8 @@ export class FastTokenizer {
         // Scan tag
         offset++
         const isClosing = line.charCodeAt(offset) === 47 // /
-        if (isClosing) offset++
+        if (isClosing)
+          offset++
 
         // Scan tag name
         while (offset < line.length && CHAR_TYPE[line.charCodeAt(offset)] & LETTER) {
@@ -123,7 +124,8 @@ export class FastTokenizer {
           offset++
         }
 
-        if (line.charCodeAt(offset) === 62) offset++ // >
+        if (line.charCodeAt(offset) === 62)
+          offset++ // >
 
         tokens.push({ type: 'tag', content: line.slice(start, offset) })
         continue
@@ -137,7 +139,8 @@ export class FastTokenizer {
           // Scan until { : or ;
           while (offset < line.length) {
             const c = line.charCodeAt(offset)
-            if (c === 123 || c === 58 || c === 59) break // { : ;
+            if (c === 123 || c === 58 || c === 59)
+              break // { : ;
             offset++
           }
           const content = line.slice(start, offset)
@@ -240,19 +243,23 @@ export class FastTokenizer {
         end = offset + 2
         while (end < line.length) {
           const c = line.charCodeAt(end)
-          if (!((c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102))) break
+          if (!((c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102)))
+            break
           end++
         }
         return end
-      } else if (next === 98 || next === 66) { // b or B (binary)
+      }
+      else if (next === 98 || next === 66) { // b or B (binary)
         end = offset + 2
         while (end < line.length && (line[end] === '0' || line[end] === '1')) end++
         return end
-      } else if (next === 111 || next === 79) { // o or O (octal)
+      }
+      else if (next === 111 || next === 79) { // o or O (octal)
         end = offset + 2
         while (end < line.length) {
           const c = line.charCodeAt(end)
-          if (!(c >= 48 && c <= 55)) break
+          if (!(c >= 48 && c <= 55))
+            break
           end++
         }
         return end
@@ -264,14 +271,18 @@ export class FastTokenizer {
       const c = line.charCodeAt(end)
       if (c >= 48 && c <= 57) {
         end++
-      } else if (c === 46 && !hasDecimal && !hasExponent) { // decimal point
+      }
+      else if (c === 46 && !hasDecimal && !hasExponent) { // decimal point
         hasDecimal = true
         end++
-      } else if ((c === 101 || c === 69) && !hasExponent) { // e or E (exponent)
+      }
+      else if ((c === 101 || c === 69) && !hasExponent) { // e or E (exponent)
         hasExponent = true
         end++
-        if (end < line.length && (line[end] === '+' || line[end] === '-')) end++
-      } else {
+        if (end < line.length && (line[end] === '+' || line[end] === '-'))
+          end++
+      }
+      else {
         break
       }
     }
@@ -322,33 +333,34 @@ export class FastTokenizer {
    * Scan an operator token
    */
   private scanOperator(line: string, offset: number, char1: number): number {
-    if (offset + 1 >= line.length) return offset + 1
+    if (offset + 1 >= line.length)
+      return offset + 1
 
     const char2 = line.charCodeAt(offset + 1)
 
     // Check 3-char operators
     if (offset + 2 < line.length) {
       const char3 = line.charCodeAt(offset + 2)
-      if ((char1 === 61 && char2 === 61 && char3 === 61) || // ===
-          (char1 === 33 && char2 === 61 && char3 === 61) || // !==
-          (char1 === 62 && char2 === 62 && char3 === 62) || // >>>
-          (char1 === 46 && char2 === 46 && char3 === 46)) { // ...
+      if ((char1 === 61 && char2 === 61 && char3 === 61) // ===
+        || (char1 === 33 && char2 === 61 && char3 === 61) // !==
+        || (char1 === 62 && char2 === 62 && char3 === 62) // >>>
+        || (char1 === 46 && char2 === 46 && char3 === 46)) { // ...
         return offset + 3
       }
     }
 
     // Check 2-char operators
-    if ((char1 === 43 && char2 === 43) || // ++
-        (char1 === 45 && char2 === 45) || // --
-        (char1 === 61 && char2 === 61) || // ==
-        (char1 === 33 && char2 === 61) || // !=
-        (char1 === 60 && char2 === 61) || // <=
-        (char1 === 62 && char2 === 61) || // >=
-        (char1 === 38 && char2 === 38) || // &&
-        (char1 === 124 && char2 === 124) || // ||
-        (char1 === 61 && char2 === 62) || // =>
-        (char1 === 60 && char2 === 60) || // <<
-        (char1 === 62 && char2 === 62)) { // >>
+    if ((char1 === 43 && char2 === 43) // ++
+      || (char1 === 45 && char2 === 45) // --
+      || (char1 === 61 && char2 === 61) // ==
+      || (char1 === 33 && char2 === 61) // !=
+      || (char1 === 60 && char2 === 61) // <=
+      || (char1 === 62 && char2 === 61) // >=
+      || (char1 === 38 && char2 === 38) // &&
+      || (char1 === 124 && char2 === 124) // ||
+      || (char1 === 61 && char2 === 62) // =>
+      || (char1 === 60 && char2 === 60) // <<
+      || (char1 === 62 && char2 === 62)) { // >>
       return offset + 2
     }
 

@@ -63,8 +63,8 @@ export class DualThemeRenderer {
   render(tokens: TokenLine[], options: RenderOptions = {}): RenderedCode {
     return renderDualTheme(tokens, {
       ...options,
-      lightTheme: this.lightRenderer['theme'],
-      darkTheme: this.darkRenderer['theme'],
+      lightTheme: this.lightRenderer.theme,
+      darkTheme: this.darkRenderer.theme,
       selector: this.selector,
     })
   }

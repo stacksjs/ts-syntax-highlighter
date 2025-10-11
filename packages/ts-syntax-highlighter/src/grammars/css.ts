@@ -17,7 +17,7 @@ export const cssGrammar: Grammar = {
     { include: '#punctuation' },
   ],
   repository: {
-    comments: {
+    'comments': {
       patterns: [
         {
           name: 'comment.block.css',
@@ -34,7 +34,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    selectors: {
+    'selectors': {
       patterns: [
         {
           name: 'entity.name.tag.css',
@@ -58,7 +58,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    properties: {
+    'properties': {
       patterns: [
         {
           name: 'support.type.property-name.css',
@@ -66,7 +66,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    values: {
+    'values': {
       patterns: [
         {
           name: 'support.constant.property-value.css',
@@ -74,7 +74,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    strings: {
+    'strings': {
       patterns: [
         {
           name: 'string.quoted.double.css',
@@ -88,7 +88,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    numbers: {
+    'numbers': {
       patterns: [
         {
           name: 'constant.numeric.css',
@@ -96,7 +96,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    colors: {
+    'colors': {
       patterns: [
         {
           name: 'constant.other.color.css',
@@ -108,7 +108,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    functions: {
+    'functions': {
       patterns: [
         {
           name: 'support.function.css',
@@ -116,7 +116,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    variables: {
+    'variables': {
       patterns: [
         {
           name: 'variable.other.custom-property.css',
@@ -124,7 +124,7 @@ export const cssGrammar: Grammar = {
         },
       ],
     },
-    punctuation: {
+    'punctuation': {
       patterns: [
         {
           name: 'punctuation.css',

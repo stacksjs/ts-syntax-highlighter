@@ -103,8 +103,8 @@ console.log(greeting)
 `)
 
 // Process tokens
-tokens.forEach(line => {
-  line.tokens.forEach(token => {
+tokens.forEach((line) => {
+  line.tokens.forEach((token) => {
     console.log(`${token.type}: "${token.content}"`)
   })
 })

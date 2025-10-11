@@ -11,7 +11,7 @@ export const themes: Theme[] = [
 
 export function getTheme(name: string): Theme | undefined {
   const normalized = name.toLowerCase()
-  return themes.find(theme => {
+  return themes.find((theme) => {
     const themeName = theme.name.toLowerCase()
     const themeNameDashed = themeName.replace(/\s+/g, '-')
     return themeName === normalized || themeNameDashed === normalized

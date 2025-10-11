@@ -180,10 +180,10 @@ const langFromExt = getLanguageByExtension('.jsx') // Returns JavaScript languag
 
 ```typescript
 interface Token {
-  type: string        // Token scope (e.g., 'keyword.control.js', 'string.quoted.double.ts')
-  content: string     // The actual text content
-  line: number        // Line number (0-indexed)
-  startIndex: number  // Character position in the line
+  type: string // Token scope (e.g., 'keyword.control.js', 'string.quoted.double.ts')
+  content: string // The actual text content
+  line: number // Line number (0-indexed)
+  startIndex: number // Character position in the line
 }
 
 interface LineTokens {

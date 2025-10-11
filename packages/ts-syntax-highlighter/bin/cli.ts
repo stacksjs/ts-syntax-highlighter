@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 import { readFileSync, writeFileSync } from 'node:fs'
-import { CAC } from 'cac'
-import { createHighlighter } from '../src/highlighter'
-import { getLanguage } from '../src/grammars'
-import { getTheme } from '../src/themes'
+import process from 'node:process'
 import { version } from '../package.json'
+import { getLanguage } from '../src/grammars'
+import { createHighlighter } from '../src/highlighter'
+import { getTheme } from '../src/themes'
 
 const cli = new CAC('syntax')
 

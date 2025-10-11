@@ -369,8 +369,8 @@ highlighter.clearCache()
 ### Custom Transformer Plugin
 
 ```typescript
-import { createTransformerPlugin } from 'ts-syntax-highlighter'
 import type { TokenLine } from 'ts-syntax-highlighter'
+import { createTransformerPlugin } from 'ts-syntax-highlighter'
 
 // Create a plugin that adds metadata to tokens
 const metadataPlugin = createTransformerPlugin('metadata', {

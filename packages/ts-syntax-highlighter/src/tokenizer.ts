@@ -22,38 +22,38 @@ const QUOTE = 16
 const WHITESPACE = 32
 
 // Initialize lookup table (done once at module load)
-for (let i = 65; i <= 90; i++) CHAR_TYPE[i] = LETTER  // A-Z
+for (let i = 65; i <= 90; i++) CHAR_TYPE[i] = LETTER // A-Z
 for (let i = 97; i <= 122; i++) CHAR_TYPE[i] = LETTER // a-z
-CHAR_TYPE[95] = LETTER  // _
-CHAR_TYPE[36] = LETTER  // $
-for (let i = 48; i <= 57; i++) CHAR_TYPE[i] = DIGIT   // 0-9
-CHAR_TYPE[43] = OPERATOR  // +
-CHAR_TYPE[45] = OPERATOR  // -
-CHAR_TYPE[42] = OPERATOR  // *
-CHAR_TYPE[47] = OPERATOR  // /
-CHAR_TYPE[61] = OPERATOR  // =
-CHAR_TYPE[33] = OPERATOR  // !
-CHAR_TYPE[60] = OPERATOR  // <
-CHAR_TYPE[62] = OPERATOR  // >
-CHAR_TYPE[38] = OPERATOR  // &
+CHAR_TYPE[95] = LETTER // _
+CHAR_TYPE[36] = LETTER // $
+for (let i = 48; i <= 57; i++) CHAR_TYPE[i] = DIGIT // 0-9
+CHAR_TYPE[43] = OPERATOR // +
+CHAR_TYPE[45] = OPERATOR // -
+CHAR_TYPE[42] = OPERATOR // *
+CHAR_TYPE[47] = OPERATOR // /
+CHAR_TYPE[61] = OPERATOR // =
+CHAR_TYPE[33] = OPERATOR // !
+CHAR_TYPE[60] = OPERATOR // <
+CHAR_TYPE[62] = OPERATOR // >
+CHAR_TYPE[38] = OPERATOR // &
 CHAR_TYPE[124] = OPERATOR // |
-CHAR_TYPE[37] = OPERATOR  // %
-CHAR_TYPE[63] = OPERATOR  // ?
-CHAR_TYPE[58] = OPERATOR  // :
-CHAR_TYPE[46] = OPERATOR  // .
+CHAR_TYPE[37] = OPERATOR // %
+CHAR_TYPE[63] = OPERATOR // ?
+CHAR_TYPE[58] = OPERATOR // :
+CHAR_TYPE[46] = OPERATOR // .
 CHAR_TYPE[123] = PUNCTUATION // {
 CHAR_TYPE[125] = PUNCTUATION // }
-CHAR_TYPE[40] = PUNCTUATION  // (
-CHAR_TYPE[41] = PUNCTUATION  // )
-CHAR_TYPE[91] = PUNCTUATION  // [
-CHAR_TYPE[93] = PUNCTUATION  // ]
-CHAR_TYPE[59] = PUNCTUATION  // ;
-CHAR_TYPE[44] = PUNCTUATION  // ,
-CHAR_TYPE[34] = QUOTE  // "
-CHAR_TYPE[39] = QUOTE  // '
-CHAR_TYPE[96] = QUOTE  // `
+CHAR_TYPE[40] = PUNCTUATION // (
+CHAR_TYPE[41] = PUNCTUATION // )
+CHAR_TYPE[91] = PUNCTUATION // [
+CHAR_TYPE[93] = PUNCTUATION // ]
+CHAR_TYPE[59] = PUNCTUATION // ;
+CHAR_TYPE[44] = PUNCTUATION // ,
+CHAR_TYPE[34] = QUOTE // "
+CHAR_TYPE[39] = QUOTE // '
+CHAR_TYPE[96] = QUOTE // `
 CHAR_TYPE[32] = WHITESPACE // space
-CHAR_TYPE[9] = WHITESPACE  // tab
+CHAR_TYPE[9] = WHITESPACE // tab
 CHAR_TYPE[10] = WHITESPACE // newline
 CHAR_TYPE[13] = WHITESPACE // carriage return
 
@@ -93,7 +93,7 @@ export class Tokenizer {
     // Pre-compile all regexes during initialization for better performance
     this.compiledPatterns = this.precompilePatterns(grammar.patterns)
     // Pre-compile number regex for fast path
-    this.numberRegex = /^(0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|\d+(\.\d+)?([eE][+-]?\d+)?)/
+    this.numberRegex = /^(0x[0-9a-f]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?(e[+-]?\d+)?)/i
     // Check if this is JS/TS for safe fast paths
     this.isJsOrTs = grammar.scopeName === 'source.js' || grammar.scopeName === 'source.ts'
 
@@ -253,17 +253,21 @@ export class Tokenizer {
             end = offset + 2
             while (end < line.length) {
               const c = line.charCodeAt(end)
-              if (!((c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102))) break
+              if (!((c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102)))
+                break
               end++
             }
-          } else if (next === 98 || next === 66) { // b or B (binary)
+          }
+          else if (next === 98 || next === 66) { // b or B (binary)
             end = offset + 2
             while (end < line.length && (line[end] === '0' || line[end] === '1')) end++
-          } else if (next === 111 || next === 79) { // o or O (octal)
+          }
+          else if (next === 111 || next === 79) { // o or O (octal)
             end = offset + 2
             while (end < line.length) {
               const c = line.charCodeAt(end)
-              if (!(c >= 48 && c <= 55)) break
+              if (!(c >= 48 && c <= 55))
+                break
               end++
             }
           }
@@ -274,14 +278,18 @@ export class Tokenizer {
             const c = line.charCodeAt(end)
             if (c >= 48 && c <= 57) {
               end++
-            } else if (c === 46 && !hasDecimal && !hasExponent) { // decimal point
+            }
+            else if (c === 46 && !hasDecimal && !hasExponent) { // decimal point
               hasDecimal = true
               end++
-            } else if ((c === 101 || c === 69) && !hasExponent) { // e or E (exponent)
+            }
+            else if ((c === 101 || c === 69) && !hasExponent) { // e or E (exponent)
               hasExponent = true
               end++
-              if (end < line.length && (line[end] === '+' || line[end] === '-')) end++
-            } else {
+              if (end < line.length && (line[end] === '+' || line[end] === '-'))
+                end++
+            }
+            else {
               break
             }
           }
@@ -444,27 +452,27 @@ export class Tokenizer {
 
         // Check 3-char operators: === !== >>> ...
         if (offset + 2 < line.length) {
-          if ((char1 === 61 && char2 === 61 && char3 === 61) || // ===
-              (char1 === 33 && char2 === 61 && char3 === 61) || // !==
-              (char1 === 62 && char2 === 62 && char3 === 62) || // >>>
-              (char1 === 46 && char2 === 46 && char3 === 46)) { // ...
+          if ((char1 === 61 && char2 === 61 && char3 === 61) // ===
+            || (char1 === 33 && char2 === 61 && char3 === 61) // !==
+            || (char1 === 62 && char2 === 62 && char3 === 62) // >>>
+            || (char1 === 46 && char2 === 46 && char3 === 46)) { // ...
             opLength = 3
           }
         }
 
         // Check 2-char operators if not 3-char
         if (opLength === 1 && offset + 1 < line.length) {
-          if ((char1 === 43 && char2 === 43) || // ++
-              (char1 === 45 && char2 === 45) || // --
-              (char1 === 61 && char2 === 61) || // ==
-              (char1 === 33 && char2 === 61) || // !=
-              (char1 === 60 && char2 === 61) || // <=
-              (char1 === 62 && char2 === 61) || // >=
-              (char1 === 38 && char2 === 38) || // &&
-              (char1 === 124 && char2 === 124) || // ||
-              (char1 === 61 && char2 === 62) || // =>
-              (char1 === 60 && char2 === 60) || // <<
-              (char1 === 62 && char2 === 62)) { // >>
+          if ((char1 === 43 && char2 === 43) // ++
+            || (char1 === 45 && char2 === 45) // --
+            || (char1 === 61 && char2 === 61) // ==
+            || (char1 === 33 && char2 === 61) // !=
+            || (char1 === 60 && char2 === 61) // <=
+            || (char1 === 62 && char2 === 61) // >=
+            || (char1 === 38 && char2 === 38) // &&
+            || (char1 === 124 && char2 === 124) // ||
+            || (char1 === 61 && char2 === 62) // =>
+            || (char1 === 60 && char2 === 60) // <<
+            || (char1 === 62 && char2 === 62)) { // >>
             opLength = 2
           }
         }
@@ -501,7 +509,7 @@ export class Tokenizer {
    * Uses 'g' flag for lastIndex-based matching
    */
   private precompilePatterns(patterns: GrammarPattern[]): CompiledPattern[] {
-    return patterns.map(pattern => {
+    return patterns.map((pattern) => {
       const compiled: CompiledPattern = { ...pattern }
 
       if (pattern.match) {

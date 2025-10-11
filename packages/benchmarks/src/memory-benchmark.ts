@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+import process from 'node:process'
 import { createHighlighter } from 'ts-syntax-highlighter'
 import { generateLargeCode, largeCode, mediumCode, smallCode } from './fixtures'
 
@@ -19,8 +21,8 @@ async function benchmarkMemory() {
   console.log('🧪 Memory Benchmark\n')
 
   // Force GC if available
-  if (global.gc) {
-    global.gc()
+  if (globalThis.gc) {
+    globalThis.gc()
   }
 
   const baseline = getMemoryUsage()

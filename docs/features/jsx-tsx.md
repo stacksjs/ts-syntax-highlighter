@@ -39,7 +39,13 @@ Embed JavaScript expressions using curly braces:
 
 ```jsx
 // Variables
-const greeting = <h1>Hello, {name}!</h1>
+const greeting = (
+  <h1>
+    Hello,
+    {name}
+    !
+  </h1>
+)
 
 // Function calls
 const result = <div>{calculate(x, y)}</div>
@@ -88,10 +94,16 @@ const card = (
 
 ```jsx
 function Welcome({ name }) {
-  return <h1>Hello, {name}!</h1>
+  return (
+    <h1>
+      Hello,
+      {name}
+      !
+    </h1>
+  )
 }
 
-const App = () => {
+function App() {
   return (
     <div>
       <Welcome name="Alice" />
@@ -104,20 +116,24 @@ const App = () => {
 ### Component Composition
 
 ```jsx
-const Layout = ({ children }) => (
-  <div className="layout">
-    <Header />
-    <Sidebar />
-    <main>{children}</main>
-    <Footer />
-  </div>
-)
+function Layout({ children }) {
+  return (
+    <div className="layout">
+      <Header />
+      <Sidebar />
+      <main>{children}</main>
+      <Footer />
+    </div>
+  )
+}
 
-const App = () => (
-  <Layout>
-    <Dashboard />
-  </Layout>
-)
+function App() {
+  return (
+    <Layout>
+      <Dashboard />
+    </Layout>
+  )
+}
 ```
 
 ### Props Spreading
@@ -327,7 +343,10 @@ function App() {
 
   return (
     <div>
-      <p>Count: {count}</p>
+      <p>
+        Count:
+        {count}
+      </p>
       <button onClick={() => setCount(count + 1)}>
         Increment
       </button>
@@ -347,7 +366,10 @@ export function App() {
 
   return (
     <div>
-      <p>Count: {count}</p>
+      <p>
+        Count:
+        {count}
+      </p>
       <button onClick={() => setCount(count + 1)}>
         Increment
       </button>
@@ -366,7 +388,10 @@ function App() {
 
   return (
     <div>
-      <p>Count: {count()}</p>
+      <p>
+        Count:
+        {count()}
+      </p>
       <button onClick={() => setCount(count() + 1)}>
         Increment
       </button>
@@ -511,7 +536,7 @@ const element = (
 ### Refs
 
 ```jsx
-const inputRef = React.useRef<HTMLInputElement>(null)
+const inputRef = React.useRef < HTMLInputElement > (null)
 
 const form = (
   <form>

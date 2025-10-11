@@ -115,13 +115,13 @@ Patterns are ordered by frequency of occurrence:
 
 ```typescript
 patterns: [
-  { include: '#comments' },     // Very common
-  { include: '#strings' },      // Very common
-  { include: '#keywords' },     // Common
-  { include: '#numbers' },      // Common
-  { include: '#functions' },    // Common
-  { include: '#operators' },    // Less common
-  { include: '#punctuation' },  // Handled by fast path
+  { include: '#comments' }, // Very common
+  { include: '#strings' }, // Very common
+  { include: '#keywords' }, // Common
+  { include: '#numbers' }, // Common
+  { include: '#functions' }, // Common
+  { include: '#operators' }, // Less common
+  { include: '#punctuation' }, // Handled by fast path
 ]
 ```
 
@@ -142,7 +142,7 @@ All regex patterns are compiled once and cached:
 
 ```typescript
 // Compiled at initialization
-const numberPattern = /\b(0[xX][0-9a-fA-F_]+|0[bB][01_]+|\d+)\b/
+const numberPattern = /\b(0x[0-9a-f_]+|0b[01_]+|\d+)\b/i
 
 // Reused for every tokenization
 if (numberPattern.test(text)) {
@@ -168,10 +168,10 @@ Tokens are created with minimal overhead:
 
 ```typescript
 interface Token {
-  type: string        // Interned string
-  content: string     // Source substring
-  line: number        // Integer
-  startIndex: number  // Integer
+  type: string // Interned string
+  content: string // Source substring
+  line: number // Integer
+  startIndex: number // Integer
 }
 ```
 

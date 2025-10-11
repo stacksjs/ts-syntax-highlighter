@@ -57,11 +57,11 @@ export const jsonGrammar: Grammar = {
           name: 'meta.structure.array.json',
           begin: '\\[',
           beginCaptures: {
-            '0': { name: 'punctuation.definition.array.begin.json' },
+            0: { name: 'punctuation.definition.array.begin.json' },
           },
           end: '\\]',
           endCaptures: {
-            '0': { name: 'punctuation.definition.array.end.json' },
+            0: { name: 'punctuation.definition.array.end.json' },
           },
           patterns: [
             { include: '#value' },
@@ -79,22 +79,22 @@ export const jsonGrammar: Grammar = {
           name: 'meta.structure.dictionary.json',
           begin: '\\{',
           beginCaptures: {
-            '0': { name: 'punctuation.definition.dictionary.begin.json' },
+            0: { name: 'punctuation.definition.dictionary.begin.json' },
           },
           end: '\\}',
           endCaptures: {
-            '0': { name: 'punctuation.definition.dictionary.end.json' },
+            0: { name: 'punctuation.definition.dictionary.end.json' },
           },
           patterns: [
             {
               name: 'meta.structure.dictionary.key.json',
               begin: '"',
               beginCaptures: {
-                '0': { name: 'punctuation.support.type.property-name.begin.json' },
+                0: { name: 'punctuation.support.type.property-name.begin.json' },
               },
               end: '"',
               endCaptures: {
-                '0': { name: 'punctuation.support.type.property-name.end.json' },
+                0: { name: 'punctuation.support.type.property-name.end.json' },
               },
               patterns: [
                 {

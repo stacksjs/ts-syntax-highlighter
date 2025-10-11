@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
 import { createHighlighter } from '../src'
 import { renderDualTheme } from '../src/dual-theme'
-import { createBlurTransformer, createDiffTransformer, createLinkTransformer } from '../src/transformers'
 import { githubDark } from '../src/themes/github-dark'
 import { githubLight } from '../src/themes/github-light'
+import { createBlurTransformer } from '../src/transformers'
 
 async function diffExample() {
   console.log('=== Diff Highlighting Example ===\n')
@@ -40,7 +41,7 @@ console.log(sum);`
 
   const highlighter = await createHighlighter()
 
-  const result = await highlighter.highlight(code, 'javascript', {
+  const _result = await highlighter.highlight(code, 'javascript', {
     lineNumbers: true,
     focusLines: [3], // Focus on the sum calculation
     dimLines: [1, 2, 4],
@@ -62,7 +63,7 @@ async function annotationsExample() {
 
   const highlighter = await createHighlighter({ theme: 'nord' })
 
-  const result = await highlighter.highlight(code, 'javascript', {
+  const _result = await highlighter.highlight(code, 'javascript', {
     lineNumbers: true,
     annotations: [
       { line: 1, text: 'API call', type: 'info' },
@@ -135,11 +136,11 @@ const endpoint = "https://api.example.com";`
   const highlighter = await createHighlighter()
 
   // Blur API keys
-  const blurTransformer = createBlurTransformer(
+  const _blurTransformer = createBlurTransformer(
     token => token.type === 'string' && token.content.includes('sk-'),
   )
 
-  const result = await highlighter.highlight(code, 'javascript', {
+  const _result = await highlighter.highlight(code, 'javascript', {
     lineNumbers: true,
   })
 
@@ -166,7 +167,7 @@ export function Counter() {
 
   const highlighter = await createHighlighter({ theme: 'github-dark' })
 
-  const result = await highlighter.highlight(code, 'javascript', {
+  const _result = await highlighter.highlight(code, 'javascript', {
     lineNumbers: true,
     highlightLines: [4, 9],
     addedLines: [9, 10],

@@ -33,9 +33,9 @@ console.log(greeting)
 const tokens = await tokenizer.tokenizeAsync(code)
 
 // Process tokens
-tokens.forEach(line => {
+tokens.forEach((line) => {
   console.log(`Line ${line.line}:`)
-  line.tokens.forEach(token => {
+  line.tokens.forEach((token) => {
     console.log(`  ${token.type}: "${token.content}"`)
   })
 })
@@ -68,8 +68,8 @@ import { getLanguage } from 'ts-syntax-highlighter'
 const js = getLanguage('javascript')
 
 // Get by alias
-const jsx = getLanguage('jsx')  // Returns JavaScript
-const tsx = getLanguage('tsx')  // Returns TypeScript
+const jsx = getLanguage('jsx') // Returns JavaScript
+const tsx = getLanguage('tsx') // Returns TypeScript
 
 // Check if language exists
 const lang = getLanguage('python')
@@ -97,10 +97,10 @@ Each token contains:
 
 ```typescript
 interface Token {
-  type: string        // Scope name (e.g., 'keyword.control.js')
-  content: string     // The actual text
-  line: number        // Line number (0-indexed)
-  startIndex: number  // Character position in line
+  type: string // Scope name (e.g., 'keyword.control.js')
+  content: string // The actual text
+  line: number // Line number (0-indexed)
+  startIndex: number // Character position in line
 }
 ```
 
@@ -157,8 +157,8 @@ function highlightCode(code: string, language: string): string {
 
   let html = '<pre><code>'
 
-  tokens.forEach(line => {
-    line.tokens.forEach(token => {
+  tokens.forEach((line) => {
+    line.tokens.forEach((token) => {
       const className = token.type.replace(/\./g, '-')
       html += `<span class="${className}">${escapeHtml(token.content)}</span>`
     })
@@ -199,14 +199,18 @@ async function analyzeCode(code: string, language: string) {
     functions: 0,
   }
 
-  tokens.forEach(line => {
-    line.tokens.forEach(token => {
+  tokens.forEach((line) => {
+    line.tokens.forEach((token) => {
       stats.tokens++
 
-      if (token.type.includes('keyword')) stats.keywords++
-      if (token.type.includes('string')) stats.strings++
-      if (token.type.includes('comment')) stats.comments++
-      if (token.type.includes('function')) stats.functions++
+      if (token.type.includes('keyword'))
+        stats.keywords++
+      if (token.type.includes('string'))
+        stats.strings++
+      if (token.type.includes('comment'))
+        stats.comments++
+      if (token.type.includes('function'))
+        stats.functions++
     })
   })
 
@@ -233,15 +237,15 @@ import { Tokenizer } from 'ts-syntax-highlighter'
 function generateThemeCSS(tokens: any[]) {
   const scopes = new Set<string>()
 
-  tokens.forEach(line => {
-    line.tokens.forEach(token => {
+  tokens.forEach((line) => {
+    line.tokens.forEach((token) => {
       scopes.add(token.type)
     })
   })
 
   let css = '/* Auto-generated theme */\n'
 
-  Array.from(scopes).sort().forEach(scope => {
+  Array.from(scopes).sort().forEach((scope) => {
     const className = scope.replace(/\./g, '-')
     css += `.${className} { /* Add your styles */ }\n`
   })
@@ -424,7 +428,7 @@ const tokenizer = new Tokenizer('javascript')
 const files = ['file1.js', 'file2.js', 'file3.js']
 
 const results = await Promise.all(
-  files.map(async file => {
+  files.map(async (file) => {
     const code = await fs.promises.readFile(file, 'utf-8')
     return tokenizer.tokenizeAsync(code)
   })
@@ -434,7 +438,7 @@ const results = await Promise.all(
 ## Error Handling
 
 ```typescript
-import { Tokenizer, getLanguage } from 'ts-syntax-highlighter'
+import { getLanguage, Tokenizer } from 'ts-syntax-highlighter'
 
 function safeTokenize(code: string, languageId: string) {
   // Check if language is supported
@@ -446,7 +450,8 @@ function safeTokenize(code: string, languageId: string) {
   try {
     const tokenizer = new Tokenizer(languageId)
     return tokenizer.tokenize(code)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Tokenization failed:', error)
     return []
   }

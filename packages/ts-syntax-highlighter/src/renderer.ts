@@ -127,7 +127,7 @@ export class Renderer {
   /**
    * Render a single line of tokens
    */
-  private renderLine(tokenLine: TokenLine, inline: boolean): string {
+  private renderLine(tokenLine: TokenLine, _inline: boolean): string {
     return tokenLine.tokens
       .map(token => this.renderToken(token))
       .join('')
@@ -302,7 +302,7 @@ export class Renderer {
   /**
    * Generate CSS for the theme (with caching for performance)
    */
-  private generateCSS(options: RenderOptions = {}): string {
+  private generateCSS(_options: RenderOptions = {}): string {
     // Return cached CSS if available
     if (this.cssCache) {
       return this.cssCache
@@ -488,18 +488,18 @@ export class Renderer {
    */
   private renderAnsi(tokens: TokenLine[]): string {
     const ansiColors: Record<string, string> = {
-      keyword: '\x1b[35m', // Magenta
-      string: '\x1b[32m', // Green
-      comment: '\x1b[90m', // Gray
-      number: '\x1b[36m', // Cyan
-      function: '\x1b[33m', // Yellow
-      reset: '\x1b[0m',
+      keyword: '\x1B[35m', // Magenta
+      string: '\x1B[32m', // Green
+      comment: '\x1B[90m', // Gray
+      number: '\x1B[36m', // Cyan
+      function: '\x1B[33m', // Yellow
+      reset: '\x1B[0m',
     }
 
     return tokens
       .map(line =>
         line.tokens
-          .map(token => {
+          .map((token) => {
             const type = typeof token.type === 'string' ? token.type.toLowerCase() : 'text'
             const color = ansiColors[type] || ansiColors.reset
             return `${color}${token.content}${ansiColors.reset}`

@@ -66,9 +66,9 @@ export function getLanguageByExtension(ext: string): Language | undefined {
   return languages.find(lang => lang.extensions?.includes(extension))
 }
 
-export * from './javascript'
-export * from './typescript'
-export * from './html'
 export * from './css'
+export * from './html'
+export * from './javascript'
 export * from './json'
 export * from './stx'
+export * from './typescript'

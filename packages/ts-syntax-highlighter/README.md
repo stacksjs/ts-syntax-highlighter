@@ -65,7 +65,7 @@ const result = await highlighter.highlight(
 )
 
 console.log(result.html) // Highlighted HTML
-console.log(result.css)  // Theme CSS
+console.log(result.css) // Theme CSS
 ```
 
 ### Quick Highlight Function
@@ -136,8 +136,8 @@ export default {
 ### Custom Themes
 
 ```typescript
-import { createHighlighter } from 'ts-syntax-highlighter'
 import type { Theme } from 'ts-syntax-highlighter'
+import { createHighlighter } from 'ts-syntax-highlighter'
 
 const customTheme: Theme = {
   name: 'My Theme',
@@ -194,8 +194,8 @@ await highlighter.loadLanguage(customLanguage)
 Create custom plugins to extend functionality:
 
 ```typescript
-import { createHighlighter, createTransformerPlugin } from 'ts-syntax-highlighter'
 import type { TokenLine } from 'ts-syntax-highlighter'
+import { createHighlighter, createTransformerPlugin } from 'ts-syntax-highlighter'
 
 const myPlugin = createTransformerPlugin('my-plugin', {
   name: 'my-transformer',
@@ -215,8 +215,8 @@ const highlighter = await createHighlighter({
 ```typescript
 const result = await highlighter.highlight(code, 'javascript', {
   lineNumbers: true,
-  addedLines: [2, 5],      // Show with + indicator
-  removedLines: [3],       // Show with - indicator
+  addedLines: [2, 5], // Show with + indicator
+  removedLines: [3], // Show with - indicator
   annotations: [
     { line: 2, text: 'Fixed bug', type: 'success' },
   ],
@@ -227,8 +227,8 @@ const result = await highlighter.highlight(code, 'javascript', {
 
 ```typescript
 const result = await highlighter.highlight(code, 'javascript', {
-  focusLines: [3, 4, 5],   // Keep these lines clear
-  dimLines: [1, 2, 6, 7],  // Dim these lines
+  focusLines: [3, 4, 5], // Keep these lines clear
+  dimLines: [1, 2, 6, 7], // Dim these lines
 })
 ```
 
