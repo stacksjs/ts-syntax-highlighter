@@ -125,7 +125,7 @@ async function runBenchmarks() {
   })
 
   // Cache benchmarks
-  group({ name: 'With Caching (repeated highlighting)', summary: false }, () => {
+  group('With Caching (repeated highlighting)', () => {
     bench('ts-syntax-highlighter (no cache)', async () => {
       await tsHighlighter.highlight(mediumCode, 'javascript')
     })
@@ -180,13 +180,7 @@ async function runBenchmarks() {
     })
   })
 
-  await run({
-    avg: true,
-    json: false,
-    colors: true,
-    min_max: true,
-    percentiles: true,
-  })
+  await run()
 
   console.log('\n✅ Benchmarks complete!')
 }

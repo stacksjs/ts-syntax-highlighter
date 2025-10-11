@@ -1,4 +1,4 @@
-import type { RenderedCode, RenderOptions, Theme, TokenLine, TokenSettings } from './types'
+import type { RenderedCode, RenderOptions, Theme, Token, TokenLine, TokenSettings } from './types'
 
 export class Renderer {
   private theme: Theme
