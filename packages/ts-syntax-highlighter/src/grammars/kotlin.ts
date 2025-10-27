@@ -1,0 +1,46 @@
+import type { Grammar } from '../types'
+
+export const kotlinGrammar: Grammar = {
+  name: 'Kotlin',
+  scopeName: 'source.kotlin',
+  keywords: {
+    'package': 'keyword.other.kotlin', 'import': 'keyword.other.kotlin', 'class': 'keyword.other.kotlin', 'interface': 'keyword.other.kotlin',
+    'object': 'keyword.other.kotlin', 'data': 'keyword.other.kotlin', 'sealed': 'keyword.other.kotlin', 'enum': 'keyword.other.kotlin',
+    'fun': 'keyword.other.kotlin', 'val': 'keyword.other.kotlin', 'var': 'keyword.other.kotlin', 'if': 'keyword.control.kotlin',
+    'else': 'keyword.control.kotlin', 'when': 'keyword.control.kotlin', 'for': 'keyword.control.kotlin', 'while': 'keyword.control.kotlin',
+    'do': 'keyword.control.kotlin', 'return': 'keyword.control.kotlin', 'break': 'keyword.control.kotlin', 'continue': 'keyword.control.kotlin',
+    'throw': 'keyword.control.kotlin', 'try': 'keyword.control.kotlin', 'catch': 'keyword.control.kotlin', 'finally': 'keyword.control.kotlin',
+    'public': 'storage.modifier.kotlin', 'private': 'storage.modifier.kotlin', 'protected': 'storage.modifier.kotlin',
+    'internal': 'storage.modifier.kotlin', 'open': 'storage.modifier.kotlin', 'abstract': 'storage.modifier.kotlin',
+    'override': 'storage.modifier.kotlin', 'suspend': 'storage.modifier.kotlin', 'inline': 'storage.modifier.kotlin',
+    'true': 'constant.language.kotlin', 'false': 'constant.language.kotlin', 'null': 'constant.language.kotlin',
+    'this': 'variable.language.kotlin', 'super': 'variable.language.kotlin', 'it': 'variable.language.kotlin',
+  },
+  patterns: [
+    { include: '#comments' }, { include: '#strings' }, { include: '#keywords' }, { include: '#numbers' }, { include: '#functions' },
+  ],
+  repository: {
+    comments: {
+      patterns: [
+        { name: 'comment.line.double-slash.kotlin', match: '\\/\\/.*$' },
+        { name: 'comment.block.kotlin', begin: '\\/\\*', end: '\\*\\/' },
+      ],
+    },
+    strings: {
+      patterns: [
+        { name: 'string.quoted.triple.kotlin', begin: '"""', end: '"""', patterns: [{ name: 'meta.template.expression.kotlin', begin: '\\$\\{', end: '\\}' }, { name: 'variable.other.kotlin', match: '\\$[a-zA-Z_][a-zA-Z0-9_]*' }] },
+        { name: 'string.quoted.double.kotlin', begin: '"', end: '"', patterns: [{ name: 'constant.character.escape.kotlin', match: '\\\\.' }, { name: 'variable.other.kotlin', match: '\\$[a-zA-Z_][a-zA-Z0-9_]*' }, { name: 'meta.template.expression.kotlin', begin: '\\$\\{', end: '\\}' }] },
+      ],
+    },
+    keywords: {
+      patterns: [
+        { name: 'keyword.control.kotlin', match: '\\b(if|else|when|for|while|do|return|break|continue|throw|try|catch|finally)\\b' },
+        { name: 'keyword.other.kotlin', match: '\\b(package|import|class|interface|object|data|sealed|enum|fun|val|var)\\b' },
+        { name: 'storage.modifier.kotlin', match: '\\b(public|private|protected|internal|open|abstract|override|suspend|inline)\\b' },
+        { name: 'constant.language.kotlin', match: '\\b(true|false|null)\\b' },
+      ],
+    },
+    numbers: { patterns: [{ name: 'constant.numeric.kotlin', match: '\\b(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|\\d+[._]?\\d*(?:[eE][+-]?\\d+)?)[fFdDlL]?\\b' }] },
+    functions: { patterns: [{ name: 'entity.name.function.kotlin', match: '\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()' }] },
+  },
+}

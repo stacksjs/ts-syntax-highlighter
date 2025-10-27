@@ -1,0 +1,25 @@
+import type { Grammar } from '../types'
+
+export const dartGrammar: Grammar = {
+  name: 'Dart',
+  scopeName: 'source.dart',
+  keywords: {
+    'import': 'keyword.other.dart', 'library': 'keyword.other.dart', 'part': 'keyword.other.dart', 'class': 'keyword.other.dart',
+    'enum': 'keyword.other.dart', 'extends': 'keyword.other.dart', 'implements': 'keyword.other.dart', 'with': 'keyword.other.dart',
+    'mixin': 'keyword.other.dart', 'if': 'keyword.control.dart', 'else': 'keyword.control.dart', 'for': 'keyword.control.dart',
+    'while': 'keyword.control.dart', 'do': 'keyword.control.dart', 'switch': 'keyword.control.dart', 'case': 'keyword.control.dart',
+    'default': 'keyword.control.dart', 'break': 'keyword.control.dart', 'continue': 'keyword.control.dart', 'return': 'keyword.control.dart',
+    'try': 'keyword.control.dart', 'catch': 'keyword.control.dart', 'finally': 'keyword.control.dart', 'throw': 'keyword.control.dart',
+    'var': 'storage.type.dart', 'final': 'storage.type.dart', 'const': 'storage.type.dart', 'late': 'storage.modifier.dart',
+    'static': 'storage.modifier.dart', 'async': 'storage.modifier.dart', 'await': 'keyword.control.dart',
+    'true': 'constant.language.dart', 'false': 'constant.language.dart', 'null': 'constant.language.dart',
+    'this': 'variable.language.dart', 'super': 'variable.language.dart',
+  },
+  patterns: [{ include: '#comments' }, { include: '#strings' }, { include: '#keywords' }, { include: '#numbers' }],
+  repository: {
+    comments: { patterns: [{ name: 'comment.line.double-slash.dart', match: '\\/\\/.*$' }, { name: 'comment.block.dart', begin: '\\/\\*', end: '\\*\\/' }] },
+    strings: { patterns: [{ name: 'string.quoted.triple.dart', begin: '"""', end: '"""' }, { name: 'string.quoted.double.dart', begin: '"', end: '"', patterns: [{ name: 'constant.character.escape.dart', match: '\\\\.' }, { name: 'variable.other.dart', match: '\\$[a-zA-Z_][a-zA-Z0-9_]*' }, { name: 'meta.embedded.line.dart', begin: '\\$\\{', end: '\\}' }] }, { name: 'string.quoted.single.dart', begin: "'", end: "'" }] },
+    keywords: { patterns: [{ name: 'keyword.control.dart', match: '\\b(if|else|for|while|do|switch|case|default|break|continue|return|try|catch|finally|throw|await)\\b' }, { name: 'keyword.other.dart', match: '\\b(import|library|part|class|enum|extends|implements|with|mixin)\\b' }, { name: 'storage.type.dart', match: '\\b(var|final|const)\\b' }, { name: 'constant.language.dart', match: '\\b(true|false|null)\\b' }] },
+    numbers: { patterns: [{ name: 'constant.numeric.dart', match: '\\b\\d+\\.?\\d*\\b' }] },
+  },
+}

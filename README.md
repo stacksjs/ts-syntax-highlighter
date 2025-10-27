@@ -13,7 +13,7 @@ A blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar 
 ## Features
 
 - ⚡ **Blazing Fast** - Highly optimized tokenization with async and sync modes for maximum performance
-- 🎨 **6 Languages** - JavaScript/JSX, TypeScript/TSX, HTML, CSS, JSON, and STX
+- 🎨 **48 Languages** - Comprehensive support for web, system, and specialized languages
 - 🔥 **Modern Syntax** - Full support for ES2024+, BigInt, numeric separators, optional chaining, and more
 - ⚛️ **JSX/TSX Support** - Complete React and TypeScript JSX highlighting
 - 🎯 **CSS4 Features** - Modern color functions _(hwb, lab, lch, oklab, oklch)_, container queries, CSS layers
@@ -54,59 +54,73 @@ function add(a: number, b: number): number {
 
 ## Supported Languages
 
-### JavaScript/JSX
+ts-syntax-highlighter supports **48 languages** across web development, systems programming, data formats, and specialized domains:
 
-- ES2024+ features (BigInt, numeric separators, optional chaining, nullish coalescing)
-- JSX elements and expressions
-- Template literals with expressions
-- Regex literals with all flags
-- Async/await, generators
-- Modern operators: `?.`, `??`, `?.[]`, `?.()`
+### Web & Frontend (10 languages)
+- **JavaScript/JSX** - ES2024+, async/await, template literals, JSX
+- **TypeScript/TSX** - Type annotations, generics, interfaces, TSX
+- **HTML** - HTML5, data/aria attributes, event handlers
+- **CSS** - Modern features, custom properties, CSS4 functions
+- **SCSS/Sass** - Variables, nesting, mixins, functions
+- **Vue** - Single-file components, directives, templates
+- **GraphQL** - Queries, mutations, fragments, directives
+- **Markdown** - Headings, emphasis, code blocks, tables, links
+- **XML** - Elements, attributes, CDATA, namespaces
+- **LaTeX** - Commands, environments, math mode
 
-### TypeScript/TSX
+### System & Compiled Languages (10 languages)
+- **C** - Preprocessor, pointers, functions
+- **C++** - Classes, templates, namespaces, modern C++
+- **Rust** - Ownership, traits, macros, lifetimes
+- **Go** - Goroutines, interfaces, defer
+- **C#** - LINQ, async/await, properties, attributes
+- **Java** - Classes, generics, annotations
+- **Swift** - Optionals, protocols, closures
+- **Kotlin** - Null safety, coroutines, data classes
+- **Dart** - Async, mixins, null safety
 
-- All JavaScript features plus:
-- Type annotations and assertions
-- Interfaces, types, enums
-- Generics and type parameters
-- TypeScript-specific operators: `is`, `keyof`, `infer`
-- TSX (TypeScript + JSX)
-- Utility types
+### Scripting & Dynamic Languages (5 languages)
+- **Python** - Functions, classes, decorators, f-strings
+- **Ruby** - Blocks, symbols, string interpolation
+- **PHP** - Variables, functions, classes, HTML embedding
+- **Lua** - Tables, functions, metatables
+- **R** - Vectors, data frames, statistical functions
 
-### HTML
+### Data & Configuration (8 languages)
+- **JSON** - Objects, arrays, proper escaping
+- **JSONC** - JSON with comments
+- **JSON5** - Unquoted keys, trailing commas, comments
+- **YAML** - Keys, nested structures, anchors
+- **TOML** - Tables, arrays, data types
+- **CSV** - Comma-separated values
+- **IDL** - Interface definitions
+- **Protobuf** - Messages, services, enums
 
-- HTML5 elements
-- Data attributes (`data-*`)
-- ARIA attributes (`aria-*`)
-- Event handlers (`onclick`, `onload`, etc.)
-- HTML entities
-- DOCTYPE declarations
+### Shell & DevOps (7 languages)
+- **Bash/Shell** - Variables, pipes, functions, control flow
+- **PowerShell** - Cmdlets, pipelines, parameters
+- **Dockerfile** - Instructions, multi-stage builds
+- **Makefile** - Targets, variables, directives
+- **Terraform/HCL** - Resources, variables, interpolation
+- **Nginx** - Directives, server blocks, locations
+- **CMD/Batch** - Commands, variables, control flow
 
-### CSS
-
-- Modern color functions: `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `color()`
-- Math functions: `calc()`, `min()`, `max()`, `clamp()`, `round()`, `abs()`, `sign()`
-- Trigonometric: `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan()`
-- Gradients: `linear-gradient()`, `radial-gradient()`, `conic-gradient()`
-- At-rules: `@media`, `@keyframes`, `@supports`, `@container`, `@layer`, `@property`
-- CSS custom properties (variables): `--custom-property`, `var()`
-
-### JSON
-
-- Objects and arrays
-- Strings with proper escape sequences
-- Numbers (including scientific notation)
-- Booleans and null
-- Invalid escape detection
+### Specialized & Other (8 languages)
+- **SQL** - Queries, DDL, DML, functions
+- **Diff/Patch** - File headers, hunks, added/removed lines
+- **RegExp** - Character classes, groups, quantifiers
+- **BNF** - Grammar notation
+- **ABNF** - Augmented BNF
+- **Solidity** - Smart contracts, events, modifiers
+- **Log** - Timestamps, log levels, stack traces
+- **Text/Plain** - Plain text (no highlighting)
 
 ### STX
-
 - Blade-like templating syntax
 - 50+ directives
 - Components, layouts, includes
 - Control flow, loops
 - Authentication, authorization
-- And much more
 
 ## Performance
 
@@ -151,14 +165,23 @@ bun run bench
 ```typescript
 import { Tokenizer } from 'ts-syntax-highlighter'
 
-// Create tokenizer for a specific language
-const tokenizer = new Tokenizer('javascript' | 'typescript' | 'html' | 'css' | 'json' | 'stx')
+// Create tokenizer for a specific language (48 languages supported)
+const tokenizer = new Tokenizer('javascript') // or any of the 48 supported languages
 
 // Async tokenization (faster, recommended)
 const tokens = await tokenizer.tokenizeAsync(code: string)
 
 // Sync tokenization
 const tokens = tokenizer.tokenize(code: string)
+
+// Supported languages:
+// 'javascript', 'typescript', 'html', 'css', 'json', 'stx',
+// 'bash', 'markdown', 'yaml', 'jsonc', 'diff', 'python',
+// 'php', 'java', 'c', 'cpp', 'rust', 'csharp', 'dockerfile',
+// 'ruby', 'go', 'sql', 'idl', 'text', 'json5', 'vue', 'toml',
+// 'scss', 'kotlin', 'swift', 'dart', 'r', 'graphql', 'powershell',
+// 'makefile', 'terraform', 'bnf', 'regexp', 'lua', 'cmd', 'abnf',
+// 'csv', 'log', 'nginx', 'xml', 'protobuf', 'solidity', 'latex'
 ```
 
 ### Language Detection
