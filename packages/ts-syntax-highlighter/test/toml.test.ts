@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { tomlGrammar } from '../src/grammars/toml'
+import type { Token, TokenLine } from '../src/types'
 
 describe('TOML Grammar', () => {
-  const tokenizer = new Tokenizer('toml')
+  const tokenizer = new Tokenizer(tomlGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize TOML code', async () => {
@@ -10,7 +12,7 @@ describe('TOML Grammar', () => {
 [owner]
 name = "John Doe"
 age = 30`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -21,7 +23,7 @@ age = 30`
 server = "192.168.1.1"
 [database.connection]
 max = 5000`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -33,7 +35,7 @@ max = 5000`
 name = "Hammer"
 [[products]]
 name = "Nail"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -42,8 +44,8 @@ name = "Nail"`
     it('should highlight comments', async () => {
       const code = `# This is a comment
 key = "value" # inline comment`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const commentTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('comment'))
+      const tokens = tokenizer.tokenize(code)
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
       expect(commentTokens.length).toBeGreaterThan(0)
     })
   })

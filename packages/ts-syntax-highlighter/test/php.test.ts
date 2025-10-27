@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { phpGrammar } from '../src/grammars/php'
+import type { Token, TokenLine } from '../src/types'
 
 describe('PHP Grammar', () => {
-  const tokenizer = new Tokenizer('php')
+  const tokenizer = new Tokenizer(phpGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic PHP code', async () => {
       const code = `<?php
 echo "Hello World";
 ?>`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -21,17 +23,17 @@ echo "Hello World";
       const code = `<?php
 echo "test";
 ?>`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const phpTagTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('punctuation.section.embedded'))
+      const phpTagTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('punctuation.section.embedded')))
 
       expect(phpTagTokens.length).toBeGreaterThan(0)
     })
 
     it('should highlight short echo tags', async () => {
       const code = `<?= $variable ?>`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -43,10 +45,10 @@ echo "test";
 $name = "John";
 $age = 25;
 echo $name;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const variableTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('variable'))
+      const variableTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('variable')))
 
       expect(variableTokens.length).toBeGreaterThan(0)
     })
@@ -56,10 +58,10 @@ echo $name;`
 echo $this->name;
 echo $_GET['id'];
 echo $_POST['data'];`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const variableTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('variable'))
+      const variableTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('variable')))
 
       expect(variableTokens.length).toBeGreaterThan(0)
     })
@@ -70,10 +72,10 @@ echo $_POST['data'];`
       const code = `<?php
 $name = "World";
 echo "Hello $name";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -81,10 +83,10 @@ echo "Hello $name";`
     it('should highlight single-quoted strings', async () => {
       const code = `<?php
 echo 'Hello World';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -101,10 +103,10 @@ class User {
         return $this->name;
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const classTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type.class'))
+      const classTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type.class')))
 
       expect(classTokens.length).toBeGreaterThan(0)
     })
@@ -117,10 +119,10 @@ class Test {
     protected $c;
     static $d;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const modifierTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.modifier'))
+      const modifierTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.modifier')))
 
       expect(modifierTokens.length).toBeGreaterThan(0)
     })
@@ -136,10 +138,10 @@ if ($x > 0) {
 } else {
     echo "zero";
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -157,10 +159,10 @@ foreach ($array as $item) {
 while ($x > 0) {
     $x--;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -174,10 +176,10 @@ function greet($name) {
 }
 
 echo greet("World");`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const functionTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('function'))
+      const functionTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('function')))
 
       expect(functionTokens.length).toBeGreaterThan(0)
     })
@@ -191,10 +193,10 @@ echo greet("World");`
 /* Multi-line
    comment */
 echo "test";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -210,7 +212,7 @@ use App\\Models\\User;
 class UserController {
     // ...
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })

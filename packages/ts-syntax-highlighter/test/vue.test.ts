@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { vueGrammar } from '../src/grammars/vue'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Vue Grammar', () => {
-  const tokenizer = new Tokenizer('vue')
+  const tokenizer = new Tokenizer(vueGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize Vue SFC', async () => {
@@ -21,7 +23,7 @@ export default {
 <style scoped>
 .container { color: red; }
 </style>`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -29,7 +31,7 @@ export default {
   describe('Directives', () => {
     it('should highlight Vue directives', async () => {
       const code = `<div v-if="condition" v-for="item in items" @click="handler" :class="classes"></div>`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -37,7 +39,7 @@ export default {
   describe('Mustache Syntax', () => {
     it('should highlight interpolation', async () => {
       const code = `<p>{{ message }}</p>`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

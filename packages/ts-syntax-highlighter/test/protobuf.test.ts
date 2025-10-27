@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { protobufGrammar } from '../src/grammars/protobuf'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Protobuf Grammar', () => {
-  const tokenizer = new Tokenizer('protobuf')
+  const tokenizer = new Tokenizer(protobufGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize protobuf code', async () => {
       const code = `syntax = "proto3";
@@ -13,7 +15,7 @@ message Person {
   int32 id = 2;
   repeated string emails = 3;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -22,7 +24,7 @@ message Person {
       const code = `service UserService {
   rpc GetUser(UserRequest) returns (UserResponse);
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

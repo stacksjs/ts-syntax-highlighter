@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { rubyGrammar } from '../src/grammars/ruby'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Ruby Grammar', () => {
-  const tokenizer = new Tokenizer('ruby')
+  const tokenizer = new Tokenizer(rubyGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic Ruby code', async () => {
       const code = `puts "Hello World"
 name = "Ruby"
 puts "Hello #{name}"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -30,10 +32,10 @@ puts "Hello #{name}"`
     puts "Hello, I'm #{@name}"
   end
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const classTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const classTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(classTokens.length).toBeGreaterThan(0)
     })
@@ -44,10 +46,10 @@ end`
       const code = `symbol = :hello
 hash = { name: "John", age: 30 }
 method(:to_s)`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const symbolTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('symbol'))
+      const symbolTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('symbol')))
 
       expect(symbolTokens.length).toBeGreaterThan(0)
     })
@@ -58,10 +60,10 @@ method(:to_s)`
       const code = `name = "World"
 greeting = "Hello #{name}!"
 complex = "Result: #{x + y}"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -71,7 +73,7 @@ complex = "Result: #{x + y}"`
 double = "Hello"
 percent = %q{Hello}
 percent_Q = %Q{Hello #{name}}`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -82,14 +84,14 @@ percent_Q = %Q{Hello #{name}}`
       const code = `[1, 2, 3].each do |num|
   puts num
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
 
     it('should handle brace blocks', async () => {
       const code = `[1, 2, 3].map { |x| x * 2 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -104,10 +106,10 @@ elsif x < 0
 else
   puts "zero"
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -121,7 +123,7 @@ when 2, 3
 else
   puts "other"
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -139,7 +141,7 @@ class Person
   include Greetings
   extend SomeModule
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -153,10 +155,10 @@ Multi-line
 comment
 =end
 puts "test" # inline comment`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -169,10 +171,10 @@ pattern2 = /[a-z]+/i
 if str =~ /\\d+/
   puts "contains digits"
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const regexTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('regexp'))
+      const regexTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('regexp')))
 
       expect(regexTokens.length).toBeGreaterThan(0)
     })
@@ -187,10 +189,10 @@ rescue StandardError => e
 ensure
   cleanup
 end`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const rescueTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const rescueTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(rescueTokens.length).toBeGreaterThan(0)
     })

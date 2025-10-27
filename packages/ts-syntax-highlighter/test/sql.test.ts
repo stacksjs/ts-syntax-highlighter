@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { sqlGrammar } from '../src/grammars/sql'
+import type { Token, TokenLine } from '../src/types'
 
 describe('SQL Grammar', () => {
-  const tokenizer = new Tokenizer('sql')
+  const tokenizer = new Tokenizer(sqlGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic SQL code', async () => {
       const code = `SELECT * FROM users WHERE age > 18;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -20,10 +22,10 @@ describe('SQL Grammar', () => {
 FROM users
 WHERE active = TRUE
 ORDER BY name ASC;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const selectTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword'))
+      const selectTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword')))
 
       expect(selectTokens.length).toBeGreaterThan(0)
     })
@@ -35,7 +37,7 @@ ORDER BY name ASC;`
 FROM users
 GROUP BY country
 HAVING COUNT(*) > 10;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -48,10 +50,10 @@ FROM users u
 INNER JOIN orders o ON u.id = o.user_id
 LEFT JOIN addresses a ON u.id = a.user_id
 WHERE o.total > 100;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const joinTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword'))
+      const joinTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword')))
 
       expect(joinTokens.length).toBeGreaterThan(0)
     })
@@ -64,10 +66,10 @@ VALUES ('John Doe', 'john@example.com', 25);
 
 INSERT INTO users (name, email)
 SELECT name, email FROM temp_users;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const insertTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other.dml'))
+      const insertTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other.dml')))
 
       expect(insertTokens.length).toBeGreaterThan(0)
     })
@@ -78,10 +80,10 @@ SELECT name, email FROM temp_users;`
       const code = `UPDATE users
 SET age = 26, updated_at = NOW()
 WHERE id = 1;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const updateTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other.dml'))
+      const updateTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other.dml')))
 
       expect(updateTokens.length).toBeGreaterThan(0)
     })
@@ -91,10 +93,10 @@ WHERE id = 1;`
     it('should highlight DELETE queries', async () => {
       const code = `DELETE FROM users
 WHERE last_login < '2020-01-01';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const deleteTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other.dml'))
+      const deleteTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other.dml')))
 
       expect(deleteTokens.length).toBeGreaterThan(0)
     })
@@ -109,10 +111,10 @@ WHERE last_login < '2020-01-01';`
     age INT CHECK (age >= 0),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const createTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other.ddl'))
+      const createTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other.ddl')))
 
       expect(createTokens.length).toBeGreaterThan(0)
     })
@@ -123,7 +125,7 @@ ADD COLUMN phone VARCHAR(20);
 
 ALTER TABLE users
 DROP COLUMN phone;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -132,7 +134,7 @@ DROP COLUMN phone;`
       const code = `DROP TABLE IF EXISTS temp_users;
 DROP INDEX idx_email ON users;
 DROP DATABASE old_db;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -146,7 +148,7 @@ WHERE age > (SELECT AVG(age) FROM users);
 
 SELECT *
 FROM (SELECT * FROM users WHERE age > 18) AS adults;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -161,10 +163,10 @@ FROM (SELECT * FROM users WHERE age > 18) AS adults;`
            ELSE 'Senior'
        END AS age_group
 FROM users;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const caseTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const caseTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(caseTokens.length).toBeGreaterThan(0)
     })
@@ -174,10 +176,10 @@ FROM users;`
     it('should highlight strings', async () => {
       const code = `SELECT * FROM users WHERE name = 'John Doe';
 SELECT * FROM users WHERE email LIKE '%@example.com';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -190,10 +192,10 @@ SELECT * FROM users WHERE email LIKE '%@example.com';`
 /* Multi-line
    comment */
 SELECT * FROM users; -- inline comment`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -208,7 +210,7 @@ SELECT name FROM customers;
 SELECT id FROM table1
 INTERSECT
 SELECT id FROM table2;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })

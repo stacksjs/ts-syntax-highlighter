@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { jsoncGrammar } from '../src/grammars/jsonc'
+import type { Token, TokenLine } from '../src/types'
 
 describe('JSONC Grammar', () => {
-  const tokenizer = new Tokenizer('jsonc')
+  const tokenizer = new Tokenizer(jsoncGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize JSONC with comments', async () => {
@@ -10,7 +12,7 @@ describe('JSONC Grammar', () => {
   // This is a comment
   "key": "value"
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -21,10 +23,10 @@ describe('JSONC Grammar', () => {
     it('should highlight single-line comments', async () => {
       const code = `// Comment
 { "key": "value" }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -34,10 +36,10 @@ describe('JSONC Grammar', () => {
 line
 comment */
 { "key": "value" }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -49,7 +51,7 @@ comment */
   "key1": "value1",
   "key2": "value2",
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -63,7 +65,7 @@ comment */
   "boolean": true,
   "null": null
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })

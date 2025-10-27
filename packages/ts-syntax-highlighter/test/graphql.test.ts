@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { graphqlGrammar } from '../src/grammars/graphql'
+import type { Token, TokenLine } from '../src/types'
 
 describe('GraphQL Grammar', () => {
-  const tokenizer = new Tokenizer('graphql')
+  const tokenizer = new Tokenizer(graphqlGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize GraphQL queries', async () => {
       const code = `query GetUser($id: ID!) {
@@ -11,7 +13,7 @@ describe('GraphQL Grammar', () => {
     email
   }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -22,7 +24,7 @@ describe('GraphQL Grammar', () => {
   name: String!
   email: String
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -34,7 +36,7 @@ describe('GraphQL Grammar', () => {
     email @include(if: $withEmail)
   }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

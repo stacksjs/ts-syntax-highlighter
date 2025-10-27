@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { dockerfileGrammar } from '../src/grammars/dockerfile'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Dockerfile Grammar', () => {
-  const tokenizer = new Tokenizer('dockerfile')
+  const tokenizer = new Tokenizer(dockerfileGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic Dockerfile code', async () => {
@@ -12,7 +14,7 @@ COPY . .
 RUN npm install
 EXPOSE 3000
 CMD ["node", "server.js"]`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -24,10 +26,10 @@ CMD ["node", "server.js"]`
       const code = `FROM node:18
 FROM ubuntu:22.04 AS builder
 FROM scratch`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const fromTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const fromTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(fromTokens.length).toBeGreaterThan(0)
     })
@@ -36,10 +38,10 @@ FROM scratch`
       const code = `RUN apt-get update
 RUN npm install
 RUN mkdir -p /app/data`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const runTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const runTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(runTokens.length).toBeGreaterThan(0)
     })
@@ -48,7 +50,7 @@ RUN mkdir -p /app/data`
       const code = `COPY package.json .
 COPY . /app
 ADD archive.tar.gz /data`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -59,10 +61,10 @@ ADD archive.tar.gz /data`
       const code = `ENV NODE_ENV=production
 ENV PORT 3000
 ENV PATH="/app/bin:$PATH"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const envTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const envTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(envTokens.length).toBeGreaterThan(0)
     })
@@ -71,10 +73,10 @@ ENV PATH="/app/bin:$PATH"`
       const code = `RUN echo $HOME
 RUN echo \${USER}
 WORKDIR $APP_DIR`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const varTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('variable'))
+      const varTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('variable')))
 
       expect(varTokens.length).toBeGreaterThan(0)
     })
@@ -89,7 +91,7 @@ RUN npm run build
 
 FROM nginx:alpine AS production
 COPY --from=builder /app/dist /usr/share/nginx/html`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -101,10 +103,10 @@ COPY --from=builder /app/dist /usr/share/nginx/html`
 FROM node:18
 # Install dependencies
 RUN npm install`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -115,10 +117,10 @@ RUN npm install`
       const code = `RUN echo "Hello World"
 LABEL description='My application'
 CMD ["npm", "start"]`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -129,7 +131,7 @@ CMD ["npm", "start"]`
       const code = `CMD ["node", "app.js"]
 CMD node app.js
 CMD ["/bin/bash"]`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -137,7 +139,7 @@ CMD ["/bin/bash"]`
     it('should handle ENTRYPOINT', async () => {
       const code = `ENTRYPOINT ["docker-entrypoint.sh"]
 ENTRYPOINT ["/bin/sh", "-c"]`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -148,7 +150,7 @@ ENTRYPOINT ["/bin/sh", "-c"]`
       const code = `EXPOSE 80
 EXPOSE 443
 EXPOSE 3000/tcp`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -156,7 +158,7 @@ EXPOSE 3000/tcp`
     it('should highlight VOLUME instruction', async () => {
       const code = `VOLUME /data
 VOLUME ["/var/log", "/var/db"]`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })

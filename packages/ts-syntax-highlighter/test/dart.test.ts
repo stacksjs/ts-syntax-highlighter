@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { dartGrammar } from '../src/grammars/dart'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Dart Grammar', () => {
-  const tokenizer = new Tokenizer('dart')
+  const tokenizer = new Tokenizer(dartGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize basic Dart code', async () => {
       const code = `void main() {
   print('Hello World');
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -17,7 +19,7 @@ describe('Dart Grammar', () => {
       const code = `var name = 'World';
 var greeting = 'Hello \$name';
 var calc = 'Result: \${x + y}';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -25,7 +27,7 @@ var calc = 'Result: \${x + y}';`
     it('should handle nullable types', async () => {
       const code = `String? nullableString = null;
 late String lateString;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

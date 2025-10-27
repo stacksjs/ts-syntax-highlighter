@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { makefileGrammar } from '../src/grammars/makefile'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Makefile Grammar', () => {
-  const tokenizer = new Tokenizer('makefile')
+  const tokenizer = new Tokenizer(makefileGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize Makefile code', async () => {
       const code = `all: build test
@@ -12,7 +14,7 @@ build:
 
 clean:
 \trm -f program`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -20,7 +22,7 @@ clean:
     it('should highlight targets', async () => {
       const code = `install: build
 \tcp program /usr/local/bin`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -30,7 +32,7 @@ clean:
 CFLAGS = -Wall
 all:
 \t$(CC) $(CFLAGS) -o out main.c`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

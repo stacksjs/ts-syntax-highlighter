@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { idlGrammar } from '../src/grammars/idl'
+import type { Token, TokenLine } from '../src/types'
 
 describe('IDL Grammar', () => {
-  const tokenizer = new Tokenizer('idl')
+  const tokenizer = new Tokenizer(idlGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic IDL code', async () => {
       const code = `interface MyInterface {
   void myMethod(in long param);
 };`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
     })
@@ -21,8 +23,8 @@ describe('IDL Grammar', () => {
   attribute long value;
   readonly attribute string name;
 };`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const keywordTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('keyword'))
+      const tokens = tokenizer.tokenize(code)
+      const keywordTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword')))
       expect(keywordTokens.length).toBeGreaterThan(0)
     })
   })
@@ -32,8 +34,8 @@ describe('IDL Grammar', () => {
       const code = `interface Test {
   void method(in long x, in double y, in string s);
 };`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const typeTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('storage.type'))
+      const tokens = tokenizer.tokenize(code)
+      const typeTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
       expect(typeTokens.length).toBeGreaterThan(0)
     })
   })
@@ -43,8 +45,8 @@ describe('IDL Grammar', () => {
       const code = `// Comment
 /* Block */
 interface Test {};`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const commentTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('comment'))
+      const tokens = tokenizer.tokenize(code)
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
       expect(commentTokens.length).toBeGreaterThan(0)
     })
   })

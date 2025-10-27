@@ -6,7 +6,7 @@ describe('Grammars', () => {
   describe('Language Loading', () => {
     it('should export all languages', () => {
       expect(languages).toBeDefined()
-      expect(languages.length).toBe(6) // js, ts, html, css, json, stx
+      expect(languages.length).toBe(48) // All 48 supported languages
     })
 
     it('should get language by ID', () => {

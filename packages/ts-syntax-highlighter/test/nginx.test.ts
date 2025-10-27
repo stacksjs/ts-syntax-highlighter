@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { nginxGrammar } from '../src/grammars/nginx'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Nginx Grammar', () => {
-  const tokenizer = new Tokenizer('nginx')
+  const tokenizer = new Tokenizer(nginxGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize nginx config', async () => {
       const code = `server {
@@ -13,7 +15,7 @@ describe('Nginx Grammar', () => {
         try_files $uri $uri/ =404;
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -23,7 +25,7 @@ describe('Nginx Grammar', () => {
     proxy_pass http://backend;
     proxy_set_header Host $host;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

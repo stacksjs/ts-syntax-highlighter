@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { powershellGrammar } from '../src/grammars/powershell'
+import type { Token, TokenLine } from '../src/types'
 
 describe('PowerShell Grammar', () => {
-  const tokenizer = new Tokenizer('powershell')
+  const tokenizer = new Tokenizer(powershellGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize PowerShell code', async () => {
       const code = `Write-Host "Hello World"
 $name = "PowerShell"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -15,8 +17,8 @@ $name = "PowerShell"`
     it('should highlight variables', async () => {
       const code = `$var1 = "test"
 $_myVar = 123`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const varTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('variable'))
+      const tokens = tokenizer.tokenize(code)
+      const varTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('variable')))
       expect(varTokens.length).toBeGreaterThan(0)
     })
   })
@@ -25,7 +27,7 @@ $_myVar = 123`
       const code = `Get-Process
 Set-Location
 Write-Output`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

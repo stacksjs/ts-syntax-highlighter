@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { csharpGrammar } from '../src/grammars/csharp'
+import type { Token, TokenLine } from '../src/types'
 
 describe('C# Grammar', () => {
-  const tokenizer = new Tokenizer('csharp')
+  const tokenizer = new Tokenizer(csharpGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic C# code', async () => {
@@ -13,7 +15,7 @@ class Program {
         Console.WriteLine("Hello World");
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -31,10 +33,10 @@ class Program {
         this.age = age;
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const classTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other'))
+      const classTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other')))
 
       expect(classTokens.length).toBeGreaterThan(0)
     })
@@ -45,10 +47,10 @@ class Program {
     protected internal virtual void Method() {}
     public abstract void AbstractMethod();
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const modifierTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.modifier'))
+      const modifierTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.modifier')))
 
       expect(modifierTokens.length).toBeGreaterThan(0)
     })
@@ -61,7 +63,7 @@ class Program {
     public string Name { get; private set; }
     public int ReadOnly { get; }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -71,10 +73,10 @@ class Program {
     it('should highlight regular strings', async () => {
       const code = `string text = "Hello World";
 char ch = 'A';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -83,10 +85,10 @@ char ch = 'A';`
       const code = `string name = "World";
 string greeting = $"Hello {name}!";
 string complex = $"Result: {x + y}";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const interpolatedTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const interpolatedTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(interpolatedTokens.length).toBeGreaterThan(0)
     })
@@ -96,10 +98,10 @@ string complex = $"Result: {x + y}";`
 string multiline = @"Line 1
 Line 2
 Line 3";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const verbatimTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const verbatimTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(verbatimTokens.length).toBeGreaterThan(0)
     })
@@ -112,7 +114,7 @@ Line 3";`
           select item.Name;
 
 var result = items.Where(x => x.Active).Select(x => x.Id);`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -126,10 +128,10 @@ var result = items.Where(x => x.Active).Select(x => x.Id);`
 }
 
 var result = await GetDataAsync();`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const asyncTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.modifier') || t.type.includes('keyword.control'))
+      const asyncTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.modifier')) || t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(asyncTokens.length).toBeGreaterThan(0)
     })
@@ -140,7 +142,7 @@ var result = await GetDataAsync();`
       const code = `string? nullableString = null;
 int? nullableInt = null;
 var value = nullableInt ?? 0;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -155,10 +157,10 @@ public class MyClass {
     [MaxLength(100)]
     public string Name { get; set; }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const attributeTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('attribute'))
+      const attributeTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('attribute')))
 
       expect(attributeTokens.length).toBeGreaterThan(0)
     })
@@ -173,10 +175,10 @@ public class MyClass {
 } else {
     Console.WriteLine("zero");
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -193,10 +195,10 @@ foreach (var item in items) {
 while (x > 0) {
     x--;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -209,10 +211,10 @@ while (x > 0) {
 /* Multi-line
    comment */
 int x = 10;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -228,7 +230,7 @@ int x = 10;`
         // ...
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })

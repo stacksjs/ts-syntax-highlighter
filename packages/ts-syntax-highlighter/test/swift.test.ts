@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { swiftGrammar } from '../src/grammars/swift'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Swift Grammar', () => {
-  const tokenizer = new Tokenizer('swift')
+  const tokenizer = new Tokenizer(swiftGrammar)
   describe('Basic Tokenization', () => {
     it('should tokenize basic Swift code', async () => {
       const code = `import Foundation
 print("Hello World")`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -17,7 +19,7 @@ print("Hello World")`
 if let unwrapped = name {
     print(unwrapped)
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -25,7 +27,7 @@ if let unwrapped = name {
     it('should highlight string interpolation', async () => {
       const code = `let name = "World"
 let greeting = "Hello \\(name)"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })

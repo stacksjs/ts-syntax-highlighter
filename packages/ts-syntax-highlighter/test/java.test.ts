@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { javaGrammar } from '../src/grammars/java'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Java Grammar', () => {
-  const tokenizer = new Tokenizer('java')
+  const tokenizer = new Tokenizer(javaGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic Java code', async () => {
@@ -11,7 +13,7 @@ describe('Java Grammar', () => {
         System.out.println("Hello World");
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -28,10 +30,10 @@ describe('Java Grammar', () => {
         return name;
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const classTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type'))
+      const classTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
 
       expect(classTokens.length).toBeGreaterThan(0)
     })
@@ -41,10 +43,10 @@ describe('Java Grammar', () => {
     private static final int MAX = 100;
     protected abstract void method();
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const modifierTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.modifier'))
+      const modifierTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.modifier')))
 
       expect(modifierTokens.length).toBeGreaterThan(0)
     })
@@ -58,10 +60,10 @@ describe('Java Grammar', () => {
 public void method() {
     // ...
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const annotationTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('annotation'))
+      const annotationTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('annotation')))
 
       expect(annotationTokens.length).toBeGreaterThan(0)
     })
@@ -71,10 +73,10 @@ public void method() {
     it('should highlight strings', async () => {
       const code = `String greeting = "Hello World";
 char ch = 'A';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -87,10 +89,10 @@ char ch = 'A';`
         </body>
     </html>
     """;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -105,10 +107,10 @@ char ch = 'A';`
 } else {
     System.out.println("zero");
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -125,10 +127,10 @@ while (x > 0) {
 do {
     x++;
 } while (x < 10);`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -138,7 +140,7 @@ do {
     it('should handle generic types', async () => {
       const code = `List<String> names = new ArrayList<>();
 Map<String, Integer> map = new HashMap<>();`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -157,10 +159,10 @@ Map<String, Integer> map = new HashMap<>();`
 public String greet(String name) {
     return "Hello " + name;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -173,10 +175,10 @@ public String greet(String name) {
 import java.util.List;
 import java.util.ArrayList;
 import static java.lang.Math.PI;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const keywordTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other'))
+      const keywordTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other')))
 
       expect(keywordTokens.length).toBeGreaterThan(0)
     })

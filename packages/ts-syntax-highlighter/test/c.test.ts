@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { cGrammar } from '../src/grammars/c'
+import type { Token, TokenLine } from '../src/types'
 
 describe('C Grammar', () => {
-  const tokenizer = new Tokenizer('c')
+  const tokenizer = new Tokenizer(cGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic C code', async () => {
@@ -12,7 +14,7 @@ int main() {
     printf("Hello World\\n");
     return 0;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -23,10 +25,10 @@ int main() {
     it('should highlight include directives', async () => {
       const code = `#include <stdio.h>
 #include "myheader.h"`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const preprocessorTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('preprocessor'))
+      const preprocessorTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('preprocessor')))
 
       expect(preprocessorTokens.length).toBeGreaterThan(0)
     })
@@ -35,10 +37,10 @@ int main() {
       const code = `#define MAX 100
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #undef MAX`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const preprocessorTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('preprocessor'))
+      const preprocessorTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('preprocessor')))
 
       expect(preprocessorTokens.length).toBeGreaterThan(0)
     })
@@ -51,10 +53,10 @@ int main() {
 #else
     printf("Normal mode\\n");
 #endif`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const directiveTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('directive'))
+      const directiveTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('directive')))
 
       expect(directiveTokens.length).toBeGreaterThan(0)
     })
@@ -67,10 +69,10 @@ float y = 3.14;
 char c = 'A';
 double d = 2.718;
 unsigned long ul = 100UL;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const typeTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type'))
+      const typeTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
 
       expect(typeTokens.length).toBeGreaterThan(0)
     })
@@ -84,10 +86,10 @@ unsigned long ul = 100UL;`
 typedef struct {
     float r, g, b;
 } Color;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const structTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type'))
+      const structTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
 
       expect(structTokens.length).toBeGreaterThan(0)
     })
@@ -100,7 +102,7 @@ int **ptr2;
 void *generic_ptr;
 char *str = "Hello";
 ptr->member;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -115,10 +117,10 @@ ptr->member;`
 } else {
     printf("zero\\n");
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -135,10 +137,10 @@ while (x > 0) {
 do {
     x++;
 } while (x < 10);`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -154,10 +156,10 @@ do {
     default:
         printf("other\\n");
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -172,10 +174,10 @@ do {
 void greet(const char *name) {
     printf("Hello, %s!\\n", name);
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const functionTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('function'))
+      const functionTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('function')))
 
       expect(functionTokens.length).toBeGreaterThan(0)
     })
@@ -187,10 +189,10 @@ void greet(const char *name) {
 /* Multi-line
    comment */
 int x = 10; // inline comment`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -201,10 +203,10 @@ int x = 10; // inline comment`
       const code = `char *str = "Hello World";
 char ch = 'A';
 char *escaped = "Line 1\\nLine 2\\tTabbed";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })

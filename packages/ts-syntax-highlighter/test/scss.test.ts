@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { scssGrammar } from '../src/grammars/scss'
+import type { Token, TokenLine } from '../src/types'
 
 describe('SCSS Grammar', () => {
-  const tokenizer = new Tokenizer('scss')
+  const tokenizer = new Tokenizer(scssGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize SCSS code', async () => {
@@ -13,7 +15,7 @@ describe('SCSS Grammar', () => {
     color: lighten($primary-color, 10%);
   }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -22,8 +24,8 @@ describe('SCSS Grammar', () => {
     it('should highlight variables', async () => {
       const code = `$font-size: 16px;
 $primary: #007bff;`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const varTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('variable'))
+      const tokens = tokenizer.tokenize(code)
+      const varTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('variable')))
       expect(varTokens.length).toBeGreaterThan(0)
     })
   })
@@ -36,7 +38,7 @@ $primary: #007bff;`
 .box {
   @include border-radius(5px);
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -51,7 +53,7 @@ $primary: #007bff;`
     }
   }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -61,8 +63,8 @@ $primary: #007bff;`
       const code = `// Single line
 /* Block comment */
 .test { color: red; }`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const commentTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('comment'))
+      const tokens = tokenizer.tokenize(code)
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
       expect(commentTokens.length).toBeGreaterThan(0)
     })
   })

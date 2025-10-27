@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { rustGrammar } from '../src/grammars/rust'
+import type { Token, TokenLine } from '../src/types'
 
 describe('Rust Grammar', () => {
-  const tokenizer = new Tokenizer('rust')
+  const tokenizer = new Tokenizer(rustGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic Rust code', async () => {
       const code = `fn main() {
     println!("Hello, world!");
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -25,10 +27,10 @@ describe('Rust Grammar', () => {
 pub fn greet(name: &str) {
     println!("Hello, {}!", name);
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const fnTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other.fn'))
+      const fnTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other.fn')))
 
       expect(fnTokens.length).toBeGreaterThan(0)
     })
@@ -46,10 +48,10 @@ impl Person {
         Person { name, age }
     }
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const structTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other'))
+      const structTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other')))
 
       expect(structTokens.length).toBeGreaterThan(0)
     })
@@ -64,7 +66,7 @@ match result {
     Ok(value) => println!("Success: {}", value),
     Err(error) => println!("Error: {}", error),
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -79,10 +81,10 @@ match result {
 struct ImportantExcerpt<'a> {
     part: &'a str,
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const lifetimeTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('lifetime'))
+      const lifetimeTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('lifetime')))
 
       expect(lifetimeTokens.length).toBeGreaterThan(0)
     })
@@ -94,10 +96,10 @@ struct ImportantExcerpt<'a> {
 vec![1, 2, 3, 4, 5];
 assert_eq!(x, y);
 dbg!(some_variable);`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const macroTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('macro'))
+      const macroTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('macro')))
 
       expect(macroTokens.length).toBeGreaterThan(0)
     })
@@ -111,10 +113,10 @@ struct MyStruct {
     #[serde(rename = "field")]
     my_field: i32,
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const attributeTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('attribute'))
+      const attributeTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('attribute')))
 
       expect(attributeTokens.length).toBeGreaterThan(0)
     })
@@ -125,10 +127,10 @@ struct MyStruct {
       const code = `let s1 = "Hello, world!";
 let s2 = 'A';
 let s3 = "Line 1\\nLine 2";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -137,10 +139,10 @@ let s3 = "Line 1\\nLine 2";`
       const code = `let raw = r"This is a raw string \\n";
 let raw2 = r#"Can contain "quotes""#;
 let raw3 = r##"Can contain # and "quotes""##;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const rawStringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const rawStringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(rawStringTokens.length).toBeGreaterThan(0)
     })
@@ -154,10 +156,10 @@ let raw3 = r##"Can contain # and "quotes""##;`
     4..=10 => println!("Four to ten"),
     _ => println!("Other"),
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const matchTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const matchTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(matchTokens.length).toBeGreaterThan(0)
     })
@@ -169,10 +171,10 @@ let raw3 = r##"Can contain # and "quotes""##;`
 let mut y = 10;
 let ref z = x;
 let moved = move || { x };`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const modifierTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.modifier'))
+      const modifierTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.modifier')))
 
       expect(modifierTokens.length).toBeGreaterThan(0)
     })
@@ -187,10 +189,10 @@ let moved = move || { x };`
 fn test() {
     // ...
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })
@@ -203,10 +205,10 @@ let y: u64 = 100;
 let z: f64 = 3.14;
 let b: bool = true;
 let c: char = 'A';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const typeTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type'))
+      const typeTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
 
       expect(typeTokens.length).toBeGreaterThan(0)
     })

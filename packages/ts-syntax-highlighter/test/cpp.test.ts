@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { cppGrammar } from '../src/grammars/cpp'
+import type { Token, TokenLine } from '../src/types'
 
 describe('C++ Grammar', () => {
-  const tokenizer = new Tokenizer('cpp')
+  const tokenizer = new Tokenizer(cppGrammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize basic C++ code', async () => {
@@ -12,7 +14,7 @@ int main() {
     std::cout << "Hello World" << std::endl;
     return 0;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
@@ -33,10 +35,10 @@ public:
         return name;
     }
 };`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const classTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type'))
+      const classTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
 
       expect(classTokens.length).toBeGreaterThan(0)
     })
@@ -50,10 +52,10 @@ private:
 protected:
     int z;
 };`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const accessTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.modifier.access'))
+      const accessTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.modifier.access')))
 
       expect(accessTokens.length).toBeGreaterThan(0)
     })
@@ -73,7 +75,7 @@ template <typename T>
 T max(T a, T b) {
     return (a > b) ? a : b;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -84,10 +86,10 @@ T max(T a, T b) {
       const code = `auto x = 10;
 auto y = 3.14;
 auto z = std::vector<int>{1, 2, 3};`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const autoTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('storage.type'))
+      const autoTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('storage.type')))
 
       expect(autoTokens.length).toBeGreaterThan(0)
     })
@@ -98,17 +100,17 @@ auto z = std::vector<int>{1, 2, 3};`
 };
 
 auto result = lambda(5, 3);`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
 
     it('should highlight nullptr', async () => {
       const code = `int* ptr = nullptr;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const nullptrTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('constant.language'))
+      const nullptrTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('constant.language')))
 
       expect(nullptrTokens.length).toBeGreaterThan(0)
     })
@@ -117,7 +119,7 @@ auto result = lambda(5, 3);`
       const code = `constexpr int factorial(int n) {
     return n <= 1 ? 1 : (n * factorial(n - 1));
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
       expect(tokens).toBeDefined()
     })
@@ -133,10 +135,10 @@ auto result = lambda(5, 3);`
 
 using namespace std;
 using std::cout;`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const namespaceTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.other'))
+      const namespaceTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.other')))
 
       expect(namespaceTokens.length).toBeGreaterThan(0)
     })
@@ -146,10 +148,10 @@ using std::cout;`
     it('should highlight regular strings', async () => {
       const code = `std::string str = "Hello World";
 char ch = 'A';`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const stringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const stringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(stringTokens.length).toBeGreaterThan(0)
     })
@@ -158,10 +160,10 @@ char ch = 'A';`
       const code = `std::string raw = R"(This is a
 multiline raw
 string literal)";`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const rawStringTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('string'))
+      const rawStringTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('string')))
 
       expect(rawStringTokens.length).toBeGreaterThan(0)
     })
@@ -173,10 +175,10 @@ string literal)";`
 for (const auto& item : vec) {
     std::cout << item << std::endl;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const controlTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const controlTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(controlTokens.length).toBeGreaterThan(0)
     })
@@ -191,10 +193,10 @@ for (const auto& item : vec) {
 } catch (...) {
     std::cerr << "Unknown error" << std::endl;
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const exceptionTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('keyword.control'))
+      const exceptionTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('keyword.control')))
 
       expect(exceptionTokens.length).toBeGreaterThan(0)
     })
@@ -206,10 +208,10 @@ for (const auto& item : vec) {
 /* Multi-line
    comment */
 int x = 10; // inline comment`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
 
-      const commentTokens = tokens.flatMap(line => line.tokens)
-        .filter(t => t.type.includes('comment'))
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens)
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
 
       expect(commentTokens.length).toBeGreaterThan(0)
     })

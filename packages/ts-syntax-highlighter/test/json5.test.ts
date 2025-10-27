@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Tokenizer } from '../src/tokenizer'
+import { json5Grammar } from '../src/grammars/json5'
+import type { Token, TokenLine } from '../src/types'
 
 describe('JSON5 Grammar', () => {
-  const tokenizer = new Tokenizer('json5')
+  const tokenizer = new Tokenizer(json5Grammar)
 
   describe('Basic Tokenization', () => {
     it('should tokenize JSON5 code', async () => {
@@ -12,7 +14,7 @@ describe('JSON5 Grammar', () => {
   // Comment
   active: true,
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
       expect(tokens.length).toBeGreaterThan(0)
     })
@@ -25,7 +27,7 @@ describe('JSON5 Grammar', () => {
   $identifier: true,
   _private: 123
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
@@ -38,8 +40,8 @@ describe('JSON5 Grammar', () => {
      line */
   key: 'value'
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
-      const commentTokens = tokens.flatMap(line => line.tokens).filter(t => t.type.includes('comment'))
+      const tokens = tokenizer.tokenize(code)
+      const commentTokens = tokens.flatMap((line: TokenLine) => line.tokens).filter((t: Token) => t.scopes.some((scope: string) => scope.includes('comment')))
       expect(commentTokens.length).toBeGreaterThan(0)
     })
   })
@@ -52,7 +54,7 @@ describe('JSON5 Grammar', () => {
   hex: 0xFF,
   trailing: [1, 2, 3,],
 }`
-      const tokens = await tokenizer.tokenizeAsync(code)
+      const tokens = tokenizer.tokenize(code)
       expect(tokens).toBeDefined()
     })
   })
