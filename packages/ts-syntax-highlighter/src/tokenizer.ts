@@ -134,7 +134,11 @@ export class Tokenizer {
       const result = this.matchNextToken(line, offset, lineNumber)
 
       if (result) {
-        if (result.token) {
+        // Handle multiple tokens from capture groups
+        if (result.tokens) {
+          tokens.push(...result.tokens)
+        }
+        else if (result.token) {
           tokens.push(result.token)
         }
         offset = result.offset
@@ -180,7 +184,7 @@ export class Tokenizer {
     line: string,
     offset: number,
     lineNumber: number,
-  ): { token: Token | null, offset: number } | null {
+  ): { token: Token | null, offset: number, tokens?: Token[] } | null {
     // Cache frequently accessed values (inline to reduce lookups)
     const currentScope = this.scopeStack[this.scopeStack.length - 1]
 
@@ -555,7 +559,7 @@ export class Tokenizer {
     line: string,
     offset: number,
     lineNumber: number,
-  ): { token: Token | null, offset: number } | null {
+  ): { token: Token | null, offset: number, tokens?: Token[] } | null {
     // Handle include references
     if (pattern.include) {
       return this.handleInclude(pattern.include, line, offset, lineNumber)
@@ -585,6 +589,18 @@ export class Tokenizer {
           rule: pattern,
           endPattern,
         })
+
+        // Handle beginCaptures if present
+        if (pattern.beginCaptures) {
+          const tokens = this.applyCaptureGroups(match, pattern.beginCaptures, currentScope.scopes, lineNumber, offset)
+          if (tokens && tokens.length > 0) {
+            return {
+              token: null,
+              tokens,
+              offset: offset + content.length,
+            }
+          }
+        }
 
         // Inline getTokenType to avoid function call and split()
         let type = Tokenizer.TYPE_TEXT
@@ -616,6 +632,19 @@ export class Tokenizer {
         const content = match[0]
         const currentScope = this.scopeStack[this.scopeStack.length - 1]
 
+        // Handle captures if present (only if pattern doesn't have a name, or if we want fine-grained control)
+        // For now, prefer pattern.name over captures for compatibility
+        if (pattern.captures && !pattern.name) {
+          const tokens = this.applyCaptureGroups(match, pattern.captures, currentScope.scopes, lineNumber, offset)
+          if (tokens && tokens.length > 0) {
+            return {
+              token: null,
+              tokens,
+              offset: offset + content.length,
+            }
+          }
+        }
+
         // Only create new array if we're adding a scope
         const scopes = pattern.name
           ? [...currentScope.scopes, pattern.name]
@@ -645,6 +674,85 @@ export class Tokenizer {
   }
 
   /**
+   * Apply capture groups to create multiple tokens with specific scopes
+   */
+  private applyCaptureGroups(
+    match: RegExpExecArray,
+    captures: Record<string, { name: string }>,
+    baseScopes: string[],
+    lineNumber: number,
+    baseOffset: number,
+  ): Token[] | null {
+    const tokens: Token[] = []
+    let currentOffset = 0
+
+    // Process each capture group
+    for (let i = 0; i < match.length; i++) {
+      const captured = match[i]
+      if (captured === undefined) continue
+
+      const captureKey = i.toString()
+      const capture = captures[captureKey]
+
+      if (i === 0) {
+        // Group 0 is the full match - split it by capture groups
+        continue
+      }
+
+      // Find where this capture starts in the full match
+      const captureStart = match[0].indexOf(captured, currentOffset)
+      if (captureStart === -1) continue
+
+      // Add any text before this capture as a plain token
+      if (captureStart > currentOffset) {
+        const beforeText = match[0].substring(currentOffset, captureStart)
+        tokens.push({
+          type: Tokenizer.TYPE_TEXT,
+          content: beforeText,
+          scopes: baseScopes,
+          line: lineNumber,
+          offset: baseOffset + currentOffset,
+        })
+      }
+
+      // Add the captured group with its specific scope
+      const scopes = capture && capture.name
+        ? [...baseScopes, capture.name]
+        : baseScopes
+
+      let type = Tokenizer.TYPE_TEXT
+      if (capture && capture.name) {
+        const lastDot = capture.name.lastIndexOf('.')
+        type = lastDot === -1 ? capture.name : capture.name.slice(lastDot + 1)
+      }
+
+      tokens.push({
+        type,
+        content: captured,
+        scopes,
+        line: lineNumber,
+        offset: baseOffset + captureStart,
+      })
+
+      currentOffset = captureStart + captured.length
+    }
+
+    // Add any remaining text after the last capture
+    if (currentOffset < match[0].length) {
+      const afterText = match[0].substring(currentOffset)
+      tokens.push({
+        type: Tokenizer.TYPE_TEXT,
+        content: afterText,
+        scopes: baseScopes,
+        line: lineNumber,
+        offset: baseOffset + currentOffset,
+      })
+    }
+
+    return tokens.length > 0 ? tokens : null
+  }
+
+  /**
    * Handle include references in patterns
    */
   private handleInclude(
@@ -652,7 +760,7 @@ export class Tokenizer {
     line: string,
     offset: number,
     lineNumber: number,
-  ): { token: Token | null, offset: number } | null {
+  ): { token: Token | null, offset: number, tokens?: Token[] } | null {
     // Handle $self reference
     if (include === '$self') {
       for (const pattern of this.grammar.patterns) {

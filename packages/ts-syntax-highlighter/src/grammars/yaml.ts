@@ -54,8 +54,8 @@ export const yamlGrammar: Grammar = {
     keys: {
       patterns: [
         {
-          name: 'entity.name.tag.yaml',
-          match: '^\\s*([a-zA-Z0-9_-]+)\\s*:',
+          name: 'meta.key.yaml',
+          match: '([a-zA-Z0-9_-]+)\\s*:',
           captures: {
             '1': { name: 'entity.name.tag.yaml' },
           },
