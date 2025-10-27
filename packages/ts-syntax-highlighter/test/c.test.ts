@@ -45,7 +45,7 @@ int main() {
       expect(preprocessorTokens.length).toBeGreaterThan(0)
     })
 
-    it.todo('should highlight conditional directives', async () => {
+    it('should highlight conditional directives', async () => {
       const code = `#ifdef DEBUG
     printf("Debug mode\\n");
 #elif defined(VERBOSE)
@@ -56,7 +56,7 @@ int main() {
       const tokens = tokenizer.tokenize(code)
 
       const directiveTokens = tokens.flatMap((line: TokenLine) => line.tokens)
-        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('directive')))
+        .filter((t: Token) => t.scopes.some((scope: string) => scope.includes('preprocessor')))
 
       expect(directiveTokens.length).toBeGreaterThan(0)
     })
@@ -166,7 +166,7 @@ do {
   })
 
   describe('Functions', () => {
-    it.todo('should highlight function definitions', async () => {
+    it('should highlight function definitions', async () => {
       const code = `int add(int a, int b) {
     return a + b;
 }

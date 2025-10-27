@@ -21,7 +21,7 @@ describe('SCSS Grammar', () => {
   })
 
   describe('Variables', () => {
-    it.todo('should highlight variables', async () => {
+    it('should highlight variables', async () => {
       const code = `$font-size: 16px;
 $primary: #007bff;`
       const tokens = tokenizer.tokenize(code)

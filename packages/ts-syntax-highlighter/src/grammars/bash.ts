@@ -48,9 +48,9 @@ export const bashGrammar: Grammar = {
     'false': 'constant.language.bash',
   },
   patterns: [
-    { include: '#comments' },
     { include: '#strings' },
     { include: '#variables' },
+    { include: '#comments' },
     { include: '#keywords' },
     { include: '#functions' },
     { include: '#operators' },

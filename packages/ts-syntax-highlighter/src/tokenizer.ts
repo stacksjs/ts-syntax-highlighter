@@ -385,7 +385,8 @@ export class Tokenizer {
       }
 
       // Fast path: Identifiers/Keywords
-      if (charType & LETTER) {
+      // Skip fast path for $ character in non-JS/TS languages (for variables in bash, php, etc.)
+      if (charType & LETTER && (code !== 36 || this.isJsOrTs)) {
         // Extract full word using lookup table
         let wordEnd = offset + 1
         while (wordEnd < line.length) {
@@ -396,25 +397,9 @@ export class Tokenizer {
           wordEnd++
         }
 
-        // Check if it's a function call first (word followed by '(') - no need to extract word
-        const nextChar = line.charCodeAt(wordEnd)
-        if (this.isJsOrTs && nextChar === 40) { // 40 = '('
-          const word = line.slice(offset, wordEnd)
-          return {
-            token: {
-              type: Tokenizer.TYPE_FUNCTION,
-              content: word,
-              scopes: this.functionScopes, // Pre-computed
-              line: lineNumber,
-              offset,
-            },
-            offset: wordEnd,
-          }
-        }
-
         const word = line.slice(offset, wordEnd)
 
-        // Check if it's a keyword (O(1) Map lookup with pre-computed scopes)
+        // Check if it's a keyword first (O(1) Map lookup with pre-computed scopes)
         if (this.keywordSet && this.keywordSet.has(word)) {
           const kwData = this.keywordMap.get(word)!
           return {
@@ -422,6 +407,26 @@ export class Tokenizer {
               type: kwData.type,
               content: word,
               scopes: kwData.scopes, // Pre-computed, no allocation
+              line: lineNumber,
+              offset,
+            },
+            offset: wordEnd,
+          }
+        }
+
+        // Check if it's a function call (word followed by '(' or whitespace then '(')
+        let checkPos = wordEnd
+        // Skip optional whitespace
+        while (checkPos < line.length && (CHAR_TYPE[line.charCodeAt(checkPos)] & WHITESPACE)) {
+          checkPos++
+        }
+        const nextChar = line.charCodeAt(checkPos)
+        if (nextChar === 40) { // 40 = '('
+          return {
+            token: {
+              type: Tokenizer.TYPE_FUNCTION,
+              content: word,
+              scopes: this.functionScopes, // Pre-computed
               line: lineNumber,
               offset,
             },

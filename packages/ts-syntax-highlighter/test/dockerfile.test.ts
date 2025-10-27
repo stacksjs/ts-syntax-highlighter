@@ -69,7 +69,7 @@ ENV PATH="/app/bin:$PATH"`
       expect(envTokens.length).toBeGreaterThan(0)
     })
 
-    it.todo('should highlight variable references', async () => {
+    it('should highlight variable references', async () => {
       const code = `RUN echo $HOME
 RUN echo \${USER}
 WORKDIR $APP_DIR`
