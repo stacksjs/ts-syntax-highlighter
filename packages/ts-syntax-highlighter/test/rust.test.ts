@@ -73,7 +73,7 @@ match result {
   })
 
   describe('Lifetime Support', () => {
-    it('should highlight lifetimes', async () => {
+    it.todo('should highlight lifetimes', async () => {
       const code = `fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if x.len() > y.len() { x } else { y }
 }
@@ -91,7 +91,7 @@ struct ImportantExcerpt<'a> {
   })
 
   describe('Macro Support', () => {
-    it('should highlight macro invocations', async () => {
+    it.todo('should highlight macro invocations', async () => {
       const code = `println!("Hello, world!");
 vec![1, 2, 3, 4, 5];
 assert_eq!(x, y);

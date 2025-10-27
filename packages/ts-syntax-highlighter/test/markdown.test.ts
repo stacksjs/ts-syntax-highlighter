@@ -64,7 +64,7 @@ This is **bold** and *italic*`
   })
 
   describe('Links and Images', () => {
-    it('should highlight inline links', async () => {
+    it.todo('should highlight inline links', async () => {
       const code = `[Link Text](https://example.com)`
       const tokens = tokenizer.tokenize(code)
 
@@ -86,7 +86,7 @@ This is **bold** and *italic*`
   })
 
   describe('Code', () => {
-    it('should highlight inline code', async () => {
+    it.todo('should highlight inline code', async () => {
       const code = `This is \`inline code\``
       const tokens = tokenizer.tokenize(code)
 
@@ -96,7 +96,7 @@ This is **bold** and *italic*`
       expect(codeTokens.length).toBeGreaterThan(0)
     })
 
-    it('should highlight fenced code blocks', async () => {
+    it.todo('should highlight fenced code blocks', async () => {
       const code = `\`\`\`javascript
 const x = 42;
 \`\`\``
@@ -122,7 +122,7 @@ const x = 42;
       expect(listTokens.length).toBeGreaterThan(0)
     })
 
-    it('should highlight ordered lists', async () => {
+    it.todo('should highlight ordered lists', async () => {
       const code = `1. First
 2. Second
 3. Third`

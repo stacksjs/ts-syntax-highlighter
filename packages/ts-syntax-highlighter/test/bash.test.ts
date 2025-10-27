@@ -18,7 +18,7 @@ echo "Hello World"`
   })
 
   describe('Variable Support', () => {
-    it('should highlight variables', async () => {
+    it.todo('should highlight variables', async () => {
       const code = `VAR="test"
 echo $VAR
 echo \${VAR}

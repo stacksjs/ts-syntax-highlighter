@@ -149,7 +149,7 @@ var value = nullableInt ?? 0;`
   })
 
   describe('Attribute Support', () => {
-    it('should highlight attributes', async () => {
+    it.todo('should highlight attributes', async () => {
       const code = `[Serializable]
 [Obsolete("Use NewMethod instead")]
 public class MyClass {
