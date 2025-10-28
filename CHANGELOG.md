@@ -1,3 +1,24 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.0...v0.2.1)
+
+### 🧹 Chores
+
+- release v0.2.1 ([d72676a](https://github.com/stacksjs/ts-syntax-highlighter/commit/d72676a))
+- fix lint issues ([7feefff](https://github.com/stacksjs/ts-syntax-highlighter/commit/7feefff))
+
+### Contributors
+
+- Adelino Ngomacha <adelinob335@gmail.com>
+
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.0...HEAD)
+
+### 🧹 Chores
+
+- fix lint issues ([7feefff](https://github.com/stacksjs/ts-syntax-highlighter/commit/7feefff))
+
+### Contributors
+
+- Adelino Ngomacha <adelinob335@gmail.com>
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.1.0...v0.2.0)
 
 ### 🚀 Features
