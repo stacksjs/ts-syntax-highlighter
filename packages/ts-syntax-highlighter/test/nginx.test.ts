@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
 import { nginxGrammar } from '../src/grammars/nginx'
-import type { Token, TokenLine } from '../src/types'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('Nginx Grammar', () => {
   const tokenizer = new Tokenizer(nginxGrammar)

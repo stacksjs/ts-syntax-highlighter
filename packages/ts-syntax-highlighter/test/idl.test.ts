@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { idlGrammar } from '../src/grammars/idl'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { idlGrammar } from '../src/grammars/idl'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('IDL Grammar', () => {
   const tokenizer = new Tokenizer(idlGrammar)

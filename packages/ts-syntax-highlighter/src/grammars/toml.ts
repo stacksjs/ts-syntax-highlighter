@@ -4,8 +4,8 @@ export const tomlGrammar: Grammar = {
   name: 'TOML',
   scopeName: 'source.toml',
   keywords: {
-    'true': 'constant.language.toml',
-    'false': 'constant.language.toml',
+    true: 'constant.language.toml',
+    false: 'constant.language.toml',
   },
   patterns: [
     { include: '#comments' },
@@ -35,9 +35,9 @@ export const tomlGrammar: Grammar = {
     strings: {
       patterns: [
         { name: 'string.quoted.triple.toml', begin: '"""', end: '"""' },
-        { name: 'string.quoted.triple.toml', begin: "'''", end: "'''" },
+        { name: 'string.quoted.triple.toml', begin: '\'\'\'', end: '\'\'\'' },
         { name: 'string.quoted.double.toml', begin: '"', end: '"', patterns: [{ name: 'constant.character.escape.toml', match: '\\\\.' }] },
-        { name: 'string.quoted.single.toml', begin: "'", end: "'" },
+        { name: 'string.quoted.single.toml', begin: '\'', end: '\'' },
       ],
     },
     numbers: {

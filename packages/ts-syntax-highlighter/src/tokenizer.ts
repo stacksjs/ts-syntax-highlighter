@@ -689,7 +689,8 @@ export class Tokenizer {
     // Process each capture group
     for (let i = 0; i < match.length; i++) {
       const captured = match[i]
-      if (captured === undefined) continue
+      if (captured === undefined)
+        continue
 
       const captureKey = i.toString()
       const capture = captures[captureKey]
@@ -701,7 +702,8 @@ export class Tokenizer {
 
       // Find where this capture starts in the full match
       const captureStart = match[0].indexOf(captured, currentOffset)
-      if (captureStart === -1) continue
+      if (captureStart === -1)
+        continue
 
       // Add any text before this capture as a plain token
       if (captureStart > currentOffset) {

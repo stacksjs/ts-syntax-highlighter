@@ -19,16 +19,16 @@ export const diffGrammar: Grammar = {
           name: 'meta.diff.header.from-file',
           match: '^(---\\s+)(.*)$',
           captures: {
-            '1': { name: 'punctuation.definition.from-file.diff' },
-            '2': { name: 'meta.diff.header.from-path' },
+            1: { name: 'punctuation.definition.from-file.diff' },
+            2: { name: 'meta.diff.header.from-path' },
           },
         },
         {
           name: 'meta.diff.header.to-file',
           match: '^(\\+\\+\\+\\s+)(.*)$',
           captures: {
-            '1': { name: 'punctuation.definition.to-file.diff' },
-            '2': { name: 'meta.diff.header.to-path' },
+            1: { name: 'punctuation.definition.to-file.diff' },
+            2: { name: 'meta.diff.header.to-path' },
           },
         },
         {
@@ -43,10 +43,10 @@ export const diffGrammar: Grammar = {
           name: 'meta.diff.range.unified',
           match: '^(@@)\\s+(-\\d+,\\d+\\s+\\+\\d+,\\d+)\\s+(@@)(.*)$',
           captures: {
-            '1': { name: 'punctuation.definition.range.diff' },
-            '2': { name: 'meta.diff.range.context' },
-            '3': { name: 'punctuation.definition.range.diff' },
-            '4': { name: 'entity.name.function.diff' },
+            1: { name: 'punctuation.definition.range.diff' },
+            2: { name: 'meta.diff.range.context' },
+            3: { name: 'punctuation.definition.range.diff' },
+            4: { name: 'entity.name.function.diff' },
           },
         },
       ],
@@ -75,7 +75,7 @@ export const diffGrammar: Grammar = {
         },
       ],
     },
-    metadata: {
+    'metadata': {
       patterns: [
         {
           name: 'meta.diff.index',

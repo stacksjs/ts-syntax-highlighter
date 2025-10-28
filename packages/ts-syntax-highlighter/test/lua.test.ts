@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
 import { luaGrammar } from '../src/grammars/lua'
-import type { Token, TokenLine } from '../src/types'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('Lua Grammar', () => {
   const tokenizer = new Tokenizer(luaGrammar)

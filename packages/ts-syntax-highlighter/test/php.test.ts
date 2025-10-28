@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { phpGrammar } from '../src/grammars/php'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { phpGrammar } from '../src/grammars/php'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('PHP Grammar', () => {
   const tokenizer = new Tokenizer(phpGrammar)

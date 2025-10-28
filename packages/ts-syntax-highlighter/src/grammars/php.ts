@@ -101,11 +101,11 @@ export const phpGrammar: Grammar = {
           name: 'meta.embedded.block.php',
           begin: '<\\?(?:php|=)?',
           beginCaptures: {
-            '0': { name: 'punctuation.section.embedded.begin.php' },
+            0: { name: 'punctuation.section.embedded.begin.php' },
           },
           end: '\\?>',
           endCaptures: {
-            '0': { name: 'punctuation.section.embedded.end.php' },
+            0: { name: 'punctuation.section.embedded.end.php' },
           },
           patterns: [
             { include: '#comments' },
@@ -120,7 +120,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    comments: {
+    'comments': {
       patterns: [
         {
           name: 'comment.line.double-slash.php',
@@ -137,7 +137,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    strings: {
+    'strings': {
       patterns: [
         {
           name: 'string.quoted.double.php',
@@ -164,18 +164,18 @@ export const phpGrammar: Grammar = {
         },
         {
           name: 'string.quoted.single.php',
-          begin: "'",
-          end: "'",
+          begin: '\'',
+          end: '\'',
           patterns: [
             {
               name: 'constant.character.escape.php',
-              match: "\\\\['\\\\]",
+              match: '\\\\[\'\\\\]',
             },
           ],
         },
       ],
     },
-    heredoc: {
+    'heredoc': {
       patterns: [
         {
           name: 'string.unquoted.heredoc.php',
@@ -190,7 +190,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    keywords: {
+    'keywords': {
       patterns: [
         {
           name: 'keyword.control.php',
@@ -218,7 +218,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    variables: {
+    'variables': {
       patterns: [
         {
           name: 'variable.language.php',
@@ -230,7 +230,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    functions: {
+    'functions': {
       patterns: [
         {
           name: 'entity.name.function.php',
@@ -238,7 +238,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    numbers: {
+    'numbers': {
       patterns: [
         {
           name: 'constant.numeric.php',
@@ -246,7 +246,7 @@ export const phpGrammar: Grammar = {
         },
       ],
     },
-    operators: {
+    'operators': {
       patterns: [
         {
           name: 'keyword.operator.php',

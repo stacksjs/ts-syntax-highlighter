@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { xmlGrammar } from '../src/grammars/xml'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { xmlGrammar } from '../src/grammars/xml'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('XML Grammar', () => {
   const tokenizer = new Tokenizer(xmlGrammar)

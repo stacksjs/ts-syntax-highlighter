@@ -102,12 +102,12 @@ export const rubyGrammar: Grammar = {
         },
         {
           name: 'string.quoted.single.ruby',
-          begin: "'",
-          end: "'",
+          begin: '\'',
+          end: '\'',
           patterns: [
             {
               name: 'constant.character.escape.ruby',
-              match: "\\\\['\\\\]",
+              match: '\\\\[\'\\\\]',
             },
           ],
         },

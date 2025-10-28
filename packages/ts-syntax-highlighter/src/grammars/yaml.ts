@@ -4,21 +4,21 @@ export const yamlGrammar: Grammar = {
   name: 'YAML',
   scopeName: 'source.yaml',
   keywords: {
-    'true': 'constant.language.boolean.yaml',
-    'false': 'constant.language.boolean.yaml',
-    'null': 'constant.language.null.yaml',
-    'True': 'constant.language.boolean.yaml',
-    'False': 'constant.language.boolean.yaml',
-    'TRUE': 'constant.language.boolean.yaml',
-    'FALSE': 'constant.language.boolean.yaml',
-    'yes': 'constant.language.boolean.yaml',
-    'no': 'constant.language.boolean.yaml',
-    'Yes': 'constant.language.boolean.yaml',
-    'No': 'constant.language.boolean.yaml',
-    'YES': 'constant.language.boolean.yaml',
-    'NO': 'constant.language.boolean.yaml',
-    'on': 'constant.language.boolean.yaml',
-    'off': 'constant.language.boolean.yaml',
+    true: 'constant.language.boolean.yaml',
+    false: 'constant.language.boolean.yaml',
+    null: 'constant.language.null.yaml',
+    True: 'constant.language.boolean.yaml',
+    False: 'constant.language.boolean.yaml',
+    TRUE: 'constant.language.boolean.yaml',
+    FALSE: 'constant.language.boolean.yaml',
+    yes: 'constant.language.boolean.yaml',
+    no: 'constant.language.boolean.yaml',
+    Yes: 'constant.language.boolean.yaml',
+    No: 'constant.language.boolean.yaml',
+    YES: 'constant.language.boolean.yaml',
+    NO: 'constant.language.boolean.yaml',
+    on: 'constant.language.boolean.yaml',
+    off: 'constant.language.boolean.yaml',
   },
   patterns: [
     { include: '#comments' },
@@ -31,7 +31,7 @@ export const yamlGrammar: Grammar = {
     { include: '#tags' },
   ],
   repository: {
-    comments: {
+    'comments': {
       patterns: [
         {
           name: 'comment.line.number-sign.yaml',
@@ -51,25 +51,25 @@ export const yamlGrammar: Grammar = {
         },
       ],
     },
-    keys: {
+    'keys': {
       patterns: [
         {
           name: 'meta.key.yaml',
           match: '([a-zA-Z0-9_-]+)\\s*:',
           captures: {
-            '1': { name: 'entity.name.tag.yaml' },
+            1: { name: 'entity.name.tag.yaml' },
           },
         },
         {
           name: 'string.quoted.yaml',
           match: '(["\'])([a-zA-Z0-9_-]+)\\1\\s*:',
           captures: {
-            '2': { name: 'entity.name.tag.yaml' },
+            2: { name: 'entity.name.tag.yaml' },
           },
         },
       ],
     },
-    strings: {
+    'strings': {
       patterns: [
         {
           name: 'string.quoted.double.yaml',
@@ -84,12 +84,12 @@ export const yamlGrammar: Grammar = {
         },
         {
           name: 'string.quoted.single.yaml',
-          begin: "'",
-          end: "'",
+          begin: '\'',
+          end: '\'',
           patterns: [
             {
               name: 'constant.character.escape.yaml',
-              match: "''",
+              match: '\'\'',
             },
           ],
         },
@@ -99,7 +99,7 @@ export const yamlGrammar: Grammar = {
         },
       ],
     },
-    numbers: {
+    'numbers': {
       patterns: [
         {
           name: 'constant.numeric.yaml',
@@ -107,7 +107,7 @@ export const yamlGrammar: Grammar = {
         },
       ],
     },
-    constants: {
+    'constants': {
       patterns: [
         {
           name: 'constant.language.yaml',
@@ -115,7 +115,7 @@ export const yamlGrammar: Grammar = {
         },
       ],
     },
-    anchors: {
+    'anchors': {
       patterns: [
         {
           name: 'entity.name.type.anchor.yaml',
@@ -127,7 +127,7 @@ export const yamlGrammar: Grammar = {
         },
       ],
     },
-    tags: {
+    'tags': {
       patterns: [
         {
           name: 'storage.type.tag.yaml',

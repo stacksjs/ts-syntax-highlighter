@@ -10,6 +10,6 @@ export const nginxGrammar: Grammar = {
     directives: { patterns: [{ name: 'keyword.other.directive.nginx', match: '\\b(server|location|listen|root|index|proxy_pass|return|rewrite|try_files|add_header|set|if|access_log|error_log)\\b' }] },
     blocks: { patterns: [{ name: 'entity.name.section.nginx', match: '\\b(http|server|location|upstream|events)\\b' }] },
     variables: { patterns: [{ name: 'variable.other.nginx', match: '\\$[a-zA-Z_][a-zA-Z0-9_]*' }] },
-    strings: { patterns: [{ name: 'string.quoted.double.nginx', begin: '"', end: '"' }, { name: 'string.quoted.single.nginx', begin: "'", end: "'" }] },
+    strings: { patterns: [{ name: 'string.quoted.double.nginx', begin: '"', end: '"' }, { name: 'string.quoted.single.nginx', begin: '\'', end: '\'' }] },
   },
 }

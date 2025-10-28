@@ -4,9 +4,9 @@ export const jsoncGrammar: Grammar = {
   name: 'JSONC',
   scopeName: 'source.jsonc',
   keywords: {
-    'true': 'constant.language.json',
-    'false': 'constant.language.json',
-    'null': 'constant.language.json',
+    true: 'constant.language.json',
+    false: 'constant.language.json',
+    null: 'constant.language.json',
   },
   patterns: [
     { include: '#comments' },

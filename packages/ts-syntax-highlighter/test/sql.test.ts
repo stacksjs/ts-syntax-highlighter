@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { sqlGrammar } from '../src/grammars/sql'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { sqlGrammar } from '../src/grammars/sql'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('SQL Grammar', () => {
   const tokenizer = new Tokenizer(sqlGrammar)

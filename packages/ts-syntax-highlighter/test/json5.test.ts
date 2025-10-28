@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { json5Grammar } from '../src/grammars/json5'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { json5Grammar } from '../src/grammars/json5'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('JSON5 Grammar', () => {
   const tokenizer = new Tokenizer(json5Grammar)

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
 import { solidityGrammar } from '../src/grammars/solidity'
-import type { Token, TokenLine } from '../src/types'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('Solidity Grammar', () => {
   const tokenizer = new Tokenizer(solidityGrammar)

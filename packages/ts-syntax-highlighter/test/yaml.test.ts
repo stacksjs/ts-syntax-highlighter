@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { yamlGrammar } from '../src/grammars/yaml'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { yamlGrammar } from '../src/grammars/yaml'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('YAML Grammar', () => {
   const tokenizer = new Tokenizer(yamlGrammar)

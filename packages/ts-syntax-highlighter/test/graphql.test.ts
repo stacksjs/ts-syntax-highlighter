@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
 import { graphqlGrammar } from '../src/grammars/graphql'
-import type { Token, TokenLine } from '../src/types'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('GraphQL Grammar', () => {
   const tokenizer = new Tokenizer(graphqlGrammar)

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { kotlinGrammar } from '../src/grammars/kotlin'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { kotlinGrammar } from '../src/grammars/kotlin'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('Kotlin Grammar', () => {
   const tokenizer = new Tokenizer(kotlinGrammar)

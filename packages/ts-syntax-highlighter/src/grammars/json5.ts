@@ -4,11 +4,11 @@ export const json5Grammar: Grammar = {
   name: 'JSON5',
   scopeName: 'source.json5',
   keywords: {
-    'true': 'constant.language.json5',
-    'false': 'constant.language.json5',
-    'null': 'constant.language.json5',
-    'Infinity': 'constant.language.json5',
-    'NaN': 'constant.language.json5',
+    true: 'constant.language.json5',
+    false: 'constant.language.json5',
+    null: 'constant.language.json5',
+    Infinity: 'constant.language.json5',
+    NaN: 'constant.language.json5',
   },
   patterns: [
     { include: '#comments' },
@@ -26,7 +26,7 @@ export const json5Grammar: Grammar = {
     },
     strings: {
       patterns: [
-        { name: 'string.quoted.single.json5', begin: "'", end: "'", patterns: [{ name: 'constant.character.escape.json5', match: '\\\\.' }] },
+        { name: 'string.quoted.single.json5', begin: '\'', end: '\'', patterns: [{ name: 'constant.character.escape.json5', match: '\\\\.' }] },
         { name: 'string.quoted.double.json5', begin: '"', end: '"', patterns: [{ name: 'constant.character.escape.json5', match: '\\\\.' }] },
       ],
     },
@@ -44,7 +44,7 @@ export const json5Grammar: Grammar = {
       patterns: [
         { name: 'support.type.property-name.json5', match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\s*(?=:)' },
         { name: 'support.type.property-name.json5', begin: '"', end: '"(?=\\s*:)' },
-        { name: 'support.type.property-name.json5', begin: "'", end: "'(?=\\s*:)" },
+        { name: 'support.type.property-name.json5', begin: '\'', end: '\'(?=\\s*:)' },
       ],
     },
   },

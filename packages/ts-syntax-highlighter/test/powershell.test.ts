@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
-import { Tokenizer } from '../src/tokenizer'
-import { powershellGrammar } from '../src/grammars/powershell'
 import type { Token, TokenLine } from '../src/types'
+import { describe, expect, it } from 'bun:test'
+import { powershellGrammar } from '../src/grammars/powershell'
+import { Tokenizer } from '../src/tokenizer'
 
 describe('PowerShell Grammar', () => {
   const tokenizer = new Tokenizer(powershellGrammar)

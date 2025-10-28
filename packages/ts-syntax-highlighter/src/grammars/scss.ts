@@ -29,7 +29,7 @@ export const scssGrammar: Grammar = {
     { include: '#properties' },
   ],
   repository: {
-    comments: {
+    'comments': {
       patterns: [
         { name: 'comment.line.double-slash.scss', match: '\\/\\/.*$' },
         { name: 'comment.block.scss', begin: '\\/\\*', end: '\\*\\/' },
@@ -40,25 +40,25 @@ export const scssGrammar: Grammar = {
         { name: 'keyword.control.at-rule.scss', match: '@[a-z-]+' },
       ],
     },
-    variables: {
+    'variables': {
       patterns: [
         { name: 'variable.scss', match: '\\$[a-zA-Z_-][a-zA-Z0-9_-]*' },
       ],
     },
-    strings: {
+    'strings': {
       patterns: [
         { name: 'string.quoted.double.scss', begin: '"', end: '"' },
-        { name: 'string.quoted.single.scss', begin: "'", end: "'" },
+        { name: 'string.quoted.single.scss', begin: '\'', end: '\'' },
       ],
     },
-    selectors: {
+    'selectors': {
       patterns: [
         { name: 'entity.name.tag.scss', match: '\\b[a-z][a-z0-9-]*\\b' },
         { name: 'entity.other.attribute-name.class.scss', match: '\\.[a-zA-Z_-][a-zA-Z0-9_-]*' },
         { name: 'entity.other.attribute-name.id.scss', match: '#[a-zA-Z_-][a-zA-Z0-9_-]*' },
       ],
     },
-    properties: {
+    'properties': {
       patterns: [
         { name: 'support.type.property-name.scss', match: '\\b[a-z-]+(?=\\s*:)' },
       ],

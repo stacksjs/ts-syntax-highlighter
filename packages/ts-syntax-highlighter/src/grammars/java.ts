@@ -133,8 +133,8 @@ export const javaGrammar: Grammar = {
         },
         {
           name: 'string.quoted.single.java',
-          begin: "'",
-          end: "'",
+          begin: '\'',
+          end: '\'',
           patterns: [
             {
               name: 'constant.character.escape.java',
