@@ -1,3 +1,42 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.1.0...v0.2.0)
+
+### 🚀 Features
+
+- add support to more languages ([ab20218](https://github.com/stacksjs/ts-syntax-highlighter/commit/ab20218))
+
+### 🧹 Chores
+
+- release v0.2.0 ([d8df68b](https://github.com/stacksjs/ts-syntax-highlighter/commit/d8df68b))
+- wip ([321a102](https://github.com/stacksjs/ts-syntax-highlighter/commit/321a102))
+- wip ([117787f](https://github.com/stacksjs/ts-syntax-highlighter/commit/117787f))
+- wip ([81689e9](https://github.com/stacksjs/ts-syntax-highlighter/commit/81689e9))
+- wip ([cc2467e](https://github.com/stacksjs/ts-syntax-highlighter/commit/cc2467e))
+- wip ([3abe17e](https://github.com/stacksjs/ts-syntax-highlighter/commit/3abe17e))
+- wip ([9eb8388](https://github.com/stacksjs/ts-syntax-highlighter/commit/9eb8388))
+
+### Contributors
+
+- Adelino Ngomacha <adelinob335@gmail.com>
+
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.1.0...HEAD)
+
+### 🚀 Features
+
+- add support to more languages ([ab20218](https://github.com/stacksjs/ts-syntax-highlighter/commit/ab20218))
+
+### 🧹 Chores
+
+- wip ([321a102](https://github.com/stacksjs/ts-syntax-highlighter/commit/321a102))
+- wip ([117787f](https://github.com/stacksjs/ts-syntax-highlighter/commit/117787f))
+- wip ([81689e9](https://github.com/stacksjs/ts-syntax-highlighter/commit/81689e9))
+- wip ([cc2467e](https://github.com/stacksjs/ts-syntax-highlighter/commit/cc2467e))
+- wip ([3abe17e](https://github.com/stacksjs/ts-syntax-highlighter/commit/3abe17e))
+- wip ([9eb8388](https://github.com/stacksjs/ts-syntax-highlighter/commit/9eb8388))
+
+### Contributors
+
+- Adelino Ngomacha <adelinob335@gmail.com>
+
 ### 🧹 Chores
 
 - wip ([f02fdc6](https://github.com/stacksjs/ts-syntax-highlighter/commit/f02fdc6))
