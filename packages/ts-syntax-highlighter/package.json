@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@stacksjs/clapp": "^0.2.0",
-    "bunfig": "^0.15.0"
+    "bunfig": "^0.15.5"
   },
   "lint-staged": {
     "*.{js,ts}": "bunx --bun eslint . --fix"
