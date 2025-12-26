@@ -924,6 +924,125 @@ describe('Grammars', () => {
 
       expect(tokens.length).toBe(3)
     })
+
+    it('should tokenize Alpine x-* directives', () => {
+      const code = '<div x-data="{ open: false }" x-show="open" x-model="value" x-ref="input" x-init="init()" x-cloak>'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize Alpine x-transition directives', () => {
+      const code = '<div x-transition x-transition:enter="fade-in" x-transition:leave="fade-out">'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize event handlers with @ prefix', () => {
+      const code = '<button @click="handleClick" @submit.prevent="submit" @keydown.enter.ctrl="save">'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize attribute binding with : prefix', () => {
+      const code = '<div :class="activeClass" :style="{ color: textColor }" :disabled="isDisabled">'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize Vue-style v-* directives', () => {
+      const code = '<div v-bind:class="className" v-on:click="onClick" v-model="value" v-if="show" v-for="item in items">'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize PascalCase component tags', () => {
+      const code = '<MyComponent prop="value"><ChildComponent /></MyComponent>'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize Icon components', () => {
+      const code = '<HomeIcon size="24" /><SettingsIcon color="red" /><SearchIcon />'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize client script block', () => {
+      const code = '<script client>\nimport { ref } from "stx"\nconst count = ref(0)\n</script>'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize filter syntax in echo', () => {
+      const code = '{{ name | uppercase }} {{ price | currency:USD }} {{ items | filter | sort }}'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize special variables', () => {
+      const code = '<button @click="$event.preventDefault()">{{ $refs.input.value }}</button>'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize escaped directives', () => {
+      const code = '@@if will render as @if and @{{ }} will render literally'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize additional conditional directives', () => {
+      const code = '@isset(variable) @endisset @empty(array) @endempty @when(condition) @elsewhen(other) @endwhen'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize form directives', () => {
+      const code = '@error("email") {{ $message }} @enderror @old("name")'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize @each directive', () => {
+      const code = '@each(items as item) {{ item.name }} @endeach'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize @json directive', () => {
+      const code = '@json(userData)'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize prepend stack directives', () => {
+      const code = '@prepend("styles") @endprepend @prependOnce("scripts") @endprependOnce'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
+
+    it('should tokenize lang directive', () => {
+      const code = '@lang("en") English content @endlang'
+      const tokens = tokenizer.tokenize(code)
+
+      expect(tokens[0].tokens.length).toBeGreaterThan(0)
+    })
   })
 
   describe('Grammar Edge Cases', () => {
