@@ -1,0 +1,559 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "STX",
+  "scopeName": "text.html.stx",
+  "patterns": [
+    {
+      "include": "#stx-comments"
+    },
+    {
+      "include": "#stx-escaped"
+    },
+    {
+      "include": "#stx-echo"
+    },
+    {
+      "include": "#stx-directives"
+    },
+    {
+      "include": "#html"
+    }
+  ],
+  "repository": {
+    "stx-comments": {
+      "patterns": [
+        {
+          "begin": "\\{\\{--",
+          "end": "--\\}\\}",
+          "name": "comment.block.stx"
+        }
+      ]
+    },
+    "stx-escaped": {
+      "patterns": [
+        {
+          "match": "@@[a-zA-Z_][a-zA-Z0-9_]*",
+          "name": "string.quoted.other.stx.escaped"
+        },
+        {
+          "begin": "@\\{\\{",
+          "end": "\\}\\}",
+          "name": "string.quoted.other.stx.escaped"
+        }
+      ]
+    },
+    "stx-echo": {
+      "patterns": [
+        {
+          "begin": "(?<!@)\\{\\{\\{",
+          "end": "\\}\\}\\}",
+          "name": "meta.embedded.block.stx.unescaped",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.begin.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#stx-expression"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![@{])\\{\\{",
+          "end": "\\}\\}",
+          "name": "meta.embedded.block.stx.escaped",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.begin.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#stx-expression"
+            }
+          ]
+        },
+        {
+          "begin": "(?<!@)\\{!!",
+          "end": "!!\\}",
+          "name": "meta.embedded.block.stx.raw",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.begin.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.embedded.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#stx-expression"
+            }
+          ]
+        }
+      ]
+    },
+    "stx-expression": {
+      "patterns": [
+        {
+          "match": "(?<!\\|)\\|(?!\\|)",
+          "name": "keyword.operator.filter.stx"
+        },
+        {
+          "match": "(?<=\\|)\\s*([a-zA-Z_][a-zA-Z0-9_]*)",
+          "name": "support.function.filter.stx",
+          "captures": {
+            "1": {
+              "name": "support.function.filter.stx"
+            }
+          }
+        },
+        {
+          "match": "\\$(event|el|refs|data|root|store|watch|nextTick|dispatch|id)\\b",
+          "name": "variable.language.stx"
+        },
+        {
+          "contentName": "source.ts.embedded.stx"
+        }
+      ]
+    },
+    "stx-directives": {
+      "patterns": [
+        {
+          "match": "@(if|else|elseif|endif|unless|endunless|switch|case|default|endswitch|break)\\b",
+          "name": "keyword.control.conditional.stx"
+        },
+        {
+          "match": "@(isset|endisset|empty|endempty|when|elsewhen|endwhen)\\b",
+          "name": "keyword.control.conditional.stx"
+        },
+        {
+          "match": "@(for|endfor|foreach|endforeach|while|endwhile|continue|forelse|each|endeach)\\b",
+          "name": "keyword.control.loop.stx"
+        },
+        {
+          "match": "@(auth|guest|can|cannot|canany|endauth|endguest|endcan|endcannot|endcanany)\\b",
+          "name": "keyword.control.auth.stx"
+        },
+        {
+          "match": "@(component|endcomponent|slot|endslot|props|inject|aware)\\b",
+          "name": "keyword.control.component.stx"
+        },
+        {
+          "match": "@(section|endsection|yield|extends|parent|show|hasSection|sectionMissing)\\b",
+          "name": "keyword.control.layout.stx"
+        },
+        {
+          "match": "@(include|includeIf|includeWhen|includeUnless|includeFirst|partial)\\b",
+          "name": "support.function.include.stx"
+        },
+        {
+          "match": "@(push|endpush|pushOnce|endpushOnce|pushIf|endpushIf|prepend|endprepend|prependOnce|endprependOnce|stack)\\b",
+          "name": "keyword.control.stack.stx"
+        },
+        {
+          "match": "@(once|endonce)\\b",
+          "name": "keyword.control.once.stx"
+        },
+        {
+          "match": "@(csrf|method|error|enderror|old)\\b",
+          "name": "support.function.security.stx"
+        },
+        {
+          "match": "@(production|endproduction|development|enddevelopment|env|endenv)\\b",
+          "name": "keyword.control.environment.stx"
+        },
+        {
+          "match": "@(translate|endtranslate|t|lang|endlang|choice)\\b",
+          "name": "support.function.translation.stx"
+        },
+        {
+          "match": "@webcomponent\\b",
+          "name": "support.function.webcomponent.stx"
+        },
+        {
+          "match": "@route\\b",
+          "name": "support.function.route.stx"
+        },
+        {
+          "match": "@json\\b",
+          "name": "support.function.json.stx"
+        },
+        {
+          "begin": "@markdown\\b",
+          "end": "@endmarkdown\\b",
+          "name": "keyword.control.markdown.stx",
+          "contentName": "text.html.markdown.embedded.stx",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.markdown.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "keyword.control.markdown.stx"
+            }
+          }
+        },
+        {
+          "match": "@markdown-file\\b",
+          "name": "support.function.markdown.stx"
+        },
+        {
+          "match": "@(transition|endtransition|motion|endmotion)\\b",
+          "name": "keyword.control.animation.stx"
+        },
+        {
+          "begin": "@ts\\b",
+          "end": "@endts\\b",
+          "name": "meta.embedded.block.ts",
+          "contentName": "source.ts",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "keyword.control.stx"
+            }
+          }
+        },
+        {
+          "begin": "@js\\b",
+          "end": "@endjs\\b",
+          "name": "meta.embedded.block.js",
+          "contentName": "source.js",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "keyword.control.stx"
+            }
+          }
+        },
+        {
+          "begin": "@(raw|verbatim)\\b",
+          "end": "@end(raw|verbatim)\\b",
+          "name": "meta.embedded.block.raw",
+          "contentName": "string.unquoted.raw",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "keyword.control.stx"
+            }
+          }
+        },
+        {
+          "match": "@[a-zA-Z_][a-zA-Z0-9_]*",
+          "name": "entity.name.function.stx"
+        }
+      ]
+    },
+    "html": {
+      "patterns": [
+        {
+          "begin": "(<)(script)(\\s+client)(\\s*>)",
+          "end": "(</)(script)(>)",
+          "name": "meta.embedded.block.script.client.stx",
+          "contentName": "source.ts.embedded.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "entity.other.attribute-name.special.stx"
+            },
+            "4": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          }
+        },
+        {
+          "begin": "(<)(script)(\\s*>)",
+          "end": "(</)(script)(>)",
+          "name": "meta.embedded.block.script.stx",
+          "contentName": "source.ts.embedded.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          }
+        },
+        {
+          "begin": "(<)(style)(\\s*>)",
+          "end": "(</)(style)(>)",
+          "name": "meta.embedded.block.style.stx",
+          "contentName": "source.css.embedded.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          }
+        },
+        {
+          "begin": "(<)([A-Z][a-zA-Z0-9]*Icon)\\b",
+          "end": "(/>)|(>)",
+          "name": "meta.tag.component.icon.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "support.class.component.icon.stx"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.html"
+            },
+            "2": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        {
+          "begin": "(<)([A-Z][a-zA-Z0-9]*)\\b",
+          "end": "(/>)|(>)",
+          "name": "meta.tag.component.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "support.class.component.stx"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.html"
+            },
+            "2": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        {
+          "begin": "(</)([A-Z][a-zA-Z0-9]*)",
+          "end": "(>)",
+          "name": "meta.tag.component.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "support.class.component.stx"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          }
+        },
+        {
+          "begin": "<([a-z][a-zA-Z0-9:-]*)",
+          "end": "(/>)|(>)",
+          "name": "meta.tag.html",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "1": {
+              "name": "entity.name.tag.html"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.html"
+            },
+            "2": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        {
+          "begin": "(</)([a-z][a-zA-Z0-9:-]*)",
+          "end": "(>)",
+          "name": "meta.tag.html",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.end.html"
+            }
+          }
+        },
+        {
+          "begin": "<!--",
+          "end": "-->",
+          "name": "comment.block.html"
+        }
+      ]
+    },
+    "tag-attributes": {
+      "patterns": [
+        {
+          "match": "x-(data|text|html|model|show|hide|if|bind|on|ref|init|cloak|effect|ignore|id|teleport|modelable|transition)\\b",
+          "name": "entity.other.attribute-name.directive.alpine.stx"
+        },
+        {
+          "match": "x-transition(:(enter|enter-start|enter-end|leave|leave-start|leave-end))?",
+          "name": "entity.other.attribute-name.directive.alpine.stx"
+        },
+        {
+          "match": "@([a-zA-Z]+)(\\.([a-zA-Z]+|\\d+))*",
+          "name": "entity.other.attribute-name.event.stx"
+        },
+        {
+          "match": ":([a-zA-Z][a-zA-Z0-9-]*)",
+          "name": "entity.other.attribute-name.binding.stx",
+          "captures": {
+            "1": {
+              "name": "entity.other.attribute-name.binding.stx"
+            }
+          }
+        },
+        {
+          "match": "v-(bind|on|model|if|else|else-if|for|show|html|text|pre|cloak|once|memo|slot)\\b",
+          "name": "entity.other.attribute-name.directive.vue.stx"
+        },
+        {
+          "match": "v-(bind|on):([a-zA-Z][a-zA-Z0-9-]*)",
+          "name": "entity.other.attribute-name.directive.vue.stx"
+        },
+        {
+          "match": "[a-zA-Z_][a-zA-Z0-9_-]*",
+          "name": "entity.other.attribute-name.html"
+        },
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.html",
+          "patterns": [
+            {
+              "include": "#stx-echo"
+            },
+            {
+              "include": "#attribute-expression"
+            }
+          ]
+        },
+        {
+          "begin": "'",
+          "end": "'",
+          "name": "string.quoted.single.html",
+          "patterns": [
+            {
+              "include": "#stx-echo"
+            },
+            {
+              "include": "#attribute-expression"
+            }
+          ]
+        },
+        {
+          "match": "=",
+          "name": "punctuation.separator.key-value.html"
+        }
+      ]
+    },
+    "attribute-expression": {
+      "patterns": [
+        {
+          "match": "\\$(event|el|refs|data|root|store|watch|nextTick|dispatch|id)\\b",
+          "name": "variable.language.stx"
+        }
+      ]
+    }
+  }
+}

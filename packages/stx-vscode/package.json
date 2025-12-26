@@ -1,0 +1,74 @@
+{
+  "name": "stx",
+  "displayName": "STX",
+  "description": "Syntax highlighting for STX - a modern frontend framework rivaling Vue and React",
+  "version": "0.1.0",
+  "publisher": "stacksjs",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "stx",
+    "syntax",
+    "highlighting",
+    "frontend",
+    "framework",
+    "template",
+    "blade",
+    "alpine"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stacksjs/stx"
+  },
+  "galleryBanner": {
+    "color": "#0f172a",
+    "theme": "dark"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "stx",
+        "aliases": [
+          "STX",
+          "stx"
+        ],
+        "extensions": [
+          ".stx"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/stx-light.svg",
+          "dark": "./icons/stx-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "stx",
+        "scopeName": "text.html.stx",
+        "path": "./syntaxes/stx.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.ts.embedded.stx": "typescript",
+          "source.js.embedded.stx": "javascript",
+          "source.css.embedded.stx": "css",
+          "source.ts": "typescript",
+          "source.js": "javascript",
+          "text.html.markdown.embedded.stx": "markdown"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^2.22.0"
+  }
+}
