@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+*.ts
+*.map
+.vscode
+.vscodeignore
+build.ts
+bun.lockb
+package-lock.json

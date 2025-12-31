@@ -6,11 +6,16 @@ export const stxGrammar: Grammar = {
   patterns: [
     { include: '#stx-comments' },
     { include: '#stx-escaped' },
-    { include: '#stx-echo' },
+    { include: '#sfc-blocks' },
+    { include: '#stx-raw-expression' },
+    { include: '#stx-expression' },
     { include: '#stx-directives' },
+    { include: '#component-tags' },
+    { include: '#slot-element' },
     { include: '#html' },
   ],
   repository: {
+    // 1. STX Comments {{-- --}}
     'stx-comments': {
       patterns: [
         {
@@ -20,14 +25,14 @@ export const stxGrammar: Grammar = {
         },
       ],
     },
+
+    // Escaped directives and expressions
     'stx-escaped': {
       patterns: [
-        // Escaped directive @@
         {
           name: 'string.quoted.other.stx.escaped',
           match: '@@[a-zA-Z_][a-zA-Z0-9_]*',
         },
-        // Escaped echo @{{ }}
         {
           name: 'string.quoted.other.stx.escaped',
           begin: '@\\{\\{',
@@ -35,335 +40,448 @@ export const stxGrammar: Grammar = {
         },
       ],
     },
-    'stx-echo': {
+
+    // 2. SFC Block Tags
+    'sfc-blocks': {
       patterns: [
-        // Unescaped triple braces {{{ }}}
+        // Script with client attribute
         {
-          name: 'meta.embedded.block.stx.unescaped',
-          begin: '(?<!@)\\{\\{\\{',
+          name: 'meta.tag.block.stx',
+          begin: '(<)(script)(\\s+client)([^>]*)(>)',
           beginCaptures: {
-            0: { name: 'punctuation.section.embedded.begin.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'entity.other.attribute-name.stx' },
+            4: { name: 'meta.tag.attributes.stx' },
+            5: { name: 'punctuation.definition.tag.end.stx' },
           },
-          end: '\\}\\}\\}',
+          end: '(</)(script)(>)',
           endCaptures: {
-            0: { name: 'punctuation.section.embedded.end.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
           },
           patterns: [
-            { include: '#stx-expression' },
+            { include: '#script-content' },
           ],
         },
-        // Escaped double braces {{ }} with filter support
+        // Regular script
         {
-          name: 'meta.embedded.block.stx.escaped',
-          begin: '(?<![@{])\\{\\{',
+          name: 'meta.tag.block.stx',
+          begin: '(<)(script)([^>]*)(>)',
           beginCaptures: {
-            0: { name: 'punctuation.section.embedded.begin.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'meta.tag.attributes.stx' },
+            4: { name: 'punctuation.definition.tag.end.stx' },
           },
-          end: '\\}\\}',
+          end: '(</)(script)(>)',
           endCaptures: {
-            0: { name: 'punctuation.section.embedded.end.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
           },
           patterns: [
-            { include: '#stx-expression' },
+            { include: '#script-content' },
           ],
         },
-        // Raw HTML {!! !!}
+        // Template block
         {
-          name: 'meta.embedded.block.stx.raw',
-          begin: '(?<!@)\\{!!',
+          name: 'meta.tag.block.stx',
+          begin: '(<)(template)([^>]*)(>)',
           beginCaptures: {
-            0: { name: 'punctuation.section.embedded.begin.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'meta.tag.attributes.stx' },
+            4: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          end: '(</)(template)(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#stx-comments' },
+            { include: '#stx-raw-expression' },
+            { include: '#stx-expression' },
+            { include: '#stx-directives' },
+            { include: '#component-tags' },
+            { include: '#slot-element' },
+            { include: '#html' },
+          ],
+        },
+        // Style with scoped attribute
+        {
+          name: 'meta.tag.block.stx',
+          begin: '(<)(style)(\\s+scoped)([^>]*)(>)',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'entity.other.attribute-name.stx' },
+            4: { name: 'meta.tag.attributes.stx' },
+            5: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          end: '(</)(style)(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#css-content' },
+          ],
+        },
+        // Regular style
+        {
+          name: 'meta.tag.block.stx',
+          begin: '(<)(style)([^>]*)(>)',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'meta.tag.attributes.stx' },
+            4: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          end: '(</)(style)(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#css-content' },
+          ],
+        },
+      ],
+    },
+
+    // 3. Raw Expression {!! !!}
+    'stx-raw-expression': {
+      patterns: [
+        {
+          name: 'meta.embedded.expression.raw.stx',
+          begin: '\\{!!',
+          beginCaptures: {
+            0: { name: 'punctuation.definition.expression.raw.begin.stx' },
           },
           end: '!!\\}',
           endCaptures: {
-            0: { name: 'punctuation.section.embedded.end.stx' },
+            0: { name: 'punctuation.definition.expression.raw.end.stx' },
           },
           patterns: [
-            { include: '#stx-expression' },
+            { include: '#js-expression' },
           ],
         },
       ],
     },
+
+    // 4. Escaped Expression {{ }}
     'stx-expression': {
       patterns: [
-        // Filter pipe operator (but not ||)
         {
-          name: 'keyword.operator.filter.stx',
-          match: '(?<!\\|)\\|(?!\\|)',
-        },
-        // Filter name after pipe
-        {
-          name: 'support.function.filter.stx',
-          match: '(?<=\\|)\\s*([a-zA-Z_][a-zA-Z0-9_]*)',
-          captures: {
-            1: { name: 'support.function.filter.stx' },
+          name: 'meta.embedded.expression.stx',
+          begin: '\\{\\{(?!--)',
+          beginCaptures: {
+            0: { name: 'punctuation.definition.expression.begin.stx' },
           },
-        },
-        // Special variables
-        {
-          name: 'variable.language.stx',
-          match: '\\$(event|el|refs|data|root|store|watch|nextTick|dispatch|id)\\b',
-        },
-        // Everything else is embedded TypeScript
-        {
-          contentName: 'source.ts.embedded.stx',
+          end: '\\}\\}',
+          endCaptures: {
+            0: { name: 'punctuation.definition.expression.end.stx' },
+          },
+          patterns: [
+            { include: '#js-expression' },
+          ],
         },
       ],
     },
+
+    // 5. Directives
     'stx-directives': {
       patterns: [
-        // Control flow
+        // Block directives with @end
         {
-          name: 'keyword.control.conditional.stx',
-          match: '@(if|else|elseif|endif|unless|endunless|switch|case|default|endswitch|break)\\b',
+          name: 'keyword.control.directive.stx',
+          match: '@(if|elseif|else|endif|foreach|endforeach|for|endfor|while|endwhile|switch|case|default|endswitch|auth|endauth|guest|endguest|section|endsection|push|endpush|once|endonce|unless|endunless|isset|endisset|empty|endempty|can|cannot|endcan|endcannot|canany|endcanany|error|enderror|production|endproduction|env|endenv|verbatim|endverbatim)\\b',
         },
-        // Additional conditionals
+        // Inline directives
         {
-          name: 'keyword.control.conditional.stx',
-          match: '@(isset|endisset|empty|endempty|when|elsewhen|endwhen)\\b',
+          name: 'keyword.control.directive.stx',
+          match: '@(include|layout|extends|yield|component|stack|csrf|method|json|translate|t|slot|props|inject|parent|show|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|break|continue|php|endphp|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint)\\b',
         },
-        // Loops
+        // Generic directive (catch-all)
         {
-          name: 'keyword.control.loop.stx',
-          match: '@(for|endfor|foreach|endforeach|while|endwhile|continue|forelse|each|endeach)\\b',
-        },
-        // Authentication & Authorization
-        {
-          name: 'keyword.control.auth.stx',
-          match: '@(auth|guest|can|cannot|canany|endauth|endguest|endcan|endcannot|endcanany)\\b',
-        },
-        // Components
-        {
-          name: 'keyword.control.component.stx',
-          match: '@(component|endcomponent|slot|endslot|props|inject|aware)\\b',
-        },
-        // Layout & Sections
-        {
-          name: 'keyword.control.layout.stx',
-          match: '@(section|endsection|yield|extends|parent|show|hasSection|sectionMissing)\\b',
-        },
-        // Includes
-        {
-          name: 'support.function.include.stx',
-          match: '@(include|includeIf|includeWhen|includeUnless|includeFirst|partial)\\b',
-        },
-        // Stacks
-        {
-          name: 'keyword.control.stack.stx',
-          match: '@(push|endpush|pushOnce|endpushOnce|pushIf|endpushIf|prepend|endprepend|prependOnce|endprependOnce|stack)\\b',
-        },
-        // Once directive
-        {
-          name: 'keyword.control.once.stx',
-          match: '@(once|endonce)\\b',
-        },
-        // Forms & Security
-        {
-          name: 'support.function.security.stx',
-          match: '@(csrf|method|error|enderror|old)\\b',
-        },
-        // Environment
-        {
-          name: 'keyword.control.environment.stx',
-          match: '@(production|endproduction|development|enddevelopment|env|endenv)\\b',
-        },
-        // Translation / Internationalization
-        {
-          name: 'support.function.translation.stx',
-          match: '@(translate|endtranslate|t|lang|endlang|choice)\\b',
-        },
-        // Web Components
-        {
-          name: 'support.function.webcomponent.stx',
-          match: '@webcomponent\\b',
-        },
-        // Routes
-        {
-          name: 'support.function.route.stx',
-          match: '@route\\b',
-        },
-        // JSON output
-        {
-          name: 'support.function.json.stx',
-          match: '@json\\b',
-        },
-        // Markdown
-        {
-          name: 'keyword.control.markdown.stx',
-          begin: '@markdown\\b',
-          beginCaptures: {
-            0: { name: 'keyword.control.markdown.stx' },
-          },
-          end: '@endmarkdown\\b',
-          endCaptures: {
-            0: { name: 'keyword.control.markdown.stx' },
-          },
-          contentName: 'text.html.markdown.embedded.stx',
-        },
-        // Markdown file directive
-        {
-          name: 'support.function.markdown.stx',
-          match: '@markdown-file\\b',
-        },
-        // Animation directives
-        {
-          name: 'keyword.control.animation.stx',
-          match: '@(transition|endtransition|motion|endmotion)\\b',
-        },
-        // TypeScript block
-        {
-          name: 'meta.embedded.block.ts',
-          begin: '@ts\\b',
-          beginCaptures: {
-            0: { name: 'keyword.control.stx' },
-          },
-          end: '@endts\\b',
-          endCaptures: {
-            0: { name: 'keyword.control.stx' },
-          },
-          contentName: 'source.ts',
-        },
-        // JavaScript block
-        {
-          name: 'meta.embedded.block.js',
-          begin: '@js\\b',
-          beginCaptures: {
-            0: { name: 'keyword.control.stx' },
-          },
-          end: '@endjs\\b',
-          endCaptures: {
-            0: { name: 'keyword.control.stx' },
-          },
-          contentName: 'source.js',
-        },
-        // Raw content
-        {
-          name: 'meta.embedded.block.raw',
-          begin: '@(raw|verbatim)\\b',
-          beginCaptures: {
-            0: { name: 'keyword.control.stx' },
-          },
-          end: '@end(raw|verbatim)\\b',
-          endCaptures: {
-            0: { name: 'keyword.control.stx' },
-          },
-          contentName: 'string.unquoted.raw',
-        },
-        // Generic directive (catch-all for custom directives)
-        {
-          name: 'entity.name.function.stx',
+          name: 'keyword.control.directive.stx',
           match: '@[a-zA-Z_][a-zA-Z0-9_]*',
         },
       ],
     },
-    'html': {
+
+    // 6. Component Tags (PascalCase and kebab-case)
+    'component-tags': {
       patterns: [
-        // Client-side script block
-        {
-          name: 'meta.embedded.block.script.client.stx',
-          begin: '(<)(script)(\\s+client)(\\s*>)',
-          beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'entity.name.tag.html' },
-            3: { name: 'entity.other.attribute-name.special.stx' },
-            4: { name: 'punctuation.definition.tag.end.html' },
-          },
-          end: '(</)(script)(>)',
-          endCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'entity.name.tag.html' },
-            3: { name: 'punctuation.definition.tag.end.html' },
-          },
-          contentName: 'source.ts.embedded.stx',
-        },
-        // Regular script block
-        {
-          name: 'meta.embedded.block.script.stx',
-          begin: '(<)(script)(\\s*>)',
-          beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'entity.name.tag.html' },
-            3: { name: 'punctuation.definition.tag.end.html' },
-          },
-          end: '(</)(script)(>)',
-          endCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'entity.name.tag.html' },
-            3: { name: 'punctuation.definition.tag.end.html' },
-          },
-          contentName: 'source.ts.embedded.stx',
-        },
-        // Style block
-        {
-          name: 'meta.embedded.block.style.stx',
-          begin: '(<)(style)(\\s*>)',
-          beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'entity.name.tag.html' },
-            3: { name: 'punctuation.definition.tag.end.html' },
-          },
-          end: '(</)(style)(>)',
-          endCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'entity.name.tag.html' },
-            3: { name: 'punctuation.definition.tag.end.html' },
-          },
-          contentName: 'source.css.embedded.stx',
-        },
-        // Icon components (PascalCase ending with Icon)
-        {
-          name: 'meta.tag.component.icon.stx',
-          begin: '(<)([A-Z][a-zA-Z0-9]*Icon)\\b',
-          beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'support.class.component.icon.stx' },
-          },
-          end: '(/>)|(>)',
-          endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.html' },
-            2: { name: 'punctuation.definition.tag.end.html' },
-          },
-          patterns: [
-            { include: '#tag-attributes' },
-          ],
-        },
-        // PascalCase components (React/Vue-style)
+        // PascalCase opening tag
         {
           name: 'meta.tag.component.stx',
           begin: '(<)([A-Z][a-zA-Z0-9]*)\\b',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'support.class.component.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'entity.name.tag.component.stx' },
           },
           end: '(/>)|(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.html' },
-            2: { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.end.stx' },
+            2: { name: 'punctuation.definition.tag.end.stx' },
           },
           patterns: [
             { include: '#tag-attributes' },
           ],
         },
-        // Component closing tag
+        // PascalCase closing tag
         {
           name: 'meta.tag.component.stx',
           begin: '(</)([A-Z][a-zA-Z0-9]*)',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.html' },
-            2: { name: 'support.class.component.stx' },
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'entity.name.tag.component.stx' },
           },
           end: '(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.html' },
+            1: { name: 'punctuation.definition.tag.end.stx' },
           },
         },
-        // Regular HTML opening tag
+        // kebab-case component opening tag (must contain hyphen)
+        {
+          name: 'meta.tag.component.stx',
+          begin: '(<)([a-z][a-z0-9]*-[a-z0-9-]*)\\b',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'entity.name.tag.component.stx' },
+          },
+          end: '(/>)|(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.end.stx' },
+            2: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#tag-attributes' },
+          ],
+        },
+        // kebab-case component closing tag
+        {
+          name: 'meta.tag.component.stx',
+          begin: '(</)([a-z][a-z0-9]*-[a-z0-9-]*)',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'entity.name.tag.component.stx' },
+          },
+          end: '(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.end.stx' },
+          },
+        },
+      ],
+    },
+
+    // 7. Slot Element
+    'slot-element': {
+      patterns: [
+        // Self-closing slot
+        {
+          name: 'meta.tag.slot.stx',
+          begin: '(<)(slot)\\b',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'entity.name.tag.slot.stx' },
+          },
+          end: '(/>)|(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.end.stx' },
+            2: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#tag-attributes' },
+          ],
+        },
+        // Closing slot tag
+        {
+          name: 'meta.tag.slot.stx',
+          begin: '(</)(slot)',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'entity.name.tag.slot.stx' },
+          },
+          end: '(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.end.stx' },
+          },
+        },
+      ],
+    },
+
+    // Tag Attributes
+    'tag-attributes': {
+      patterns: [
+        // Binding attribute :prop="expression"
+        {
+          name: 'meta.attribute.binding.stx',
+          begin: '(:)([a-zA-Z][a-zA-Z0-9-]*)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.binding.stx' },
+            2: { name: 'entity.other.attribute-name.stx' },
+            3: { name: 'punctuation.separator.key-value.stx' },
+            4: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Binding attribute :prop='expression'
+        {
+          name: 'meta.attribute.binding.stx',
+          begin: '(:)([a-zA-Z][a-zA-Z0-9-]*)\\s*(=)\\s*(\')',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.binding.stx' },
+            2: { name: 'entity.other.attribute-name.stx' },
+            3: { name: 'punctuation.separator.key-value.stx' },
+            4: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '\'',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Event attribute @event.modifier="expression"
+        {
+          name: 'meta.attribute.event.stx',
+          begin: '(@)([a-zA-Z][a-zA-Z0-9]*)((?:\\.[a-zA-Z0-9]+)*)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.event.stx' },
+            2: { name: 'entity.other.attribute-name.event.stx' },
+            3: { name: 'keyword.modifier.event.stx' },
+            4: { name: 'punctuation.separator.key-value.stx' },
+            5: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Event attribute with single quotes
+        {
+          name: 'meta.attribute.event.stx',
+          begin: '(@)([a-zA-Z][a-zA-Z0-9]*)((?:\\.[a-zA-Z0-9]+)*)\\s*(=)\\s*(\')',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.event.stx' },
+            2: { name: 'entity.other.attribute-name.event.stx' },
+            3: { name: 'keyword.modifier.event.stx' },
+            4: { name: 'punctuation.separator.key-value.stx' },
+            5: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '\'',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Alpine x-* directives
+        {
+          name: 'meta.attribute.directive.stx',
+          begin: '(x-(?:data|text|html|model|show|hide|if|bind|on|ref|init|effect|cloak|ignore|transition(?::[a-z-]+)?))\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.directive.stx' },
+            2: { name: 'punctuation.separator.key-value.stx' },
+            3: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Alpine x-* without value
+        {
+          name: 'entity.other.attribute-name.directive.stx',
+          match: 'x-(cloak|ignore|id|teleport|modelable)\\b',
+        },
+        // Regular attribute with mustache in value
+        {
+          name: 'meta.attribute.stx',
+          begin: '([a-zA-Z_][a-zA-Z0-9_:-]*)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.html' },
+            2: { name: 'punctuation.separator.key-value.html' },
+            3: { name: 'punctuation.definition.string.begin.html' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.html' },
+          },
+          contentName: 'string.quoted.double.html',
+          patterns: [
+            { include: '#stx-expression' },
+          ],
+        },
+        // Regular attribute with single quotes
+        {
+          name: 'meta.attribute.stx',
+          begin: '([a-zA-Z_][a-zA-Z0-9_:-]*)\\s*(=)\\s*(\')',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.html' },
+            2: { name: 'punctuation.separator.key-value.html' },
+            3: { name: 'punctuation.definition.string.begin.html' },
+          },
+          end: '\'',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.html' },
+          },
+          contentName: 'string.quoted.single.html',
+          patterns: [
+            { include: '#stx-expression' },
+          ],
+        },
+        // Boolean attribute (no value)
+        {
+          name: 'entity.other.attribute-name.html',
+          match: '[a-zA-Z_][a-zA-Z0-9_:-]*',
+        },
+      ],
+    },
+
+    // HTML Tags
+    'html': {
+      patterns: [
+        // HTML comment
+        {
+          name: 'comment.block.html',
+          begin: '<!--',
+          end: '-->',
+        },
+        // HTML opening tag
         {
           name: 'meta.tag.html',
-          begin: '<([a-z][a-zA-Z0-9:-]*)',
+          begin: '(<)([a-z][a-zA-Z0-9:-]*)\\b',
           beginCaptures: {
-            0: { name: 'punctuation.definition.tag.begin.html' },
-            1: { name: 'entity.name.tag.html' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.html' },
           },
           end: '(/>)|(>)',
           endCaptures: {
@@ -374,7 +492,7 @@ export const stxGrammar: Grammar = {
             { include: '#tag-attributes' },
           ],
         },
-        // Regular HTML closing tag
+        // HTML closing tag
         {
           name: 'meta.tag.html',
           begin: '(</)([a-z][a-zA-Z0-9:-]*)',
@@ -387,88 +505,169 @@ export const stxGrammar: Grammar = {
             1: { name: 'punctuation.definition.tag.end.html' },
           },
         },
-        // HTML comment
-        {
-          name: 'comment.block.html',
-          begin: '<!--',
-          end: '-->',
-        },
       ],
     },
-    'tag-attributes': {
+
+    // JavaScript Expression Patterns
+    'js-expression': {
       patterns: [
-        // Alpine x-* directives
+        { include: '#js-string' },
+        { include: '#js-number' },
+        { include: '#js-keywords' },
+        { include: '#js-constants' },
+        { include: '#js-operators' },
+        { include: '#js-function-call' },
+        { include: '#js-property' },
+        { include: '#js-identifier' },
+      ],
+    },
+    'js-string': {
+      patterns: [
         {
-          name: 'entity.other.attribute-name.directive.alpine.stx',
-          match: 'x-(data|text|html|model|show|hide|if|bind|on|ref|init|cloak|effect|ignore|id|teleport|modelable|transition)\\b',
+          name: 'string.template.js',
+          begin: '`',
+          end: '`',
+          patterns: [
+            {
+              name: 'meta.template.expression.js',
+              begin: '\\$\\{',
+              beginCaptures: {
+                0: { name: 'punctuation.definition.template-expression.begin.js' },
+              },
+              end: '\\}',
+              endCaptures: {
+                0: { name: 'punctuation.definition.template-expression.end.js' },
+              },
+              patterns: [
+                { include: '#js-expression' },
+              ],
+            },
+          ],
         },
-        // Alpine x-transition with modifiers
         {
-          name: 'entity.other.attribute-name.directive.alpine.stx',
-          match: 'x-transition(:(enter|enter-start|enter-end|leave|leave-start|leave-end))?',
-        },
-        // Event handlers with @ prefix and modifiers
-        {
-          name: 'entity.other.attribute-name.event.stx',
-          match: '@([a-zA-Z]+)(\\.([a-zA-Z]+|\\d+))*',
-        },
-        // Vue-style v-bind shorthand with : prefix
-        {
-          name: 'entity.other.attribute-name.binding.stx',
-          match: ':([a-zA-Z][a-zA-Z0-9-]*)',
-          captures: {
-            1: { name: 'entity.other.attribute-name.binding.stx' },
-          },
-        },
-        // Vue-style v-bind, v-on, v-model, v-if, v-for, v-show
-        {
-          name: 'entity.other.attribute-name.directive.vue.stx',
-          match: 'v-(bind|on|model|if|else|else-if|for|show|html|text|pre|cloak|once|memo|slot)\\b',
-        },
-        // v-bind:attr and v-on:event syntax
-        {
-          name: 'entity.other.attribute-name.directive.vue.stx',
-          match: 'v-(bind|on):([a-zA-Z][a-zA-Z0-9-]*)',
-        },
-        // Regular HTML/custom attributes
-        {
-          name: 'entity.other.attribute-name.html',
-          match: '[a-zA-Z_][a-zA-Z0-9_-]*',
-        },
-        // Attribute value with double quotes
-        {
-          name: 'string.quoted.double.html',
+          name: 'string.quoted.double.js',
           begin: '"',
           end: '"',
           patterns: [
-            { include: '#stx-echo' },
-            { include: '#attribute-expression' },
+            { name: 'constant.character.escape.js', match: '\\\\.' },
           ],
         },
-        // Attribute value with single quotes
         {
-          name: 'string.quoted.single.html',
+          name: 'string.quoted.single.js',
           begin: '\'',
           end: '\'',
           patterns: [
-            { include: '#stx-echo' },
-            { include: '#attribute-expression' },
+            { name: 'constant.character.escape.js', match: '\\\\.' },
           ],
-        },
-        // Equals sign
-        {
-          name: 'punctuation.separator.key-value.html',
-          match: '=',
         },
       ],
     },
-    'attribute-expression': {
+    'js-number': {
       patterns: [
-        // Special variables in expressions
+        { name: 'constant.numeric.hex.js', match: '\\b0[xX][0-9a-fA-F]+\\b' },
+        { name: 'constant.numeric.binary.js', match: '\\b0[bB][01]+\\b' },
+        { name: 'constant.numeric.octal.js', match: '\\b0[oO][0-7]+\\b' },
+        { name: 'constant.numeric.decimal.js', match: '\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b' },
+      ],
+    },
+    'js-keywords': {
+      patterns: [
+        { name: 'keyword.control.js', match: '\\b(if|else|for|while|do|switch|case|default|break|continue|return|throw|try|catch|finally|yield|await)\\b' },
+        { name: 'storage.type.js', match: '\\b(var|let|const|function|class|interface|type|enum|async|export|import|from|as|extends|implements)\\b' },
+        { name: 'keyword.operator.js', match: '\\b(new|delete|typeof|instanceof|in|of|void)\\b' },
+      ],
+    },
+    'js-constants': {
+      patterns: [
+        { name: 'constant.language.boolean.js', match: '\\b(true|false)\\b' },
+        { name: 'constant.language.js', match: '\\b(null|undefined|NaN|Infinity)\\b' },
+        { name: 'variable.language.js', match: '\\b(this|super)\\b' },
+      ],
+    },
+    'js-operators': {
+      patterns: [
+        { name: 'keyword.operator.comparison.js', match: '===|!==|==|!=|<=|>=|<|>' },
+        { name: 'keyword.operator.logical.js', match: '&&|\\|\\||!(?!=)' },
+        { name: 'keyword.operator.js', match: '\\?\\?|\\?\\.(?!\\d)' },
+        { name: 'keyword.operator.assignment.js', match: '\\+=|-=|\\*=|/=|%=|=(?![=>])' },
+        { name: 'keyword.operator.arithmetic.js', match: '\\+\\+|--|\\*\\*|\\+|-|\\*|/|%' },
+        { name: 'keyword.operator.ternary.js', match: '\\?|:' },
+        { name: 'keyword.operator.spread.js', match: '\\.\\.\\.' },
+        { name: 'storage.type.function.arrow.js', match: '=>' },
+      ],
+    },
+    'js-function-call': {
+      patterns: [
         {
-          name: 'variable.language.stx',
-          match: '\\$(event|el|refs|data|root|store|watch|nextTick|dispatch|id)\\b',
+          name: 'meta.function-call.js',
+          match: '\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(?=\\()',
+          captures: { 1: { name: 'entity.name.function.js' } },
         },
+      ],
+    },
+    'js-property': {
+      patterns: [
+        {
+          name: 'meta.property.js',
+          match: '(?<=\\.)\\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\\b(?!\\s*\\()',
+          captures: { 1: { name: 'variable.other.property.js' } },
+        },
+        {
+          name: 'meta.method-call.js',
+          match: '(?<=\\.)\\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(?=\\()',
+          captures: { 1: { name: 'entity.name.function.js' } },
+        },
+      ],
+    },
+    'js-identifier': {
+      patterns: [
+        { name: 'variable.other.stx', match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b' },
+      ],
+    },
+
+    // Script Content
+    'script-content': {
+      patterns: [
+        { name: 'comment.line.double-slash.js', match: '//.*$' },
+        { name: 'comment.block.js', begin: '/\\*', end: '\\*/' },
+        {
+          name: 'meta.import.js',
+          begin: '\\b(import)\\b',
+          beginCaptures: { 1: { name: 'keyword.control.import.js' } },
+          end: '(?=;|$)',
+          patterns: [
+            { name: 'keyword.control.from.js', match: '\\bfrom\\b' },
+            { name: 'keyword.control.as.js', match: '\\bas\\b' },
+            { include: '#js-string' },
+            { include: '#js-identifier' },
+          ],
+        },
+        {
+          name: 'meta.export.js',
+          match: '\\b(export)\\s+(default)?\\b',
+          captures: {
+            1: { name: 'keyword.control.export.js' },
+            2: { name: 'keyword.control.default.js' },
+          },
+        },
+        { include: '#js-expression' },
+      ],
+    },
+
+    // CSS Content
+    'css-content': {
+      patterns: [
+        { name: 'comment.block.css', begin: '/\\*', end: '\\*/' },
+        { name: 'keyword.control.at-rule.css', match: '@[a-zA-Z-]+' },
+        { name: 'entity.other.attribute-name.class.css', match: '\\.[a-zA-Z_-][a-zA-Z0-9_-]*' },
+        { name: 'entity.other.attribute-name.id.css', match: '#[a-zA-Z_-][a-zA-Z0-9_-]*' },
+        { name: 'entity.other.attribute-name.pseudo-class.css', match: ':[a-zA-Z-]+' },
+        { name: 'support.type.property-name.css', match: '\\b[a-z-]+(?=\\s*:)' },
+        { name: 'constant.other.color.css', match: '#[0-9a-fA-F]{3,8}\\b' },
+        { name: 'constant.numeric.css', match: '-?\\d+(\\.\\d+)?(px|em|rem|%|vh|vw|vmin|vmax|ch|ex|cm|mm|in|pt|pc|deg|rad|s|ms)?' },
+        { include: '#js-string' },
+        { name: 'support.function.css', match: '\\b[a-zA-Z-]+(?=\\()' },
+        { name: 'support.constant.css', match: '\\b(inherit|initial|unset|none|auto|block|inline|flex|grid|absolute|relative|fixed|sticky|hidden|visible|solid|dashed|dotted|center|left|right|top|bottom)\\b' },
       ],
     },
   },
