@@ -777,11 +777,14 @@ export const stxGrammar: Grammar = {
       ],
     },
 
-    // Script Content
+    // Script Content - comprehensive JS/TS highlighting
     'script-content': {
       patterns: [
+        // Comments
         { name: 'comment.line.double-slash.js', match: '//.*$' },
         { name: 'comment.block.js', begin: '/\\*', end: '\\*/' },
+
+        // Import statements
         {
           name: 'meta.import.js',
           begin: '\\b(import)\\b',
@@ -790,10 +793,13 @@ export const stxGrammar: Grammar = {
           patterns: [
             { name: 'keyword.control.from.js', match: '\\bfrom\\b' },
             { name: 'keyword.control.as.js', match: '\\bas\\b' },
+            { name: 'keyword.operator.js', match: '\\*' },
             { include: '#js-string' },
-            { include: '#js-identifier' },
+            { name: 'variable.other.readwrite.js', match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b' },
           ],
         },
+
+        // Export statements
         {
           name: 'meta.export.js',
           match: '\\b(export)\\s+(default)?\\b',
@@ -802,7 +808,204 @@ export const stxGrammar: Grammar = {
             2: { name: 'keyword.control.default.js' },
           },
         },
-        { include: '#js-expression' },
+
+        // Function declaration
+        {
+          name: 'meta.function.js',
+          begin: '\\b(async\\s+)?(function)\\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(\\()',
+          beginCaptures: {
+            1: { name: 'storage.modifier.async.js' },
+            2: { name: 'storage.type.function.js' },
+            3: { name: 'entity.name.function.js' },
+            4: { name: 'punctuation.definition.parameters.begin.js' },
+          },
+          end: '(\\))',
+          endCaptures: {
+            1: { name: 'punctuation.definition.parameters.end.js' },
+          },
+          patterns: [
+            { include: '#function-parameters' },
+          ],
+        },
+
+        // Arrow function with parameters
+        {
+          name: 'meta.arrow-function.js',
+          match: '(\\()([^)]*)(\\))\\s*(=>)',
+          captures: {
+            1: { name: 'punctuation.definition.parameters.begin.js' },
+            2: { patterns: [{ include: '#function-parameters' }] },
+            3: { name: 'punctuation.definition.parameters.end.js' },
+            4: { name: 'storage.type.function.arrow.js' },
+          },
+        },
+
+        // Simple arrow function
+        {
+          name: 'meta.arrow-function.js',
+          match: '\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(=>)',
+          captures: {
+            1: { name: 'variable.parameter.js' },
+            2: { name: 'storage.type.function.arrow.js' },
+          },
+        },
+
+        // Variable declarations
+        {
+          name: 'meta.var.js',
+          match: '\\b(const|let|var)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)',
+          captures: {
+            1: { name: 'storage.type.js' },
+            2: { name: 'variable.other.readwrite.js' },
+          },
+        },
+
+        // Class declaration
+        {
+          name: 'meta.class.js',
+          match: '\\b(class)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\\s+(extends)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*))?',
+          captures: {
+            1: { name: 'storage.type.class.js' },
+            2: { name: 'entity.name.type.class.js' },
+            3: { name: 'storage.modifier.extends.js' },
+            4: { name: 'entity.other.inherited-class.js' },
+          },
+        },
+
+        // Built-in objects
+        {
+          name: 'support.class.builtin.js',
+          match: '\\b(window|document|console|Array|Object|String|Number|Boolean|Function|Symbol|Map|Set|WeakMap|WeakSet|Promise|Proxy|Reflect|JSON|Math|Date|RegExp|Error|TypeError|ReferenceError|SyntaxError|RangeError|URIError|EvalError|AggregateError|localStorage|sessionStorage|navigator|location|history|fetch|Request|Response|Headers|URL|URLSearchParams|FormData|Blob|File|FileReader|Worker|WebSocket|EventSource|XMLHttpRequest|AbortController|MutationObserver|IntersectionObserver|ResizeObserver|performance|crypto|Intl)\\b',
+        },
+
+        // DOM methods
+        {
+          name: 'support.function.dom.js',
+          match: '\\b(getElementById|getElementsByClassName|getElementsByTagName|querySelector|querySelectorAll|createElement|createTextNode|appendChild|removeChild|insertBefore|replaceChild|cloneNode|addEventListener|removeEventListener|dispatchEvent|getAttribute|setAttribute|removeAttribute|hasAttribute|classList|innerHTML|outerHTML|textContent|innerText|style|dataset|parentNode|parentElement|children|firstChild|lastChild|nextSibling|previousSibling|firstElementChild|lastElementChild|nextElementSibling|previousElementSibling)\\b(?=\\s*\\(|\\s*\\.)',
+        },
+
+        // Array/Object methods
+        {
+          name: 'support.function.js',
+          match: '\\b(map|filter|reduce|forEach|find|findIndex|some|every|includes|indexOf|lastIndexOf|join|split|slice|splice|concat|push|pop|shift|unshift|sort|reverse|fill|copyWithin|flat|flatMap|from|isArray|of|keys|values|entries|assign|freeze|seal|preventExtensions|isFrozen|isSealed|isExtensible|getOwnPropertyNames|getOwnPropertySymbols|getOwnPropertyDescriptor|getOwnPropertyDescriptors|defineProperty|defineProperties|create|getPrototypeOf|setPrototypeOf|hasOwnProperty|isPrototypeOf|propertyIsEnumerable|toString|valueOf|toLocaleString|toJSON|parse|stringify)\\b(?=\\s*\\()',
+        },
+
+        // Console methods
+        {
+          name: 'support.function.console.js',
+          match: '(?<=console\\.)(log|info|warn|error|debug|trace|dir|dirxml|table|count|countReset|group|groupCollapsed|groupEnd|time|timeLog|timeEnd|assert|clear|profile|profileEnd)\\b',
+        },
+
+        // Control flow keywords
+        {
+          name: 'keyword.control.js',
+          match: '\\b(if|else|for|while|do|switch|case|default|break|continue|return|throw|try|catch|finally|with)\\b',
+        },
+
+        // Async/await
+        {
+          name: 'keyword.control.flow.js',
+          match: '\\b(async|await|yield)\\b',
+        },
+
+        // Operators as keywords
+        {
+          name: 'keyword.operator.expression.js',
+          match: '\\b(new|delete|typeof|instanceof|in|of|void)\\b',
+        },
+
+        // Boolean/null/undefined
+        {
+          name: 'constant.language.boolean.js',
+          match: '\\b(true|false)\\b',
+        },
+        {
+          name: 'constant.language.null.js',
+          match: '\\b(null)\\b',
+        },
+        {
+          name: 'constant.language.undefined.js',
+          match: '\\b(undefined)\\b',
+        },
+        {
+          name: 'constant.language.nan.js',
+          match: '\\b(NaN|Infinity)\\b',
+        },
+
+        // this/super
+        {
+          name: 'variable.language.this.js',
+          match: '\\b(this)\\b',
+        },
+        {
+          name: 'variable.language.super.js',
+          match: '\\b(super)\\b',
+        },
+
+        // Strings
+        { include: '#js-string' },
+
+        // Numbers
+        { include: '#js-number' },
+
+        // Regex
+        {
+          name: 'string.regexp.js',
+          begin: '(?<=[=(:,\\[!&|?])\\s*(/)',
+          beginCaptures: { 1: { name: 'punctuation.definition.string.begin.js' } },
+          end: '(/)[gimsuvy]*',
+          endCaptures: { 1: { name: 'punctuation.definition.string.end.js' } },
+        },
+
+        // Operators
+        { name: 'keyword.operator.comparison.js', match: '===|!==|==|!=|<=|>=|<|>' },
+        { name: 'keyword.operator.logical.js', match: '&&|\\|\\||!(?!=)|\\?\\?' },
+        { name: 'keyword.operator.assignment.js', match: '\\+=|-=|\\*=|/=|%=|\\*\\*=|&&=|\\|\\|=|\\?\\?=|<<=|>>=|>>>=|&=|\\|=|\\^=|=(?![=>])' },
+        { name: 'keyword.operator.arithmetic.js', match: '\\+\\+|--|\\*\\*|\\+|-|\\*|/|%' },
+        { name: 'keyword.operator.bitwise.js', match: '<<|>>>|>>|&(?!&)|\\|(?!\\|)|\\^|~' },
+        { name: 'keyword.operator.ternary.js', match: '\\?(?!\\?|\\.)|:' },
+        { name: 'keyword.operator.spread.js', match: '\\.\\.\\.' },
+        { name: 'keyword.operator.optional-chaining.js', match: '\\?\\.' },
+        { name: 'storage.type.function.arrow.js', match: '=>' },
+
+        // Property access with method call
+        {
+          name: 'meta.method-call.js',
+          match: '(?<=\\.)\\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(?=\\()',
+          captures: { 1: { name: 'entity.name.function.js' } },
+        },
+
+        // Property access
+        {
+          name: 'meta.property.js',
+          match: '(?<=\\.)\\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\\b(?!\\s*\\()',
+          captures: { 1: { name: 'variable.other.property.js' } },
+        },
+
+        // Function call
+        {
+          name: 'meta.function-call.js',
+          match: '\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(?=\\()',
+          captures: { 1: { name: 'entity.name.function.js' } },
+        },
+
+        // Identifiers
+        {
+          name: 'variable.other.readwrite.js',
+          match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b',
+        },
+      ],
+    },
+
+    // Function parameters
+    'function-parameters': {
+      patterns: [
+        { name: 'variable.parameter.js', match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b' },
+        { name: 'keyword.operator.assignment.js', match: '=' },
+        { name: 'keyword.operator.spread.js', match: '\\.\\.\\.' },
+        { include: '#js-string' },
+        { include: '#js-number' },
+        { name: 'constant.language.js', match: '\\b(true|false|null|undefined)\\b' },
       ],
     },
 
