@@ -57,6 +57,44 @@
     "sfc-blocks": {
       "patterns": [
         {
+          "begin": "(<)(script)(\\s+server)([^>]*)(>)",
+          "end": "(</)(script)(>)",
+          "name": "meta.tag.block.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.stx"
+            },
+            "2": {
+              "name": "keyword.control.stx"
+            },
+            "3": {
+              "name": "entity.other.attribute-name.stx"
+            },
+            "4": {
+              "name": "meta.tag.attributes.stx"
+            },
+            "5": {
+              "name": "punctuation.definition.tag.end.stx"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.stx"
+            },
+            "2": {
+              "name": "keyword.control.stx"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#script-content"
+            }
+          ]
+        },
+        {
           "begin": "(<)(script)(\\s+client)([^>]*)(>)",
           "end": "(</)(script)(>)",
           "name": "meta.tag.block.stx",
@@ -308,16 +346,124 @@
     "stx-directives": {
       "patterns": [
         {
-          "match": "@(if|elseif|else|endif|foreach|endforeach|for|endfor|while|endwhile|switch|case|default|endswitch|auth|endauth|guest|endguest|section|endsection|push|endpush|once|endonce|unless|endunless|isset|endisset|empty|endempty|can|cannot|endcan|endcannot|canany|endcanany|error|enderror|production|endproduction|env|endenv|verbatim|endverbatim)\\b",
-          "name": "keyword.control.directive.stx"
+          "begin": "(@)(if|elseif|foreach|for|while|switch|case|auth|guest|section|push|unless|isset|empty|can|cannot|canany|error|production|env|import|include|layout|extends|yield|component|slot|props|inject|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint|json|translate|t|method)\\s*(\\()",
+          "end": "(\\))",
+          "name": "meta.directive.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.directive.stx"
+            },
+            "2": {
+              "name": "keyword.control.directive.stx"
+            },
+            "3": {
+              "name": "punctuation.section.parens.begin.stx"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.section.parens.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#directive-arguments"
+            }
+          ]
         },
         {
-          "match": "@(include|layout|extends|yield|component|stack|csrf|method|json|translate|t|slot|props|inject|parent|show|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|break|continue|php|endphp|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint)\\b",
-          "name": "keyword.control.directive.stx"
+          "match": "(@)(endif|endforeach|endfor|endwhile|endswitch|endauth|endguest|endsection|endpush|endonce|endunless|endisset|endempty|endcan|endcannot|endcanany|enderror|endproduction|endenv|endverbatim|endphp|else|default)\\b",
+          "name": "meta.directive.stx",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.stx"
+            },
+            "2": {
+              "name": "keyword.control.directive.stx"
+            }
+          }
         },
         {
-          "match": "@[a-zA-Z_][a-zA-Z0-9_]*",
-          "name": "keyword.control.directive.stx"
+          "match": "(@)(csrf|parent|show|break|continue|once|verbatim|php)\\b",
+          "name": "meta.directive.stx",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.stx"
+            },
+            "2": {
+              "name": "keyword.control.directive.stx"
+            }
+          }
+        },
+        {
+          "match": "(@)([a-zA-Z_][a-zA-Z0-9_]*)",
+          "name": "meta.directive.stx",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.stx"
+            },
+            "2": {
+              "name": "keyword.control.directive.stx"
+            }
+          }
+        }
+      ]
+    },
+    "directive-arguments": {
+      "patterns": [
+        {
+          "begin": "'",
+          "end": "'",
+          "name": "string.quoted.single.stx",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.stx"
+            }
+          ]
+        },
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.stx",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.stx"
+            }
+          ]
+        },
+        {
+          "match": "\\$[a-zA-Z_][a-zA-Z0-9_]*",
+          "name": "variable.other.stx"
+        },
+        {
+          "match": "\\b(as)\\b",
+          "name": "keyword.operator.as.stx"
+        },
+        {
+          "match": "=>",
+          "name": "keyword.operator.arrow.stx"
+        },
+        {
+          "match": "===|!==|==|!=|<=|>=|<|>",
+          "name": "keyword.operator.comparison.stx"
+        },
+        {
+          "match": "&&|\\|\\||!(?!=)",
+          "name": "keyword.operator.logical.stx"
+        },
+        {
+          "match": "\\b\\d+(\\.\\d+)?\\b",
+          "name": "constant.numeric.stx"
+        },
+        {
+          "match": "\\b(true|false|null)\\b",
+          "name": "constant.language.stx"
+        },
+        {
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b",
+          "name": "variable.other.stx"
         }
       ]
     },
@@ -329,18 +475,18 @@
           "name": "meta.tag.component.stx",
           "beginCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.stx"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag.component.stx"
+              "name": "support.class.component.stx"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             },
             "2": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             }
           },
           "patterns": [
@@ -355,15 +501,15 @@
           "name": "meta.tag.component.stx",
           "beginCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.stx"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag.component.stx"
+              "name": "support.class.component.stx"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             }
           }
         },
@@ -373,18 +519,18 @@
           "name": "meta.tag.component.stx",
           "beginCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.stx"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag.component.stx"
+              "name": "support.class.component.stx"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             },
             "2": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             }
           },
           "patterns": [
@@ -399,15 +545,15 @@
           "name": "meta.tag.component.stx",
           "beginCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.stx"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag.component.stx"
+              "name": "support.class.component.stx"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             }
           }
         }
@@ -421,18 +567,18 @@
           "name": "meta.tag.slot.stx",
           "beginCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.stx"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag.slot.stx"
+              "name": "entity.name.tag.slot.stx support.class.component.stx"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             },
             "2": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             }
           },
           "patterns": [
@@ -447,15 +593,15 @@
           "name": "meta.tag.slot.stx",
           "beginCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.stx"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag.slot.stx"
+              "name": "entity.name.tag.slot.stx support.class.component.stx"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.end.stx"
+              "name": "punctuation.definition.tag.end.html"
             }
           }
         }
@@ -590,7 +736,67 @@
           ]
         },
         {
-          "begin": "(x-(?:data|text|html|model|show|hide|if|bind|on|ref|init|effect|cloak|ignore|transition(?::[a-z-]+)?))\\s*(=)\\s*(\")",
+          "begin": "(x-)(data|model|text)\\s*(=)\\s*(\")",
+          "end": "\"",
+          "name": "meta.attribute.reactive.stx",
+          "contentName": "meta.embedded.expression.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.reactive.stx"
+            },
+            "2": {
+              "name": "entity.other.attribute-name.reactive.stx"
+            },
+            "3": {
+              "name": "punctuation.separator.key-value.stx"
+            },
+            "4": {
+              "name": "punctuation.definition.string.begin.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#js-expression"
+            }
+          ]
+        },
+        {
+          "begin": "(x-)(data|model|text)\\s*(=)\\s*(')",
+          "end": "'",
+          "name": "meta.attribute.reactive.stx",
+          "contentName": "meta.embedded.expression.stx",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.reactive.stx"
+            },
+            "2": {
+              "name": "entity.other.attribute-name.reactive.stx"
+            },
+            "3": {
+              "name": "punctuation.separator.key-value.stx"
+            },
+            "4": {
+              "name": "punctuation.definition.string.begin.stx"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.stx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#js-expression"
+            }
+          ]
+        },
+        {
+          "begin": "(x-(?:show|hide|if|bind|on|ref|init|effect|html|transition(?::[a-z-]+)?))\\s*(=)\\s*(\")",
           "end": "\"",
           "name": "meta.attribute.directive.stx",
           "contentName": "meta.embedded.expression.stx",

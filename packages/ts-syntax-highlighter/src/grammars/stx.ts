@@ -44,7 +44,28 @@ export const stxGrammar: Grammar = {
     // 2. SFC Block Tags
     'sfc-blocks': {
       patterns: [
-        // Script with client attribute
+        // Script with server attribute (SSR only, stripped from output)
+        {
+          name: 'meta.tag.block.stx',
+          begin: '(<)(script)(\\s+server)([^>]*)(>)',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'entity.other.attribute-name.stx' },
+            4: { name: 'meta.tag.attributes.stx' },
+            5: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          end: '(</)(script)(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#script-content' },
+          ],
+        },
+        // Script with client attribute (client only, skips server evaluation)
         {
           name: 'meta.tag.block.stx',
           begin: '(<)(script)(\\s+client)([^>]*)(>)',
@@ -65,7 +86,7 @@ export const stxGrammar: Grammar = {
             { include: '#script-content' },
           ],
         },
-        // Regular script
+        // Regular script (runs on server, preserved for client)
         {
           name: 'meta.tag.block.stx',
           begin: '(<)(script)([^>]*)(>)',
@@ -198,20 +219,113 @@ export const stxGrammar: Grammar = {
     // 5. Directives
     'stx-directives': {
       patterns: [
-        // Block directives with @end
+        // Directive with parentheses and arguments
         {
-          name: 'keyword.control.directive.stx',
-          match: '@(if|elseif|else|endif|foreach|endforeach|for|endfor|while|endwhile|switch|case|default|endswitch|auth|endauth|guest|endguest|section|endsection|push|endpush|once|endonce|unless|endunless|isset|endisset|empty|endempty|can|cannot|endcan|endcannot|canany|endcanany|error|enderror|production|endproduction|env|endenv|verbatim|endverbatim)\\b',
+          name: 'meta.directive.stx',
+          begin: '(@)(if|elseif|foreach|for|while|switch|case|auth|guest|section|push|unless|isset|empty|can|cannot|canany|error|production|env|import|include|layout|extends|yield|component|slot|props|inject|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint|json|translate|t|method)\\s*(\\()',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.directive.stx' },
+            2: { name: 'keyword.control.directive.stx' },
+            3: { name: 'punctuation.section.parens.begin.stx' },
+          },
+          end: '(\\))',
+          endCaptures: {
+            1: { name: 'punctuation.section.parens.end.stx' },
+          },
+          patterns: [
+            { include: '#directive-arguments' },
+          ],
         },
-        // Inline directives
+        // Block end directives (no arguments)
         {
-          name: 'keyword.control.directive.stx',
-          match: '@(include|layout|extends|yield|component|stack|csrf|method|json|translate|t|slot|props|inject|parent|show|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|break|continue|php|endphp|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint)\\b',
+          name: 'meta.directive.stx',
+          match: '(@)(endif|endforeach|endfor|endwhile|endswitch|endauth|endguest|endsection|endpush|endonce|endunless|endisset|endempty|endcan|endcannot|endcanany|enderror|endproduction|endenv|endverbatim|endphp|else|default)\\b',
+          captures: {
+            1: { name: 'punctuation.definition.directive.stx' },
+            2: { name: 'keyword.control.directive.stx' },
+          },
+        },
+        // Simple directives without arguments
+        {
+          name: 'meta.directive.stx',
+          match: '(@)(csrf|parent|show|break|continue|once|verbatim|php)\\b',
+          captures: {
+            1: { name: 'punctuation.definition.directive.stx' },
+            2: { name: 'keyword.control.directive.stx' },
+          },
         },
         // Generic directive (catch-all)
         {
-          name: 'keyword.control.directive.stx',
-          match: '@[a-zA-Z_][a-zA-Z0-9_]*',
+          name: 'meta.directive.stx',
+          match: '(@)([a-zA-Z_][a-zA-Z0-9_]*)',
+          captures: {
+            1: { name: 'punctuation.definition.directive.stx' },
+            2: { name: 'keyword.control.directive.stx' },
+          },
+        },
+      ],
+    },
+
+    // Directive Arguments
+    'directive-arguments': {
+      patterns: [
+        // String in single quotes
+        {
+          name: 'string.quoted.single.stx',
+          begin: '\'',
+          end: '\'',
+          patterns: [
+            { name: 'constant.character.escape.stx', match: '\\\\.' },
+          ],
+        },
+        // String in double quotes
+        {
+          name: 'string.quoted.double.stx',
+          begin: '"',
+          end: '"',
+          patterns: [
+            { name: 'constant.character.escape.stx', match: '\\\\.' },
+          ],
+        },
+        // Variable
+        {
+          name: 'variable.other.stx',
+          match: '\\$[a-zA-Z_][a-zA-Z0-9_]*',
+        },
+        // Arrow for foreach: items as item
+        {
+          name: 'keyword.operator.as.stx',
+          match: '\\b(as)\\b',
+        },
+        // Key => value
+        {
+          name: 'keyword.operator.arrow.stx',
+          match: '=>',
+        },
+        // Comparison operators
+        {
+          name: 'keyword.operator.comparison.stx',
+          match: '===|!==|==|!=|<=|>=|<|>',
+        },
+        // Logical operators
+        {
+          name: 'keyword.operator.logical.stx',
+          match: '&&|\\|\\||!(?!=)',
+        },
+        // Numbers
+        {
+          name: 'constant.numeric.stx',
+          match: '\\b\\d+(\\.\\d+)?\\b',
+        },
+        // Boolean/null
+        {
+          name: 'constant.language.stx',
+          match: '\\b(true|false|null)\\b',
+        },
+        // Identifiers
+        {
+          name: 'variable.other.stx',
+          match: '\\b[a-zA-Z_][a-zA-Z0-9_]*\\b',
         },
       ],
     },
@@ -224,13 +338,13 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.component.stx',
           begin: '(<)([A-Z][a-zA-Z0-9]*)\\b',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.stx' },
-            2: { name: 'entity.name.tag.component.stx' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'support.class.component.stx' },
           },
           end: '(/>)|(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.stx' },
-            2: { name: 'punctuation.definition.tag.end.stx' },
+            1: { name: 'punctuation.definition.tag.end.html' },
+            2: { name: 'punctuation.definition.tag.end.html' },
           },
           patterns: [
             { include: '#tag-attributes' },
@@ -241,12 +355,12 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.component.stx',
           begin: '(</)([A-Z][a-zA-Z0-9]*)',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.stx' },
-            2: { name: 'entity.name.tag.component.stx' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'support.class.component.stx' },
           },
           end: '(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.stx' },
+            1: { name: 'punctuation.definition.tag.end.html' },
           },
         },
         // kebab-case component opening tag (must contain hyphen)
@@ -254,13 +368,13 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.component.stx',
           begin: '(<)([a-z][a-z0-9]*-[a-z0-9-]*)\\b',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.stx' },
-            2: { name: 'entity.name.tag.component.stx' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'support.class.component.stx' },
           },
           end: '(/>)|(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.stx' },
-            2: { name: 'punctuation.definition.tag.end.stx' },
+            1: { name: 'punctuation.definition.tag.end.html' },
+            2: { name: 'punctuation.definition.tag.end.html' },
           },
           patterns: [
             { include: '#tag-attributes' },
@@ -271,12 +385,12 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.component.stx',
           begin: '(</)([a-z][a-z0-9]*-[a-z0-9-]*)',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.stx' },
-            2: { name: 'entity.name.tag.component.stx' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'support.class.component.stx' },
           },
           end: '(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.stx' },
+            1: { name: 'punctuation.definition.tag.end.html' },
           },
         },
       ],
@@ -290,13 +404,13 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.slot.stx',
           begin: '(<)(slot)\\b',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.stx' },
-            2: { name: 'entity.name.tag.slot.stx' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.slot.stx support.class.component.stx' },
           },
           end: '(/>)|(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.stx' },
-            2: { name: 'punctuation.definition.tag.end.stx' },
+            1: { name: 'punctuation.definition.tag.end.html' },
+            2: { name: 'punctuation.definition.tag.end.html' },
           },
           patterns: [
             { include: '#tag-attributes' },
@@ -307,12 +421,12 @@ export const stxGrammar: Grammar = {
           name: 'meta.tag.slot.stx',
           begin: '(</)(slot)',
           beginCaptures: {
-            1: { name: 'punctuation.definition.tag.begin.stx' },
-            2: { name: 'entity.name.tag.slot.stx' },
+            1: { name: 'punctuation.definition.tag.begin.html' },
+            2: { name: 'entity.name.tag.slot.stx support.class.component.stx' },
           },
           end: '(>)',
           endCaptures: {
-            1: { name: 'punctuation.definition.tag.end.stx' },
+            1: { name: 'punctuation.definition.tag.end.html' },
           },
         },
       ],
@@ -399,10 +513,48 @@ export const stxGrammar: Grammar = {
             { include: '#js-expression' },
           ],
         },
-        // Alpine x-* directives
+        // Reactive attributes (x-data, x-model, x-text)
+        {
+          name: 'meta.attribute.reactive.stx',
+          begin: '(x-)(data|model|text)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.reactive.stx' },
+            2: { name: 'entity.other.attribute-name.reactive.stx' },
+            3: { name: 'punctuation.separator.key-value.stx' },
+            4: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Reactive attributes with single quotes
+        {
+          name: 'meta.attribute.reactive.stx',
+          begin: '(x-)(data|model|text)\\s*(=)\\s*(\')',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.reactive.stx' },
+            2: { name: 'entity.other.attribute-name.reactive.stx' },
+            3: { name: 'punctuation.separator.key-value.stx' },
+            4: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '\'',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Other x-* directives (show, hide, if, bind, etc.)
         {
           name: 'meta.attribute.directive.stx',
-          begin: '(x-(?:data|text|html|model|show|hide|if|bind|on|ref|init|effect|cloak|ignore|transition(?::[a-z-]+)?))\\s*(=)\\s*(")',
+          begin: '(x-(?:show|hide|if|bind|on|ref|init|effect|html|transition(?::[a-z-]+)?))\\s*(=)\\s*(")',
           beginCaptures: {
             1: { name: 'entity.other.attribute-name.directive.stx' },
             2: { name: 'punctuation.separator.key-value.stx' },
@@ -417,7 +569,7 @@ export const stxGrammar: Grammar = {
             { include: '#js-expression' },
           ],
         },
-        // Alpine x-* without value
+        // x-* without value
         {
           name: 'entity.other.attribute-name.directive.stx',
           match: 'x-(cloak|ignore|id|teleport|modelable)\\b',
