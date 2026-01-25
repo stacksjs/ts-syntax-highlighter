@@ -6,7 +6,7 @@
   "publisher": "stacksjs",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.999.0"
   },
   "categories": [
     "Programming Languages"
@@ -69,6 +69,6 @@
     "publish": "vsce publish"
   },
   "devDependencies": {
-    "@vscode/vsce": "^2.22.0"
+    "@vscode/vsce": "^2.32.0"
   }
 }
