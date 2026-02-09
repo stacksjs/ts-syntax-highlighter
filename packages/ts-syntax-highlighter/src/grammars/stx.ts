@@ -834,7 +834,7 @@ export const stxGrammar: Grammar = {
           match: '(\\()([^)]*)(\\))\\s*(=>)',
           captures: {
             1: { name: 'punctuation.definition.parameters.begin.js' },
-            2: { patterns: [{ include: '#function-parameters' }] },
+            2: { name: 'variable.parameter.js' },
             3: { name: 'punctuation.definition.parameters.end.js' },
             4: { name: 'storage.type.function.arrow.js' },
           },

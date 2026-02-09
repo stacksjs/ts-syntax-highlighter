@@ -13,7 +13,8 @@ async function diffExample() {
   return "Welcome!";
 }
 
-const result = greet("World");`
+const result = greet("World");
+`
 
   const highlighter = await createHighlighter({ theme: 'github-dark' })
 
@@ -37,7 +38,8 @@ async function focusExample() {
   const code = `const x = 1;
 const y = 2;
 const sum = x + y;
-console.log(sum);`
+console.log(sum);
+`
 
   const highlighter = await createHighlighter()
 

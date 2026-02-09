@@ -1,3 +1,4 @@
+/* eslint-disable max-statements-per-line */
 export const smallCode = `
 const greeting = "Hello, World!";
 console.log(greeting);

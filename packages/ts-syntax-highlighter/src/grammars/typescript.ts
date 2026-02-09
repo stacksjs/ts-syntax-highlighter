@@ -83,7 +83,7 @@ export const typescriptGrammar: Grammar = {
     from: 'keyword.other.ts',
     require: 'keyword.other.ts',
     with: 'keyword.other.ts',
-    debugger: 'keyword.other.ts',
+    'debugger': 'keyword.other.ts',
   },
   patterns: [
     { include: '#comments' }, // Must be before operators (// vs /)
@@ -212,11 +212,11 @@ export const typescriptGrammar: Grammar = {
       patterns: [
         {
           name: 'string.regexp.ts',
-          begin: '(?<=[=(,\\[!&|?{};:])\\s*(\\/)',
+          begin: '(?<=[=(,\\[!&|?{};:])\\s{0,10}(\\/)',
           beginCaptures: {
             1: { name: 'punctuation.definition.string.begin.ts' },
           },
-          end: '(\\/)[gimsuvy]*',
+          end: '(\\/)[gimsuvy]{0,7}',
           endCaptures: {
             1: { name: 'punctuation.definition.string.end.ts' },
           },

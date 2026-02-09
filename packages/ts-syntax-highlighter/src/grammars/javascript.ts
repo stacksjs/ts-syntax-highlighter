@@ -57,7 +57,7 @@ export const javascriptGrammar: Grammar = {
     from: 'keyword.other.js',
     as: 'keyword.other.js',
     with: 'keyword.other.js',
-    debugger: 'keyword.other.js',
+    'debugger': 'keyword.other.js',
   },
   patterns: [
     { include: '#comments' }, // Must be before operators (// vs /)
@@ -185,11 +185,11 @@ export const javascriptGrammar: Grammar = {
       patterns: [
         {
           name: 'string.regexp.js',
-          begin: '(?<=[=(,\\[!&|?{};:])\\s*(\\/)',
+          begin: '(?<=[=(,\\[!&|?{};:])\\s{0,10}(\\/)',
           beginCaptures: {
             1: { name: 'punctuation.definition.string.begin.js' },
           },
-          end: '(\\/)[gimsuvy]*',
+          end: '(\\/)[gimsuvy]{0,7}',
           endCaptures: {
             1: { name: 'punctuation.definition.string.end.js' },
           },
