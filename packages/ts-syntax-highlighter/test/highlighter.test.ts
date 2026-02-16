@@ -72,7 +72,8 @@ describe('Highlighter', () => {
     const result = await highlighter.highlight(code, 'stx')
 
     expect(result.html).toBeDefined()
-    expect(result.html).toContain('@if')
+    // The highlighter splits @if into @ and if tokens, so check for the directive class
+    expect(result.html).toContain('keyword-control-directive-stx')
   })
 
   it('should support different themes', async () => {
