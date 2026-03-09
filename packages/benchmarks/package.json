@@ -16,6 +16,6 @@
   "devDependencies": {
     "highlight.js": "^11.11.1",
     "mitata": "^1.0.34",
-    "shiki": "^4.0.1"
+    "shiki": "^4.0.2"
   }
 }
