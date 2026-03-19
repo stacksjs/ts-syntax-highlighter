@@ -86,6 +86,27 @@ export const stxGrammar: Grammar = {
             { include: '#script-content' },
           ],
         },
+        // Script with js attribute (opt out of TypeScript)
+        {
+          name: 'meta.tag.block.stx',
+          begin: '(<)(script)(\\s+js)([^>]*)(>)',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'entity.other.attribute-name.stx' },
+            4: { name: 'meta.tag.attributes.stx' },
+            5: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          end: '(</)(script)(>)',
+          endCaptures: {
+            1: { name: 'punctuation.definition.tag.begin.stx' },
+            2: { name: 'keyword.control.stx' },
+            3: { name: 'punctuation.definition.tag.end.stx' },
+          },
+          patterns: [
+            { include: '#script-content' },
+          ],
+        },
         // Regular script (runs on server, preserved for client)
         {
           name: 'meta.tag.block.stx',
@@ -219,10 +240,10 @@ export const stxGrammar: Grammar = {
     // 5. Directives
     'stx-directives': {
       patterns: [
-        // Directive with parentheses and arguments
+        // Block directives with parenthesized arguments (conditionals, loops, etc.)
         {
           name: 'meta.directive.stx',
-          begin: '(@)(if|elseif|foreach|for|while|switch|case|auth|guest|section|push|unless|isset|empty|can|cannot|canany|error|production|env|import|include|layout|extends|yield|component|slot|props|inject|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint|json|translate|t|method)\\s*(\\()',
+          begin: '(@)(if|elseif|foreach|forelse|for|while|switch|case|when|elsewhen|auth|guest|section|push|pushOnce|prepend|unless|isset|empty|can|cannot|canany|error|production|development|env|import|include|layout|extends|yield|component|slot|props|inject|hasSection|sectionMissing|includeIf|includeWhen|includeUnless|includeFirst|each|class|style|checked|selected|disabled|readonly|required|aware|vite|entrypoint|json|translate|t|method|meta|seo|route|webcomponent|old|transition|defer|teleport|errorBoundary|async|suspense|keepAlive)\\s*(\\()',
           beginCaptures: {
             1: { name: 'punctuation.definition.directive.stx' },
             2: { name: 'keyword.control.directive.stx' },
@@ -236,10 +257,10 @@ export const stxGrammar: Grammar = {
             { include: '#directive-arguments' },
           ],
         },
-        // Block end directives (no arguments)
+        // Block end directives and structural keywords (no arguments)
         {
           name: 'meta.directive.stx',
-          match: '(@)(endif|endforeach|endfor|endwhile|endswitch|endauth|endguest|endsection|endpush|endonce|endunless|endisset|endempty|endcan|endcannot|endcanany|enderror|endproduction|endenv|endverbatim|endphp|else|default)\\b',
+          match: '(@)(endif|endforeach|endforelse|endfor|endwhile|endswitch|endwhen|endauth|endguest|endsection|endpush|endpushOnce|endprepend|endonce|endunless|endisset|endempty|endcan|endcannot|endcanany|enderror|endproduction|enddevelopment|endenv|endverbatim|endtransition|enddefer|endteleport|enderrorBoundary|endasync|endsuspense|endkeepAlive|endmarkdown|endmotion|endraw|endjs|endts|endeach|endwrap|else|default|fallback|placeholder|loading)\\b',
           captures: {
             1: { name: 'punctuation.definition.directive.stx' },
             2: { name: 'keyword.control.directive.stx' },
@@ -248,13 +269,13 @@ export const stxGrammar: Grammar = {
         // Simple directives without arguments
         {
           name: 'meta.directive.stx',
-          match: '(@)(csrf|parent|show|break|continue|once|verbatim|php)\\b',
+          match: '(@)(csrf|parent|show|break|continue|once|verbatim|markdown|raw|js|ts|php)\\b',
           captures: {
             1: { name: 'punctuation.definition.directive.stx' },
             2: { name: 'keyword.control.directive.stx' },
           },
         },
-        // Generic directive (catch-all)
+        // Generic directive (catch-all for custom directives)
         {
           name: 'meta.directive.stx',
           match: '(@)([a-zA-Z_][a-zA-Z0-9_]*)',
@@ -287,6 +308,15 @@ export const stxGrammar: Grammar = {
             { name: 'constant.character.escape.stx', match: '\\\\.' },
           ],
         },
+        // Named parameter (key: value) in directive options
+        {
+          name: 'meta.directive-param.stx',
+          match: '\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(:)',
+          captures: {
+            1: { name: 'entity.other.attribute-name.stx' },
+            2: { name: 'punctuation.separator.key-value.stx' },
+          },
+        },
         // Variable
         {
           name: 'variable.other.stx',
@@ -300,6 +330,11 @@ export const stxGrammar: Grammar = {
         // Key => value
         {
           name: 'keyword.operator.arrow.stx',
+          match: '=>',
+        },
+        // Arrow function
+        {
+          name: 'storage.type.function.arrow.js',
           match: '=>',
         },
         // Comparison operators
@@ -317,10 +352,20 @@ export const stxGrammar: Grammar = {
           name: 'constant.numeric.stx',
           match: '\\b\\d+(\\.\\d+)?\\b',
         },
-        // Boolean/null
+        // Boolean/null/undefined
         {
           name: 'constant.language.stx',
-          match: '\\b(true|false|null)\\b',
+          match: '\\b(true|false|null|undefined)\\b',
+        },
+        // JS keywords in directive args (let, const, etc.)
+        {
+          name: 'storage.type.js',
+          match: '\\b(let|const|var)\\b',
+        },
+        // Operators in directive args (in, of)
+        {
+          name: 'keyword.operator.js',
+          match: '\\b(in|of)\\b',
         },
         // Identifiers
         {
@@ -435,6 +480,79 @@ export const stxGrammar: Grammar = {
     // Tag Attributes
     'tag-attributes': {
       patterns: [
+        // Named slot shorthand: #slotName or #slotName="{ destructured }"
+        {
+          name: 'meta.attribute.slot-shorthand.stx',
+          begin: '(#)([a-zA-Z][a-zA-Z0-9-]*)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'punctuation.definition.slot.stx' },
+            2: { name: 'entity.other.attribute-name.slot.stx' },
+            3: { name: 'punctuation.separator.key-value.stx' },
+            4: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Named slot shorthand without value: #slotName
+        {
+          name: 'meta.attribute.slot-shorthand.stx',
+          match: '(#)([a-zA-Z][a-zA-Z0-9-]*)',
+          captures: {
+            1: { name: 'punctuation.definition.slot.stx' },
+            2: { name: 'entity.other.attribute-name.slot.stx' },
+          },
+        },
+        // Vue-style v-slot:name="scope"
+        {
+          name: 'meta.attribute.directive.vue.stx',
+          begin: '(v-slot)(:)([a-zA-Z][a-zA-Z0-9-]*)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.directive.stx' },
+            2: { name: 'punctuation.separator.directive.stx' },
+            3: { name: 'entity.other.attribute-name.stx' },
+            4: { name: 'punctuation.separator.key-value.stx' },
+            5: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Vue-style v-* directives with value: v-bind:prop="expr", v-on:event="handler", v-model="val", v-if="cond", v-for="item in items"
+        {
+          name: 'meta.attribute.directive.vue.stx',
+          begin: '(v-(?:bind|on|model|if|else-if|else|for|show|html|text|cloak|once|pre|memo))(?:(:)([a-zA-Z][a-zA-Z0-9-]*))?\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.directive.stx' },
+            2: { name: 'punctuation.separator.directive.stx' },
+            3: { name: 'entity.other.attribute-name.stx' },
+            4: { name: 'punctuation.separator.key-value.stx' },
+            5: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Vue-style v-* without value
+        {
+          name: 'entity.other.attribute-name.directive.stx',
+          match: 'v-(?:bind|on|model|if|else-if|else|for|show|html|text|cloak|once|pre|memo|slot)(?::[a-zA-Z][a-zA-Z0-9-]*)?',
+        },
         // Binding attribute :prop="expression"
         {
           name: 'meta.attribute.binding.stx',
@@ -513,10 +631,29 @@ export const stxGrammar: Grammar = {
             { include: '#js-expression' },
           ],
         },
-        // Reactive attributes (x-data, x-model, x-text)
+        // @transition attribute with modifiers: @transition.fade="isVisible"
+        {
+          name: 'meta.attribute.transition.stx',
+          begin: '(@transition)((?:\\.[a-zA-Z0-9-]+)*)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.directive.stx' },
+            2: { name: 'keyword.modifier.event.stx' },
+            3: { name: 'punctuation.separator.key-value.stx' },
+            4: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
+        // Reactive attributes (x-data, x-model, x-text, x-html)
         {
           name: 'meta.attribute.reactive.stx',
-          begin: '(x-)(data|model|text)\\s*(=)\\s*(")',
+          begin: '(x-)(data|model|text|html)\\s*(=)\\s*(")',
           beginCaptures: {
             1: { name: 'punctuation.definition.reactive.stx' },
             2: { name: 'entity.other.attribute-name.reactive.stx' },
@@ -535,7 +672,7 @@ export const stxGrammar: Grammar = {
         // Reactive attributes with single quotes
         {
           name: 'meta.attribute.reactive.stx',
-          begin: '(x-)(data|model|text)\\s*(=)\\s*(\')',
+          begin: '(x-)(data|model|text|html)\\s*(=)\\s*(\')',
           beginCaptures: {
             1: { name: 'punctuation.definition.reactive.stx' },
             2: { name: 'entity.other.attribute-name.reactive.stx' },
@@ -551,10 +688,10 @@ export const stxGrammar: Grammar = {
             { include: '#js-expression' },
           ],
         },
-        // Other x-* directives (show, hide, if, bind, etc.)
+        // Other x-* directives with value (show, hide, if, bind, on, ref, init, effect, transition)
         {
           name: 'meta.attribute.directive.stx',
-          begin: '(x-(?:show|hide|if|bind|on|ref|init|effect|html|transition(?::[a-z-]+)?))\\s*(=)\\s*(")',
+          begin: '(x-(?:show|hide|if|bind|on|ref|init|effect|transition(?::[a-z-]+)?))\\s*(=)\\s*(")',
           beginCaptures: {
             1: { name: 'entity.other.attribute-name.directive.stx' },
             2: { name: 'punctuation.separator.key-value.stx' },
@@ -569,10 +706,43 @@ export const stxGrammar: Grammar = {
             { include: '#js-expression' },
           ],
         },
+        // x-* directives with single quotes
+        {
+          name: 'meta.attribute.directive.stx',
+          begin: '(x-(?:show|hide|if|bind|on|ref|init|effect|transition(?::[a-z-]+)?))\\s*(=)\\s*(\')',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.directive.stx' },
+            2: { name: 'punctuation.separator.key-value.stx' },
+            3: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '\'',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'meta.embedded.expression.stx',
+          patterns: [
+            { include: '#js-expression' },
+          ],
+        },
         // x-* without value
         {
           name: 'entity.other.attribute-name.directive.stx',
-          match: 'x-(cloak|ignore|id|teleport|modelable)\\b',
+          match: 'x-(cloak|ignore|id|teleport|modelable|transition)\\b',
+        },
+        // ref attribute (DOM reference binding)
+        {
+          name: 'meta.attribute.ref.stx',
+          begin: '(ref|@ref)\\s*(=)\\s*(")',
+          beginCaptures: {
+            1: { name: 'entity.other.attribute-name.directive.stx' },
+            2: { name: 'punctuation.separator.key-value.stx' },
+            3: { name: 'punctuation.definition.string.begin.stx' },
+          },
+          end: '"',
+          endCaptures: {
+            0: { name: 'punctuation.definition.string.end.stx' },
+          },
+          contentName: 'string.quoted.double.html',
         },
         // Regular attribute with mustache in value
         {
@@ -793,6 +963,7 @@ export const stxGrammar: Grammar = {
           patterns: [
             { name: 'keyword.control.from.js', match: '\\bfrom\\b' },
             { name: 'keyword.control.as.js', match: '\\bas\\b' },
+            { name: 'keyword.control.type.ts', match: '\\btype\\b' },
             { name: 'keyword.operator.js', match: '\\*' },
             { include: '#js-string' },
             { name: 'variable.other.readwrite.js', match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b' },
@@ -807,6 +978,57 @@ export const stxGrammar: Grammar = {
             1: { name: 'keyword.control.export.js' },
             2: { name: 'keyword.control.default.js' },
           },
+        },
+
+        // TypeScript interface declaration
+        {
+          name: 'meta.interface.ts',
+          match: '\\b(interface)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)',
+          captures: {
+            1: { name: 'storage.type.interface.ts' },
+            2: { name: 'entity.name.type.interface.ts' },
+          },
+        },
+
+        // TypeScript type alias
+        {
+          name: 'meta.type-alias.ts',
+          match: '\\b(type)\\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(=)',
+          captures: {
+            1: { name: 'storage.type.type.ts' },
+            2: { name: 'entity.name.type.alias.ts' },
+            3: { name: 'keyword.operator.assignment.ts' },
+          },
+        },
+
+        // TypeScript type annotations (: Type after parameter/variable)
+        {
+          name: 'meta.type-annotation.ts',
+          match: '(?<=:\\s*)(string|number|boolean|void|never|any|unknown|null|undefined|object|symbol|bigint)\\b',
+          captures: {
+            1: { name: 'support.type.primitive.ts' },
+          },
+        },
+
+        // TypeScript generic angle brackets with type
+        {
+          name: 'meta.type-parameters.ts',
+          match: '<([A-Z][a-zA-Z0-9_$]*)>',
+          captures: {
+            1: { name: 'entity.name.type.ts' },
+          },
+        },
+
+        // STX auto-imported composables and lifecycle hooks
+        {
+          name: 'support.function.stx',
+          match: '\\b(state|derived|useRef|useRoute|useTitle|useEventListener|useWebSocket|useLocalStorage|useSessionStorage|useColorMode|useMouse|useWindowSize|useMediaQuery|useClipboard|useDebounce|useThrottle|useInterval|useTimeout|onMount|onMounted|onDestroy|onUnmounted|onUpdate|onUpdated|onActivated|onDeactivated|defineProps|defineEmits|withDefaults|provide|inject|createInjectionKey|watch|watchEffect|nextTick|navigate|defineStore|registerStoresClient|waitForStore|defineAsyncComponent|withErrorBoundary)\\b(?=\\s*[<(])',
+        },
+
+        // STX global objects
+        {
+          name: 'support.class.stx',
+          match: '\\b(STX)\\b',
         },
 
         // Function declaration
@@ -875,7 +1097,7 @@ export const stxGrammar: Grammar = {
         // Built-in objects
         {
           name: 'support.class.builtin.js',
-          match: '\\b(window|document|console|Array|Object|String|Number|Boolean|Function|Symbol|Map|Set|WeakMap|WeakSet|Promise|Proxy|Reflect|JSON|Math|Date|RegExp|Error|TypeError|ReferenceError|SyntaxError|RangeError|URIError|EvalError|AggregateError|localStorage|sessionStorage|navigator|location|history|fetch|Request|Response|Headers|URL|URLSearchParams|FormData|Blob|File|FileReader|Worker|WebSocket|EventSource|XMLHttpRequest|AbortController|MutationObserver|IntersectionObserver|ResizeObserver|performance|crypto|Intl)\\b',
+          match: '\\b(window|document|console|Array|Object|String|Number|Boolean|Function|Symbol|Map|Set|WeakMap|WeakSet|Promise|Proxy|Reflect|JSON|Math|Date|RegExp|Error|TypeError|ReferenceError|SyntaxError|RangeError|URIError|EvalError|AggregateError|localStorage|sessionStorage|navigator|location|history|fetch|Request|Response|Headers|URL|URLSearchParams|FormData|Blob|File|FileReader|Worker|WebSocket|EventSource|XMLHttpRequest|AbortController|MutationObserver|IntersectionObserver|ResizeObserver|performance|crypto|Intl|HTMLElement|Element|Event|CustomEvent)\\b',
         },
 
         // DOM methods
@@ -1000,6 +1222,11 @@ export const stxGrammar: Grammar = {
     // Function parameters
     'function-parameters': {
       patterns: [
+        // TypeScript type annotation in parameters
+        {
+          name: 'support.type.primitive.ts',
+          match: '(?<=:\\s*)(string|number|boolean|void|never|any|unknown|null|undefined|object|symbol|bigint)\\b',
+        },
         { name: 'variable.parameter.js', match: '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b' },
         { name: 'keyword.operator.assignment.js', match: '=' },
         { name: 'keyword.operator.spread.js', match: '\\.\\.\\.' },
