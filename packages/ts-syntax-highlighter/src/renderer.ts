@@ -48,7 +48,7 @@ export class Renderer {
       // Add diff indicators
       let diffIndicator = ''
       if (addedLines.includes(lineNumber)) {
-        diffIndicator = '<span class="diff-indicator add">+</span>'
+        diffIndicator = '<span class="add diff-indicator">+</span>'
       }
       else if (removedLines.includes(lineNumber)) {
         diffIndicator = '<span class="diff-indicator remove">-</span>'

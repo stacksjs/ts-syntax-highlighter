@@ -12,9 +12,9 @@ export function createFocusTransformer(focusLines: number[]): {
       name: 'focus',
       transform: (line: string, lineNumber: number) => {
         if (!focusLines.includes(lineNumber)) {
-          return line.replace('<span class="line"', '<span class="line dim"')
+          return line.replace('<span class="line"', '<span class="dim line"')
         }
-        return line.replace('<span class="line"', '<span class="line focus"')
+        return line.replace('<span class="line"', '<span class="focus line"')
       },
     },
     tokenTransformer: {
@@ -40,7 +40,7 @@ export function createDiffTransformer(
     transform: (line: string, lineNumber: number) => {
       if (addedLines.includes(lineNumber)) {
         return line
-          .replace('<span class="line"', '<span class="line added"')
+          .replace('<span class="line"', '<span class="added line"')
           .replace('>', '><span class="diff-indicator">+</span>')
       }
       if (removedLines.includes(lineNumber)) {
