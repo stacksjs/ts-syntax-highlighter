@@ -45,10 +45,12 @@ export class Renderer {
         ? `<span class="line-number">${lineNumber}</span>`
         : ''
 
-      // Add diff indicators
+      // Add diff indicators. Both branches lead with `diff-indicator` so
+      // CSS hooks can rely on the leading class — the trailing modifier
+      // (`add`/`remove`) is the variant.
       let diffIndicator = ''
       if (addedLines.includes(lineNumber)) {
-        diffIndicator = '<span class="add diff-indicator">+</span>'
+        diffIndicator = '<span class="diff-indicator add">+</span>'
       }
       else if (removedLines.includes(lineNumber)) {
         diffIndicator = '<span class="diff-indicator remove">-</span>'
