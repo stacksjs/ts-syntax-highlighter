@@ -9,11 +9,21 @@ export const defaultConfig: SyntaxHighlighterConfig = {
   plugins: [],
 }
 
-// eslint-disable-next-line antfu/no-top-level-await
-export const config: SyntaxHighlighterConfig = await loadConfig({
-  name: 'syntax',
-  defaultConfig,
-})
+// Lazy-loaded config to avoid top-level await (enables bun --compile)
+let _config: SyntaxHighlighterConfig | null = null
+
+export async function getConfig(): Promise<SyntaxHighlighterConfig> {
+  if (!_config) {
+    _config = await loadConfig({
+      name: 'syntax',
+      defaultConfig,
+    })
+  }
+  return _config
+}
+
+// For backwards compatibility - synchronous access with default fallback
+export const config: SyntaxHighlighterConfig = defaultConfig
 
 /**
  * Get a specific config value
