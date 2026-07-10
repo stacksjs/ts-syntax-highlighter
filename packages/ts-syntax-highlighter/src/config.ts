@@ -12,7 +12,7 @@ export const defaultConfig: SyntaxHighlighterConfig = {
 // Lazy-loaded config to avoid top-level await (enables bun --compile)
 let _config: SyntaxHighlighterConfig | null = null
 
-export async function getConfig(): Promise<SyntaxHighlighterConfig> {
+export async function loadSyntaxHighlighterConfig(): Promise<SyntaxHighlighterConfig> {
   if (!_config) {
     _config = await loadConfig({
       name: 'syntax',

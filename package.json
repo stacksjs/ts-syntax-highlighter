@@ -37,7 +37,7 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^6.0.2",
+    "typescript": "^7.0.2",
     "better-dx": "^0.2.15"
   },
   "git-hooks": {
@@ -50,5 +50,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "overrides": {
+    "typescript": "^7.0.2"
+  }
 }
