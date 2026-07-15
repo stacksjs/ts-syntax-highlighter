@@ -1,6 +1,7 @@
 {
   "name": "ts-syntax-highlighter",
   "type": "module",
+  "sideEffects": false,
   "version": "0.2.3",
   "description": "Performant & minimal syntax highlighter.",
   "author": "Chris Breuer <chris@stacksjs.org>",

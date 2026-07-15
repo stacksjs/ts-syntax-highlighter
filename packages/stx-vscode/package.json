@@ -5,6 +5,7 @@
   "version": "0.2.3",
   "publisher": "stacksjs",
   "license": "MIT",
+  "sideEffects": false,
   "engines": {
     "vscode": "^1.85.0"
   },
