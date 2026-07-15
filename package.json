@@ -2,7 +2,7 @@
   "name": "ts-syntax-highlighter",
   "type": "module",
   "sideEffects": false,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Like our `ts-starter`, but optimized for monorepos.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
