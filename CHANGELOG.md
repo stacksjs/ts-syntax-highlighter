@@ -1,3 +1,14 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.2...v0.2.3)
+
+## 🧹 Chores
+
+- release v0.2.3 ([bb1cb3d](https://github.com/stacksjs/ts-syntax-highlighter/commit/bb1cb3d)) _(by Chris <chrisbreuer93@gmail.com>)_
+- add release:patch script ([fde6305](https://github.com/stacksjs/ts-syntax-highlighter/commit/fde6305)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.1...v0.2.2)
 
 ## 🐛 Bug Fixes
