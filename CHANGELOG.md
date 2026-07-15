@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.3...v0.2.4)
+
+## 🐛 Bug Fixes
+
+- **pkg**: apply sideEffects:false to the published sub-packages ([7c40755](https://github.com/stacksjs/ts-syntax-highlighter/commit/7c40755)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.4 ([917f1ba](https://github.com/stacksjs/ts-syntax-highlighter/commit/917f1ba)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.2...v0.2.3)
 
 ## 🧹 Chores
