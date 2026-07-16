@@ -2,7 +2,7 @@
   "name": "stx",
   "displayName": "STX",
   "description": "Syntax highlighting for STX - a modern frontend framework rivaling Vue and React",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "publisher": "stacksjs",
   "license": "MIT",
   "sideEffects": false,

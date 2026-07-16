@@ -1,3 +1,18 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.4...v0.2.5)
+
+## 🐛 Bug Fixes
+
+- **pkg**: drop sideEffects:false, it broke the published dist ([8b627cc](https://github.com/stacksjs/ts-syntax-highlighter/commit/8b627cc)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.5 ([ed49e44](https://github.com/stacksjs/ts-syntax-highlighter/commit/ed49e44)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **deps**: declare bun ^1.3.14 in deps.yaml ([4731045](https://github.com/stacksjs/ts-syntax-highlighter/commit/4731045)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.3...v0.2.4)
 
 ## 🐛 Bug Fixes
