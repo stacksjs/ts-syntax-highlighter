@@ -1,3 +1,21 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.5...v0.2.6)
+
+## 🐛 Bug Fixes
+
+- **fast**: emit whitespace so the token stream reproduces its input ([3aab122](https://github.com/stacksjs/ts-syntax-highlighter/commit/3aab122)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 📚 Documentation
+
+- link the community as stacksjs.com/discord ([a3c96c0](https://github.com/stacksjs/ts-syntax-highlighter/commit/a3c96c0)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.6 ([cdbcfec](https://github.com/stacksjs/ts-syntax-highlighter/commit/cdbcfec)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.4...v0.2.5)
 
 ## 🐛 Bug Fixes
