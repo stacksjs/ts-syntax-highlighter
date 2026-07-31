@@ -49,13 +49,29 @@ CHAR_TYPE[13] = WHITESPACE // carriage return
  * Ultra-fast tokenizer - no scope tracking, minimal allocations
  * Targets highlight.js-level performance on small files
  */
+export interface FastTokenizerOptions {
+  /** Emit the gaps between tokens so the stream reproduces the source. Default true. */
+  preserveWhitespace?: boolean
+}
+
 export class FastTokenizer {
   private keywordSet: Set<string> | null = null
   private isJsOrTs: boolean
   private isHtml: boolean
   private isCss: boolean
 
-  constructor(grammar: Grammar) {
+  /**
+   * Whether the gaps between tokens are emitted.
+   *
+   * On by default, because a token stream that cannot reproduce its input is
+   * not usable for rendering code: indentation disappears, `a = 1` comes back
+   * as `a=1`, and any consumer showing a diff is showing the wrong thing. Pass
+   * `false` for measurement, where only the classification work matters.
+   */
+  private preserveWhitespace: boolean
+
+  constructor(grammar: Grammar, options: FastTokenizerOptions = {}) {
+    this.preserveWhitespace = options.preserveWhitespace ?? true
     this.isJsOrTs = grammar.scopeName === 'source.js' || grammar.scopeName === 'source.ts'
     this.isHtml = grammar.scopeName === 'text.html.basic'
     this.isCss = grammar.scopeName === 'source.css'
@@ -91,9 +107,17 @@ export class FastTokenizer {
       const code = line.charCodeAt(offset)
       const charType = CHAR_TYPE[code]
 
-      // Skip whitespace entirely
+      // Whitespace is content, not a gap to step over: it carries the
+      // indentation, and in a diff it is frequently the entire change.
       if (charType & WHITESPACE) {
+        const start = offset
         offset++
+        while (offset < line.length && (CHAR_TYPE[line.charCodeAt(offset)] & WHITESPACE))
+          offset++
+
+        if (this.preserveWhitespace)
+          tokens.push({ type: 'whitespace', content: line.slice(start, offset) })
+
         continue
       }
 
