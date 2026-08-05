@@ -3,6 +3,7 @@ export * from './config'
 export * from './detect'
 export * from './dual-theme'
 export * from './export-textmate'
+export * from './flat-tokens'
 export * from './import-theme'
 // Language and theme exports
 export * from './grammars'
@@ -35,6 +36,9 @@ export * from './themes'
 export * from './tokenizer'
 // Advanced features
 export * from './transformers'
+// The worker entry is exported as a module rather than started here: importing
+// it must not turn the importing thread into a tokenizer server.
+export { handleTokenize, serveTokenizer, type TokenizeRequest, type WorkerRequest, type WorkerResponse } from './worker'
 
 export * from './types'
 

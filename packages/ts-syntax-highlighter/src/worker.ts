@@ -1,0 +1,152 @@
+/**
+ * The worker entry.
+ *
+ * Tokenizing is the expensive half of highlighting and it is pure CPU, so it is
+ * the classic thing to move off whichever thread is trying to stay responsive -
+ * a browser's main thread, or a server's event loop. Every consumer that wants
+ * that has so far had to write this file themselves, which means each of them
+ * invents its own protocol, its own cancellation, and its own answer to what
+ * happens when a grammar is missing.
+ *
+ * The protocol is four messages and deliberately small:
+ *
+ *     → { id, type: 'tokenize', language, lines }
+ *     ← { id, type: 'tokens', flat }        the flat form, arrays transferred
+ *     ← { id, type: 'plain' }               over the ceiling, or no grammar
+ *     ← { id, type: 'error', message }
+ *     → { id, type: 'cancel' }              drop it if it has not started
+ *
+ * Cancellation is best-effort and says so. A request already being tokenized
+ * runs to completion, because the tokenizer is a tight loop with no yield
+ * points in it and adding some would cost more than the cancellation saves. The
+ * case cancellation is for is a reader scrolling past forty queued files, and
+ * for that a queue check is enough.
+ */
+
+import type { FlatTokenLines } from './flat-tokens'
+import { createHighlighter } from './highlighter'
+import { overTokenizeCeiling, packLines, transferable } from './flat-tokens'
+
+export interface TokenizeRequest {
+  id: number
+  type: 'tokenize'
+  language: string
+  lines: string[]
+  /** Overrides the library ceiling for this request. */
+  ceiling?: number
+}
+
+export interface CancelRequest {
+  id: number
+  type: 'cancel'
+}
+
+export type WorkerRequest = TokenizeRequest | CancelRequest
+
+export type WorkerResponse =
+  | { id: number, type: 'tokens', flat: FlatTokenLines }
+  | { id: number, type: 'plain' }
+  | { id: number, type: 'error', message: string }
+
+/**
+ * Handle one request, without knowing what it is running inside.
+ *
+ * Separated from the message plumbing so it can be tested directly: a test for
+ * "a file over the ceiling comes back plain" should not have to start a worker
+ * to find out.
+ */
+export async function handleTokenize(request: TokenizeRequest): Promise<WorkerResponse> {
+  if (overTokenizeCeiling(request.lines, request.ceiling))
+    return { id: request.id, type: 'plain' }
+
+  try {
+    const highlighter = await sharedHighlighter()
+    const tokenized = highlighter.highlightFast(request.lines.join('\n'), request.language)
+
+    // A tokenizer that returns a different number of lines would shift every
+    // line number the consumer anchors on, so the plain answer is the safe one.
+    if (tokenized.length !== request.lines.length)
+      return { id: request.id, type: 'plain' }
+
+    const flat = packLines(
+      tokenized.map(line => line.tokens.map(token => ({ type: token.type, content: token.content }))),
+      request.lines,
+    )
+
+    return { id: request.id, type: 'tokens', flat }
+  }
+  catch (error) {
+    return { id: request.id, type: 'error', message: error instanceof Error ? error.message : String(error) }
+  }
+}
+
+/**
+ * One highlighter per worker, built on the first request.
+ *
+ * Built lazily rather than at startup so a worker that is never given work
+ * never parses a grammar, and shared rather than per request because building
+ * it per file is the mistake this exists to avoid.
+ */
+let highlighterPromise: ReturnType<typeof createHighlighter> | null = null
+
+function sharedHighlighter(): ReturnType<typeof createHighlighter> {
+  if (highlighterPromise == null)
+    highlighterPromise = createHighlighter({})
+
+  return highlighterPromise
+}
+
+/**
+ * Wire the protocol to a worker scope.
+ *
+ * Takes the scope rather than reaching for a global, so this is testable and so
+ * the same function serves a browser `Worker`, a Bun worker, and a `MessagePort`
+ * without a branch for each.
+ */
+export function serveTokenizer(scope: {
+  addEventListener: (type: 'message', listener: (event: { data: unknown }) => void) => void
+  postMessage: (message: unknown, transfer?: unknown[]) => void
+}): void {
+  /** Requests received and not yet started. Cancellation empties this. */
+  const queued = new Set<number>()
+
+  scope.addEventListener('message', (event) => {
+    const request = event.data as WorkerRequest
+    if (request == null || typeof request !== 'object')
+      return
+
+    if (request.type === 'cancel') {
+      queued.delete(request.id)
+      return
+    }
+
+    if (request.type !== 'tokenize')
+      return
+
+    queued.add(request.id)
+
+    void handleTokenize(request).then((response) => {
+      // Cancelled while it was being worked on. The work is done and thrown
+      // away, which is the honest cost of not being able to interrupt a tight
+      // loop - but the *reply* is dropped, so the caller is not handed a result
+      // for something it has stopped caring about.
+      if (!queued.delete(request.id))
+        return
+
+      if (response.type === 'tokens')
+        scope.postMessage(response, transferable(response.flat))
+      else
+        scope.postMessage(response)
+    })
+  })
+}
+
+// Started automatically when this module is the worker's entry point. The guard
+// keeps it inert when the module is merely imported, which is what the tests do.
+declare const self: {
+  addEventListener?: (type: 'message', listener: (event: { data: unknown }) => void) => void
+  postMessage?: (message: unknown, transfer?: unknown[]) => void
+} | undefined
+
+if (typeof self !== 'undefined' && typeof self.addEventListener === 'function' && typeof self.postMessage === 'function')
+  serveTokenizer(self as Parameters<typeof serveTokenizer>[0])
