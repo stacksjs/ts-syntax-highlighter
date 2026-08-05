@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.9...v0.2.10)
+
+## 🚀 Features
+
+- **worker**: tokenize off the calling thread, with tokens that clone cheaply ([fbd2ee1](https://github.com/stacksjs/ts-syntax-highlighter/commit/fbd2ee1)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.10 ([f9ab5a3](https://github.com/stacksjs/ts-syntax-highlighter/commit/f9ab5a3)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.8...v0.2.9)
 
 ## 🚀 Features
