@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.8...v0.2.9)
+
+## 🚀 Features
+
+- **themes**: read a theme somebody else published ([977d60e](https://github.com/stacksjs/ts-syntax-highlighter/commit/977d60e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.9 ([cdb45d4](https://github.com/stacksjs/ts-syntax-highlighter/commit/cdb45d4)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.7...v0.2.8)
 
 ## 🧹 Chores
