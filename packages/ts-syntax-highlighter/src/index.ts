@@ -3,6 +3,7 @@ export * from './config'
 export * from './detect'
 export * from './dual-theme'
 export * from './export-textmate'
+export * from './import-theme'
 // Language and theme exports
 export * from './grammars'
 export { createHighlighter, Highlighter } from './highlighter'
