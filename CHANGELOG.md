@@ -1,3 +1,13 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.7...v0.2.8)
+
+## 🧹 Chores
+
+- release v0.2.8 ([320fab9](https://github.com/stacksjs/ts-syntax-highlighter/commit/320fab9)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.6...v0.2.7)
 
 ## 🐛 Bug Fixes

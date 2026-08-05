@@ -22,6 +22,59 @@ interface CompiledPattern extends GrammarPattern {
   _compiledEnd?: RegExp
 }
 
+/**
+ * The token class a TextMate scope names.
+ *
+ * Read from the front of the scope, not the back. This used to take the last
+ * dot-separated part, which is where the convention puts the *language*: the
+ * scope for `const` is `storage.type.ts`, so every keyword in TypeScript was
+ * typed `ts`, every keyword in Rust `rust`, and `=` in Rust `rust` as well. A
+ * consumer mapping types to colours got one bucket per language instead of one
+ * per kind of token, and the sensible ones fell back to plain text.
+ *
+ * The classes are the ones a stylesheet can reasonably have a colour for, which
+ * is also the set `FastTokenizer` emits, so the two tokenizers agree about what
+ * a keyword is.
+ */
+export function classifyScope(scopeName: string): string {
+  // Longest prefixes first: `keyword.operator` is an operator, not a keyword,
+  // and `constant.numeric` is a number rather than a constant in general.
+  if (scopeName.startsWith('keyword.operator'))
+    return 'operator'
+  if (scopeName.startsWith('constant.numeric'))
+    return 'numeric'
+  if (scopeName.startsWith('entity.name.function') || scopeName.startsWith('support.function'))
+    return 'function'
+  if (scopeName.startsWith('entity.name.tag'))
+    return 'tag'
+  if (scopeName.startsWith('entity.other.attribute-name'))
+    return 'attribute'
+  if (scopeName.startsWith('entity.name.type') || scopeName.startsWith('support.type') || scopeName.startsWith('storage.type.class'))
+    return 'type'
+
+  const root = scopeName.split('.')[0]
+  switch (root) {
+    case 'keyword':
+    case 'storage':
+      return 'keyword'
+    case 'string':
+      return 'string'
+    case 'comment':
+      return 'comment'
+    case 'punctuation':
+      return 'punctuation'
+    case 'variable':
+      return 'variable'
+    case 'constant':
+      return 'constant'
+    case 'entity':
+    case 'support':
+      return 'type'
+    default:
+      return 'text'
+  }
+}
+
 /** Closes a block comment. Held here so the state can name it and restore it. */
 const BLOCK_COMMENT_END = '\\*/'
 
@@ -134,9 +187,10 @@ export class Tokenizer {
       for (const [word, scopeName] of Object.entries(this.grammar.keywords)) {
         if (typeof scopeName === 'string') {
           const scopes = [this.grammar.scopeName, scopeName]
-          const lastDot = scopeName.lastIndexOf('.')
-          const type = lastDot === -1 ? scopeName : scopeName.slice(lastDot + 1)
-          this.keywordMap.set(word, { scopes, type })
+          // Classified from the front of the scope, the same way every other
+          // token is. Taking the last part named the language rather than the
+          // kind, and this is the path every keyword goes through.
+          this.keywordMap.set(word, { scopes, type: classifyScope(scopeName) })
         }
       }
     }
@@ -690,12 +744,12 @@ export class Tokenizer {
           }
         }
 
-        // Inline getTokenType to avoid function call and split()
-        let type = Tokenizer.TYPE_TEXT
-        if (pattern.name && typeof pattern.name === 'string') {
-          const lastDot = pattern.name.lastIndexOf('.')
-          type = lastDot === -1 ? pattern.name : pattern.name.slice(lastDot + 1)
-        }
+        // Classified from the front of the scope. Inlined here once for the
+        // function call, and then copied twice; all three took the last part,
+        // which names the language rather than the kind of token.
+        const type = pattern.name && typeof pattern.name === 'string'
+          ? classifyScope(pattern.name)
+          : Tokenizer.TYPE_TEXT
 
         return {
           token: {
@@ -738,12 +792,12 @@ export class Tokenizer {
           ? [...currentScope.scopes, pattern.name]
           : currentScope.scopes
 
-        // Inline getTokenType to avoid function call and split()
-        let type = Tokenizer.TYPE_TEXT
-        if (pattern.name && typeof pattern.name === 'string') {
-          const lastDot = pattern.name.lastIndexOf('.')
-          type = lastDot === -1 ? pattern.name : pattern.name.slice(lastDot + 1)
-        }
+        // Classified from the front of the scope. Inlined here once for the
+        // function call, and then copied twice; all three took the last part,
+        // which names the language rather than the kind of token.
+        const type = pattern.name && typeof pattern.name === 'string'
+          ? classifyScope(pattern.name)
+          : Tokenizer.TYPE_TEXT
 
         return {
           token: {
@@ -810,11 +864,9 @@ export class Tokenizer {
         ? [...baseScopes, capture.name]
         : baseScopes
 
-      let type = Tokenizer.TYPE_TEXT
-      if (capture && capture.name) {
-        const lastDot = capture.name.lastIndexOf('.')
-        type = lastDot === -1 ? capture.name : capture.name.slice(lastDot + 1)
-      }
+      const type = capture && capture.name
+        ? classifyScope(capture.name)
+        : Tokenizer.TYPE_TEXT
 
       tokens.push({
         type,
@@ -885,9 +937,7 @@ export class Tokenizer {
     if (!scopeName || typeof scopeName !== 'string')
       return 'text'
 
-    // Extract the last part of the scope for the type
-    const parts = scopeName.split('.')
-    return parts[parts.length - 1] || 'text'
+    return classifyScope(scopeName)
   }
 
   /**

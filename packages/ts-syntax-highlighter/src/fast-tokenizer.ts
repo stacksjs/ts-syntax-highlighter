@@ -70,6 +70,22 @@ export class FastTokenizer {
    */
   private preserveWhitespace: boolean
 
+  /**
+   * A comment left open at the end of the previous line.
+   *
+   * The one piece of state this tokenizer carries, and it is not optional. A
+   * block comment is the only construct in the languages it handles that
+   * routinely spans lines, and without remembering it the body of every licence
+   * header and every JSDoc block tokenizes as code: `for` and `is` inside a
+   * sentence come back as keywords, and a diff of a documented file is a wash
+   * of colour with no relationship to what the file says.
+   *
+   * Deliberately one nullable field rather than a stack. `/* *\/` does not
+   * nest, `<!-- -->` does not nest, and a stack would be modelling a
+   * possibility neither language has.
+   */
+  private openComment: 'block' | 'html' | null = null
+
   constructor(grammar: Grammar, options: FastTokenizerOptions = {}) {
     this.preserveWhitespace = options.preserveWhitespace ?? true
     this.isJsOrTs = grammar.scopeName === 'source.js' || grammar.scopeName === 'source.ts'
@@ -85,9 +101,13 @@ export class FastTokenizer {
   /**
    * Tokenize entire code block (ultra-fast, no scopes)
    */
-  tokenize(code: string): FastTokenLine[] {
+  tokenize(code: string, startOpen: 'block' | 'html' | null = null): FastTokenLine[] {
     const lines = code.split('\n')
     const result: FastTokenLine[] = []
+
+    // A document starts outside any comment unless the caller says otherwise.
+    // Set rather than left alone, so tokenizing one file cannot colour the next.
+    this.openComment = startOpen
 
     for (let i = 0; i < lines.length; i++) {
       result.push(this.tokenizeLine(lines[i]))
@@ -97,15 +117,59 @@ export class FastTokenizer {
   }
 
   /**
+   * Whether a comment is open at the point tokenizing stopped.
+   *
+   * For a caller tokenizing a document in pieces: pass it back as `tokenize`'s
+   * second argument for the next piece, or that piece starts as though the
+   * comment had closed.
+   */
+  getOpenComment(): 'block' | 'html' | null {
+    return this.openComment
+  }
+
+  /**
    * Tokenize a single line (ultra-fast, character dispatch only)
    */
   private tokenizeLine(line: string): FastTokenLine {
     const tokens: FastToken[] = []
     let offset = 0
 
+    // Still inside a comment opened on an earlier line. Everything up to the
+    // closing marker is comment text, whatever it looks like.
+    if (this.openComment !== null) {
+      const closer = this.openComment === 'html' ? '-->' : '*/'
+      const endIndex = line.indexOf(closer)
+
+      if (endIndex === -1) {
+        if (line.length > 0)
+          tokens.push({ type: 'comment', content: line })
+        return { tokens }
+      }
+
+      tokens.push({ type: 'comment', content: line.slice(0, endIndex + closer.length) })
+      offset = endIndex + closer.length
+      this.openComment = null
+    }
+
     while (offset < line.length) {
       const code = line.charCodeAt(offset)
       const charType = CHAR_TYPE[code]
+
+      // HTML comments, before the tag scanner. `<!--` opens with `<`, so the
+      // scanner would otherwise take it for a tag and the comment's contents
+      // for markup.
+      if (this.isHtml && code === 60 && line.charCodeAt(offset + 1) === 33) { // <!--
+        const endIndex = line.indexOf('-->', offset + 4)
+        if (endIndex !== -1) {
+          tokens.push({ type: 'comment', content: line.slice(offset, endIndex + 3) })
+          offset = endIndex + 3
+          continue
+        }
+
+        tokens.push({ type: 'comment', content: line.slice(offset) })
+        this.openComment = 'html'
+        break
+      }
 
       // Whitespace is content, not a gap to step over: it carries the
       // indentation, and in a diff it is frequently the entire change.
@@ -188,18 +252,15 @@ export class FastTokenizer {
             offset = endIndex + 2
             continue
           }
+
+          // Runs past the end of this line. This used to fall through and let
+          // `/` and `*` be matched as operators, and the comment's body as code.
+          tokens.push({ type: 'comment', content: line.slice(offset) })
+          this.openComment = 'block'
+          break
         }
       }
 
-      // HTML/XML comments
-      if (this.isHtml && code === 60 && line.charCodeAt(offset + 1) === 33) { // <!--
-        const endIndex = line.indexOf('-->', offset + 4)
-        if (endIndex !== -1) {
-          tokens.push({ type: 'comment', content: line.slice(offset, endIndex + 3) })
-          offset = endIndex + 3
-          continue
-        }
-      }
 
       // Strings
       if (charType & QUOTE) {
