@@ -1,9 +1,19 @@
-import type { Grammar, GrammarPattern, Token, TokenLine } from './types'
+import type { Grammar, GrammarPattern, Token, TokenizerState, TokenLine } from './types'
 
 interface ScopeStack {
   scopes: string[]
   rule: GrammarPattern | null
   endPattern?: RegExp
+  /**
+   * Everything up to `endPattern` is content, not code.
+   *
+   * Set for a block comment that runs past the end of its line. Without it the
+   * pattern loop keeps matching inside the comment, so the body of a comment
+   * highlights as keywords and numbers.
+   */
+  raw?: boolean
+  /** The source of `endPattern`, so the frame can be written down and restored. */
+  endSource?: string
 }
 
 interface CompiledPattern extends GrammarPattern {
@@ -11,6 +21,9 @@ interface CompiledPattern extends GrammarPattern {
   _compiledBegin?: RegExp
   _compiledEnd?: RegExp
 }
+
+/** Closes a block comment. Held here so the state can name it and restore it. */
+const BLOCK_COMMENT_END = '\\*/'
 
 // Character type lookup tables for ultra-fast dispatch
 const CHAR_TYPE = new Uint8Array(256)
@@ -62,6 +75,10 @@ export class Tokenizer {
   private scopeStack: ScopeStack[] = []
   private regexCache: Map<string, RegExp> = new Map()
   private compiledPatterns: CompiledPattern[]
+  /** Compiled pattern by its path in the grammar, e.g. `"3.1.0"`. */
+  private patternsByPath: Map<string, CompiledPattern> = new Map()
+  /** The same relation the other way, for writing a state out. */
+  private pathsByPattern: Map<GrammarPattern, string> = new Map()
   private numberRegex: RegExp
   private isJsOrTs: boolean
   // Pre-computed scope arrays for common tokens (Option 3)
@@ -92,6 +109,9 @@ export class Tokenizer {
     this.grammar = grammar
     // Pre-compile all regexes during initialization for better performance
     this.compiledPatterns = this.precompilePatterns(grammar.patterns)
+    // Index every compiled pattern by its position in the grammar, so a scope
+    // stack can be written down as paths and read back. See getState().
+    this.indexPatterns(this.compiledPatterns, '')
     // Pre-compile number regex for fast path
     this.numberRegex = /^(0x[0-9a-f]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?(e[+-]?\d+)?)/i
     // Check if this is JS/TS for safe fast paths
@@ -211,20 +231,61 @@ export class Tokenizer {
       }
     }
 
+    // Inside a raw frame (a block comment spanning lines), everything up to the
+    // closing marker is content. Emitted as one token per line rather than
+    // being handed to the pattern loop, which would find keywords in prose.
+    if (currentScope.raw) {
+      let end = line.length
+
+      if (currentScope.endPattern) {
+        currentScope.endPattern.lastIndex = offset
+        const closing = currentScope.endPattern.exec(line)
+        // A match at `offset` was already handled above, so this one is later.
+        if (closing)
+          end = closing.index
+      }
+
+      if (end > offset) {
+        return {
+          token: {
+            type: Tokenizer.TYPE_BLOCK,
+            content: line.slice(offset, end),
+            scopes: currentScope.scopes,
+            line: lineNumber,
+            offset,
+          },
+          offset: end,
+        }
+      }
+    }
+
     // Ultra-fast character dispatch with pre-computed scopes - only at root level
-    if (currentScope.rule === null) {
+    if (currentScope.rule === null && !currentScope.raw) {
       const code = line.charCodeAt(offset)
       const charType = CHAR_TYPE[code]
 
-      // Fast path: Skip whitespace entirely (don't create tokens for it)
+      // Fast path: a whole run of whitespace as one token.
+      //
+      // This used to consume the run and emit nothing, on the reasoning that
+      // whitespace needs no colour. It does need to exist: the renderer joins
+      // token contents with no separator, so `const a = 1` came out of
+      // `highlight()` as `consta=1`, and every indented line lost its
+      // indentation. One token per run rather than per character, so the scan
+      // is unchanged and the cost is an object per run.
       if (charType & WHITESPACE) {
         let wsEnd = offset + 1
         while (wsEnd < line.length && (CHAR_TYPE[line.charCodeAt(wsEnd)] & WHITESPACE)) {
           wsEnd++
         }
-        // Return null token to indicate we consumed whitespace but don't want to create a token
+
         return {
-          token: null,
+          token: {
+            type: Tokenizer.TYPE_TEXT,
+            content: line.slice(offset, wsEnd),
+            scopes: this.rootScopes,
+            line: lineNumber,
+            offset,
+          },
           offset: wsEnd,
         }
       }
@@ -348,7 +409,34 @@ export class Tokenizer {
               offset: endIndex + 2,
             }
           }
-          // Multi-line block comment - fall through to patterns for proper multiline handling
+          // A block comment that runs past the end of this line.
+          //
+          // This used to fall through "to patterns for proper multiline
+          // handling", and the patterns never got a chance: the operator fast
+          // path below matched `/` and `*` first, so `/*` became two operators
+          // and the whole body of the comment tokenized as code. A diff full of
+          // licence headers highlighted as though the licence were a program.
+          //
+          // Instead, open a frame that stays open until `*/` and consumes what
+          // it spans as comment text.
+          this.scopeStack.push({
+            scopes: this.blockCommentScopes,
+            rule: null,
+            raw: true,
+            endPattern: this.getRegex(BLOCK_COMMENT_END),
+            endSource: BLOCK_COMMENT_END,
+          })
+
+          return {
+            token: {
+              type: Tokenizer.TYPE_BLOCK,
+              content: line.slice(offset),
+              scopes: this.blockCommentScopes,
+              line: lineNumber,
+              offset,
+            },
+            offset: line.length,
+          }
         }
       }
 
@@ -804,8 +892,171 @@ export class Tokenizer {
 
   /**
    * Get the current scope stack (for streaming/batching)
+   *
+   * Live objects: fine to hand straight back to `tokenizeLine` in the same
+   * process, and useless across a worker boundary because the frames hold
+   * compiled RegExps and references into the grammar. Use `getState()` when
+   * the position has to be written down, sent somewhere, or stored.
    */
   getScopeStack(): ScopeStack[] {
     return this.scopeStack
+  }
+
+  /**
+   * Record where the tokenizer is, in a form that survives being written down.
+   *
+   * This is what makes two things possible.
+   *
+   * Tokenizing in a worker: the state crosses a `postMessage` boundary, which
+   * cannot carry a RegExp or a reference into a grammar object, so the frames
+   * are reduced to scope names and a path into the pattern tree.
+   *
+   * Tokenizing part of a file: a diff hunk starts at line four hundred, and
+   * whether line four hundred is inside a block comment is not knowable from
+   * the hunk. Given the state saved at the line before it, it is exactly
+   * knowable, and the hunk highlights the same as the whole file would.
+   */
+  getState(): TokenizerState {
+    return {
+      scopeName: this.grammar.scopeName,
+      frames: this.scopeStack.map(frame => ({
+        scopes: [...frame.scopes],
+        pattern: frame.rule ? this.pathsByPattern.get(frame.rule) ?? null : null,
+        // A frame the tokenizer opened itself, such as a block comment running
+        // past the end of its line, has no pattern to point at. It carries its
+        // own closing marker instead, so it survives the round trip: without
+        // this, resuming inside a comment resumes as though it had closed.
+        ...(frame.raw ? { raw: true, end: frame.endSource ?? BLOCK_COMMENT_END } : {}),
+      })),
+    }
+  }
+
+  /**
+   * Restore a position recorded by `getState()`.
+   *
+   * A state from another grammar is refused. Silently accepting it would give
+   * confidently wrong highlighting for the rest of the file, which is worse
+   * than not highlighting at all and much harder to notice.
+   */
+  setState(state: TokenizerState): void {
+    if (state.scopeName !== this.grammar.scopeName) {
+      throw new Error(
+        `Tokenizer state belongs to ${state.scopeName}, not ${this.grammar.scopeName}`,
+      )
+    }
+
+    this.scopeStack = state.frames.map((frame) => {
+      if (frame.raw) {
+        const endSource = frame.end ?? BLOCK_COMMENT_END
+        return {
+          scopes: [...frame.scopes],
+          rule: null,
+          raw: true,
+          endPattern: this.getRegex(endSource),
+          endSource,
+        }
+      }
+
+      const rule = frame.pattern === null ? null : this.patternsByPath.get(frame.pattern) ?? null
+      const compiled = rule as CompiledPattern | null
+      const endSource = compiled?.end
+
+      return {
+        scopes: [...frame.scopes],
+        rule,
+        // Recompiled rather than carried: a RegExp has a mutable lastIndex, and
+        // sharing one between the saved state and the live tokenizer is how a
+        // resumed line silently starts matching from the wrong offset.
+        endPattern: endSource ? this.getRegex(endSource) : undefined,
+        endSource,
+      }
+    })
+
+    // An empty or unrecognisable state still has to leave the tokenizer usable.
+    if (this.scopeStack.length === 0)
+      this.scopeStack = [{ scopes: [this.grammar.scopeName], rule: null }]
+  }
+
+  /** The state a document starts in, before any line has been tokenized. */
+  initialState(): TokenizerState {
+    return {
+      scopeName: this.grammar.scopeName,
+      frames: [{ scopes: [this.grammar.scopeName], pattern: null }],
+    }
+  }
+
+  /**
+   * Tokenize a run of lines, starting from a recorded position.
+   *
+   * The unit a worker and a diff both want: hand it the lines and where the
+   * previous run finished, get back the tokens and where this one finished.
+   * Storing the end state every few hundred lines is what lets a reader seek
+   * into the middle of a large file without re-tokenizing from line one.
+   */
+  tokenizeLinesFrom(
+    lines: readonly string[],
+    startState?: TokenizerState,
+    firstLineNumber = 1,
+  ): { lines: TokenLine[], endState: TokenizerState } {
+    if (startState)
+      this.setState(startState)
+    else
+      this.scopeStack = [{ scopes: [this.grammar.scopeName], rule: null }]
+
+    const result: TokenLine[] = []
+    let carried = this.scopeStack
+
+    for (let index = 0; index < lines.length; index++) {
+      result.push(this.tokenizeLine(lines[index]!, firstLineNumber + index, carried))
+      carried = this.scopeStack
+    }
+
+    return { lines: result, endState: this.getState() }
+  }
+
+  /**
+   * Walk a document, recording the state every `interval` lines.
+   *
+   * The checkpoints are what turn "highlight lines 400,000 to 400,050" from a
+   * walk of the whole file into a walk of at most `interval` lines. Returned as
+   * a map from line number to the state *before* that line.
+   */
+  checkpoints(code: string, interval = 500): Map<number, TokenizerState> {
+    const lines = code.split('\n')
+    const checkpoints = new Map<number, TokenizerState>()
+
+    this.scopeStack = [{ scopes: [this.grammar.scopeName], rule: null }]
+    let carried: ScopeStack[] | undefined
+
+    for (let index = 0; index < lines.length; index++) {
+      if (index % interval === 0)
+        checkpoints.set(index + 1, this.getState())
+
+      this.tokenizeLine(lines[index]!, index + 1, carried)
+      carried = this.scopeStack
+    }
+
+    return checkpoints
+  }
+
+  /**
+   * Give every compiled pattern a stable name: its position in the tree.
+   *
+   * Indices rather than anything derived from the pattern's contents, because
+   * two patterns in one grammar can be identical and still be different frames.
+   * The path is only meaningful against the grammar that produced it, which is
+   * why a state carries its scope name.
+   */
+  private indexPatterns(patterns: CompiledPattern[], prefix: string): void {
+    for (let index = 0; index < patterns.length; index++) {
+      const pattern = patterns[index]!
+      const path = prefix === '' ? String(index) : `${prefix}.${index}`
+
+      this.patternsByPath.set(path, pattern)
+      this.pathsByPattern.set(pattern, path)
+
+      if (pattern.patterns)
+        this.indexPatterns(pattern.patterns as CompiledPattern[], path)
+    }
   }
 }

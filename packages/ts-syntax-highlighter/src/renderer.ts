@@ -13,6 +13,49 @@ export class Renderer {
    * Render tokens to HTML
    */
   render(tokens: TokenLine[], options: RenderOptions = {}): RenderedCode {
+    const { inline = false, showCopyButton = false } = options
+    const lines = this.renderLineSpans(tokens, options)
+
+    const copyButton = showCopyButton
+      ? '<button class="copy-button" data-copy>Copy</button>'
+      : ''
+
+    const html = inline
+      ? `<code class="syntax-inline">${lines.join('')}</code>`
+      : `<div class="syntax-wrapper">${copyButton}<pre class="syntax"><code>${lines.join('\n')}</code></pre></div>`
+
+    const css = this.generateCSS(options)
+    const ansi = this.renderAnsi(tokens)
+
+    return {
+      html,
+      css,
+      tokens,
+      ansi,
+    }
+  }
+
+  /**
+   * Render the lines with no wrapper around them.
+   *
+   * What a streaming or partial render appends. `render()` produces a complete
+   * `<pre>` every time, so concatenating two of its results gives two code
+   * blocks rather than one longer one, which is not what a chunk of a stream or
+   * a range of a large file wants.
+   */
+  renderFragment(tokens: TokenLine[], options: RenderOptions = {}): string {
+    return this.renderLineSpans(tokens, options).join(options.inline ? '' : '\n')
+  }
+
+  /**
+   * One span per line.
+   *
+   * Line numbers come from the tokenizer's own record of which line each came
+   * from, so a run tokenized from line four hundred numbers itself from four
+   * hundred. Everything positional in the options (highlighted, added, removed,
+   * annotations) is matched against that same absolute number.
+   */
+  private renderLineSpans(tokens: TokenLine[], options: RenderOptions = {}): string[] {
     const {
       lineNumbers = false,
       highlightLines = [],
@@ -22,11 +65,12 @@ export class Renderer {
       addedLines = [],
       removedLines = [],
       annotations = [],
-      showCopyButton = false,
     } = options
 
-    const lines = tokens.map((tokenLine, index) => {
-      const lineNumber = index + 1
+    return tokens.map((tokenLine, index) => {
+      const lineNumber = typeof tokenLine.line === 'number' && tokenLine.line > 0
+        ? tokenLine.line
+        : index + 1
       const lineClasses = this.getLineClasses(lineNumber, {
         highlightLines,
         focusLines,
@@ -46,8 +90,8 @@ export class Renderer {
         : ''
 
       // Add diff indicators. Both branches lead with `diff-indicator` so
-      // CSS hooks can rely on the leading class — the trailing modifier
-      // (`add`/`remove`) is the variant.
+      // CSS hooks can rely on the leading class, with the trailing modifier
+      // (`add`/`remove`) as the variant.
       let diffIndicator = ''
       if (addedLines.includes(lineNumber)) {
         diffIndicator = '<span class="diff-indicator add">+</span>'
@@ -56,7 +100,6 @@ export class Renderer {
         diffIndicator = '<span class="diff-indicator remove">-</span>'
       }
 
-      // Find annotations for this line
       const lineAnnotations = annotations.filter(a => a.line === lineNumber)
       const annotationHtml = lineAnnotations
         .map(a => this.renderAnnotation(a))
@@ -64,24 +107,6 @@ export class Renderer {
 
       return `<span class="${lineClasses}">${diffIndicator}${lineNumberHtml}${lineContent}${annotationHtml}</span>`
     })
-
-    const copyButton = showCopyButton
-      ? '<button class="copy-button" data-copy>Copy</button>'
-      : ''
-
-    const html = inline
-      ? `<code class="syntax-inline">${lines.join('')}</code>`
-      : `<div class="syntax-wrapper">${copyButton}<pre class="syntax"><code>${lines.join('\n')}</code></pre></div>`
-
-    const css = this.generateCSS(options)
-    const ansi = this.renderAnsi(tokens)
-
-    return {
-      html,
-      css,
-      tokens,
-      ansi,
-    }
   }
 
   /**

@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.6...v0.2.7)
+
+## 🐛 Bug Fixes
+
+- **release**: stop trying to npm-publish the vscode extension ([38ea140](https://github.com/stacksjs/ts-syntax-highlighter/commit/38ea140)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.7 ([696516d](https://github.com/stacksjs/ts-syntax-highlighter/commit/696516d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.5...v0.2.6)
 
 ## 🐛 Bug Fixes

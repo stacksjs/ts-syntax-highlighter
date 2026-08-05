@@ -116,6 +116,58 @@ export interface Language {
   grammar: Grammar
 }
 
+/**
+ * A language listed without its grammar attached.
+ *
+ * The point of the split: answering "what language is `src/main.rs`" needs the
+ * extension table and nothing else, and a browser bundle should not carry forty
+ * eight grammars to answer it. `load()` fetches exactly the one that was asked
+ * for, and `resolveGrammar` in `lazy.ts` caches the result.
+ */
+export interface LanguageDescriptor {
+  id: string
+  name: string
+  aliases: string[]
+  extensions: string[]
+  /** The grammar's own scope name, needed before the grammar is loaded. */
+  scopeName: string
+  load: () => Promise<Grammar>
+}
+
+/**
+ * Where a tokenizer is, part way through a document.
+ *
+ * Serializable on purpose. Two things depend on that: tokenizing in a worker,
+ * which has to post the state across a boundary that cannot carry a RegExp or a
+ * reference into a grammar; and tokenizing a diff hunk, which starts at line
+ * four hundred of a file and would otherwise have no idea whether line four
+ * hundred is inside a block comment.
+ *
+ * Restoring a state into a different grammar is refused rather than producing
+ * confidently wrong output, which is why `scopeName` is carried.
+ */
+export interface TokenizerState {
+  /** The grammar this state came from. */
+  scopeName: string
+  frames: TokenizerStateFrame[]
+}
+
+export interface TokenizerStateFrame {
+  scopes: string[]
+  /**
+   * Which pattern opened this frame, as its position in the grammar.
+   *
+   * A path of indices (`"3.1.0"`) rather than a reference, since the state has
+   * to survive `JSON.stringify`. Null for the root frame, which no pattern
+   * opened, and for a frame the tokenizer opened itself.
+   */
+  pattern: string | null
+  /** Everything up to the closing marker is content rather than code. */
+  raw?: boolean
+  /** The closing marker, as a regular expression source. */
+  end?: string
+}
+
 // Renderer Types
 export interface RenderOptions {
   lineNumbers?: boolean
