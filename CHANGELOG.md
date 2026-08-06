@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.10...v0.2.11)
+
+## 🐛 Bug Fixes
+
+- **worker**: importing the package must not start a tokenizer ([b47103d](https://github.com/stacksjs/ts-syntax-highlighter/commit/b47103d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.11 ([8eecb0b](https://github.com/stacksjs/ts-syntax-highlighter/commit/8eecb0b)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.9...v0.2.10)
 
 ## 🚀 Features
