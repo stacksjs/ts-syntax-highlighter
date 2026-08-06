@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.11...v0.2.12)
+
+## 🚀 Features
+
+- **tokenizer**: $VAR is a variable in the five languages that are full of it ([551e485](https://github.com/stacksjs/ts-syntax-highlighter/commit/551e485)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.12 ([23be16f](https://github.com/stacksjs/ts-syntax-highlighter/commit/23be16f)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.10...v0.2.11)
 
 ## 🐛 Bug Fixes
