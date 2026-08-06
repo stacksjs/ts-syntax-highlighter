@@ -51,6 +51,55 @@ CHAR_TYPE[13] = WHITESPACE // carriage return
  * Not JavaScript or TypeScript, where `$` is a legal identifier character and
  * `$foo` is simply a name.
  */
+/**
+ * Languages where a double slash opens a line comment and slash-star a block one.
+ *
+ * Named rather than assumed. The check used to be "not HTML", so every other
+ * language inherited JavaScript's comment syntax - and a URL in a shell script,
+ * a YAML file or a README had everything after its second slash rendered as a
+ * comment.
+ */
+const SLASH_COMMENT_SCOPES = new Set([
+  'source.js',
+  'source.ts',
+  'source.c',
+  'source.cpp',
+  'source.cs',
+  'source.java',
+  'source.kotlin',
+  'source.swift',
+  'source.dart',
+  'source.go',
+  'source.rust',
+  'source.php',
+  'source.css',
+  'source.scss',
+  'source.solidity',
+  'source.protobuf',
+  'source.json5',
+  'source.jsonc',
+  'source.idl',
+  'source.terraform',
+  'source.vue',
+  'source.stx',
+])
+
+/** Languages where `#` runs to the end of the line. */
+const HASH_COMMENT_SCOPES = new Set([
+  'source.bash',
+  'source.yaml',
+  'source.python',
+  'source.ruby',
+  'source.toml',
+  'source.dockerfile',
+  'source.makefile',
+  'source.nginx',
+  'source.r',
+  'source.graphql',
+  'source.terraform',
+  'source.powershell',
+])
+
 const DOLLAR_VARIABLE_SCOPES = new Set([
   'source.bash',
   'source.php',
@@ -93,6 +142,15 @@ export class FastTokenizer {
   /** PowerShell alone scopes a variable with a colon: `$env:PATH`. */
   private isPowerShell: boolean
 
+  /** Whether a double slash opens a line comment, and slash-star a block one. */
+  private slashComments: boolean
+
+  /** Whether `#` runs to the end of the line in this language. */
+  private hashComments: boolean
+
+  /** Whether a line beginning with `#` is a heading rather than a comment. */
+  private isMarkdown: boolean
+
   /**
    * Whether the gaps between tokens are emitted.
    *
@@ -126,6 +184,9 @@ export class FastTokenizer {
     this.isCss = grammar.scopeName === 'source.css'
     this.usesDollarVariables = DOLLAR_VARIABLE_SCOPES.has(grammar.scopeName)
     this.isPowerShell = grammar.scopeName === 'source.powershell'
+    this.slashComments = SLASH_COMMENT_SCOPES.has(grammar.scopeName)
+    this.hashComments = HASH_COMMENT_SCOPES.has(grammar.scopeName)
+    this.isMarkdown = grammar.scopeName === 'text.html.markdown'
 
     // Pre-build keyword set for O(1) lookups
     if (grammar.keywords) {
@@ -310,8 +371,39 @@ export class FastTokenizer {
         offset = start
       }
 
-      // Comments (JS/TS/CSS)
-      if (!this.isHtml && code === 47) { // /
+      // A markdown heading. `#` there is structure rather than a comment, and
+      // it is the most common non-code file in a pull request - a README whose
+      // headings render as plain text reads as an unhighlighted file.
+      if (this.isMarkdown && code === 35 && tokens.length === 0) { // # at the start of a line
+        let end = offset
+        while (end < line.length && line.charCodeAt(end) === 35)
+          end++
+
+        // Up to six, then a space: `#hashtag` is not a heading.
+        if (end - offset <= 6 && line.charCodeAt(end) === 32) {
+          tokens.push({ type: 'keyword', content: line.slice(offset) })
+          break
+        }
+      }
+
+      // `#` to the end of the line.
+      //
+      // After the string scanner in effect, because a string is consumed whole
+      // and the loop comes back here for whatever follows it - so `url = "a # b"`
+      // keeps its hash and `url = "a" # b` gets its comment.
+      if (this.hashComments && code === 35) { // #
+        tokens.push({ type: 'comment', content: line.slice(offset) })
+        break
+      }
+
+      // `//` and `/* */`, in the languages that have them.
+      //
+      // This used to run for every language that was not HTML, which is how a
+      // URL came to be a comment: `curl https://x.dev` in a shell script, or a
+      // link in a README, greyed out everything after the second slash. There
+      // is no string around an unquoted URL to protect it, so the only fix is
+      // to know which languages have C-style comments at all.
+      if (this.slashComments && code === 47) { // /
         const nextChar = line.charCodeAt(offset + 1)
         if (nextChar === 47) { // //
           tokens.push({ type: 'comment', content: line.slice(offset) })
