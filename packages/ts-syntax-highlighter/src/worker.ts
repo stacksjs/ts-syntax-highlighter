@@ -141,12 +141,21 @@ export function serveTokenizer(scope: {
   })
 }
 
-// Started automatically when this module is the worker's entry point. The guard
-// keeps it inert when the module is merely imported, which is what the tests do.
-declare const self: {
-  addEventListener?: (type: 'message', listener: (event: { data: unknown }) => void) => void
-  postMessage?: (message: unknown, transfer?: unknown[]) => void
-} | undefined
-
-if (typeof self !== 'undefined' && typeof self.addEventListener === 'function' && typeof self.postMessage === 'function')
-  serveTokenizer(self as Parameters<typeof serveTokenizer>[0])
+/**
+ * There is deliberately no auto-start here.
+ *
+ * The first version of this file ended with a guard that called
+ * `serveTokenizer(self)` when `self` looked like a worker scope. In a browser
+ * that is fine. In Bun and Node, `self`, `addEventListener` and `postMessage`
+ * all exist on the **main** thread as well - so merely importing this package
+ * registered a message listener on the main thread, which kept its event loop
+ * alive and hung every process that imported the library. A benchmark that had
+ * been finishing in forty seconds simply never returned.
+ *
+ * A worker entry is two lines and says what it is:
+ *
+ *     import { serveTokenizer } from 'ts-syntax-highlighter'
+ *     serveTokenizer(self)
+ *
+ * Explicit, and impossible to trigger by accident.
+ */

@@ -134,3 +134,30 @@ describe('serveTokenizer', () => {
     expect(harness.posted).toHaveLength(0)
   })
 })
+
+/**
+ * Importing this package must not turn the importing thread into a worker.
+ *
+ * The first release of it did. The guard read `typeof self !== 'undefined' &&
+ * typeof self.addEventListener === 'function'`, which is true on a browser
+ * worker - and also true on Bun's and Node's **main** thread. Importing the
+ * library therefore registered a message listener on the main thread, kept its
+ * event loop alive, and hung every process that used it. Nothing threw and
+ * nothing logged; a benchmark that had been finishing in forty seconds simply
+ * never returned, which took a while to attribute to an import.
+ */
+describe('importing the module', () => {
+  it('registers nothing on the importing thread', async () => {
+    const before = (globalThis as { __tokenizerListeners?: number }).__tokenizerListeners
+    await import('../src/worker')
+
+    expect(before).toBe((globalThis as { __tokenizerListeners?: number }).__tokenizerListeners)
+  })
+
+  it('leaves the process free to exit, which is the part that actually broke', async () => {
+    // If importing had started a server, this file would not finish.
+    await import('../src/worker')
+
+    expect(true).toBe(true)
+  })
+})
