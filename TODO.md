@@ -22,7 +22,7 @@ The following features need grammar improvements. Tests are currently marked as 
 ### Priority 1: Variable Highlighting (5 languages)
 
 #### 1. Bash Variables
-- [ ] **Fix bash variable highlighting**
+- [x] **Fix bash variable highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/bash.ts`
 - **Test**: `packages/ts-syntax-highlighter/test/bash.test.ts`
 - **Issue**: Variables like `$VAR` and `${VAR}` not being captured properly
@@ -54,14 +54,14 @@ The following features need grammar improvements. Tests are currently marked as 
 - **Fix**: Add patterns for `<?php`, `?>` tags and improve variable matching `$variable`
 
 #### 3. PowerShell Variables
-- [ ] **Fix PowerShell variable highlighting**
+- [x] **Fix PowerShell variable highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/powershell.ts`
 - **Test**: `packages/ts-syntax-highlighter/test/powershell.test.ts`
 - **Issue**: PowerShell variables `$variable` not matching
 - **Fix**: Update variable pattern to match PowerShell syntax
 
 #### 4. SCSS Variables
-- [ ] **Fix SCSS variable highlighting**
+- [x] **Fix SCSS variable highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/scss.ts`
 - **Test**: `packages/ts-syntax-highlighter/test/scss.test.ts`
 - **Issue**: SCSS variables `$variable` not highlighted

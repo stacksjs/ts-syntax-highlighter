@@ -46,6 +46,21 @@ CHAR_TYPE[10] = WHITESPACE // newline
 CHAR_TYPE[13] = WHITESPACE // carriage return
 
 /**
+ * Languages where `$` in front of a name is a variable reference.
+ *
+ * Not JavaScript or TypeScript, where `$` is a legal identifier character and
+ * `$foo` is simply a name.
+ */
+const DOLLAR_VARIABLE_SCOPES = new Set([
+  'source.bash',
+  'source.php',
+  'source.powershell',
+  'source.scss',
+  'source.dockerfile',
+  'source.makefile',
+])
+
+/**
  * Ultra-fast tokenizer - no scope tracking, minimal allocations
  * Targets highlight.js-level performance on small files
  */
@@ -59,6 +74,24 @@ export class FastTokenizer {
   private isJsOrTs: boolean
   private isHtml: boolean
   private isCss: boolean
+
+  /**
+   * Whether `$` in front of a name means a variable in this language.
+   *
+   * Five languages this library ships grammars for are thick with `$VAR`, and
+   * in every one of them it was tokenized as plain text - so a shell script, a
+   * Blade template, a PowerShell script and a stylesheet of custom properties
+   * all rendered with the one thing a reader is scanning for uncoloured.
+   *
+   * Gated on the language rather than applied everywhere, because `$` is a
+   * legal identifier character in JavaScript and TypeScript: `$foo` there is a
+   * name, not a variable reference, and calling it one would be a claim the
+   * language does not make.
+   */
+  private usesDollarVariables: boolean
+
+  /** PowerShell alone scopes a variable with a colon: `$env:PATH`. */
+  private isPowerShell: boolean
 
   /**
    * Whether the gaps between tokens are emitted.
@@ -91,6 +124,8 @@ export class FastTokenizer {
     this.isJsOrTs = grammar.scopeName === 'source.js' || grammar.scopeName === 'source.ts'
     this.isHtml = grammar.scopeName === 'text.html.basic'
     this.isCss = grammar.scopeName === 'source.css'
+    this.usesDollarVariables = DOLLAR_VARIABLE_SCOPES.has(grammar.scopeName)
+    this.isPowerShell = grammar.scopeName === 'source.powershell'
 
     // Pre-build keyword set for O(1) lookups
     if (grammar.keywords) {
@@ -236,6 +271,43 @@ export class FastTokenizer {
           tokens.push({ type, content })
           continue
         }
+      }
+
+      // `$name`, `${name}` and `$env:NAME`.
+      //
+      // Before the string and identifier scanners, because `$` is punctuation
+      // to both of them and whichever ran first would cut the name off the
+      // sigil - which is how this came to render as two plain tokens.
+      if (this.usesDollarVariables && code === 36) { // $
+        const start = offset
+        offset++
+
+        if (line.charCodeAt(offset) === 123) { // ${
+          const close = line.indexOf('}', offset)
+          offset = close === -1 ? line.length : close + 1
+        }
+        else {
+          while (offset < line.length && (CHAR_TYPE[line.charCodeAt(offset)]! & (LETTER | DIGIT))) {
+            offset++
+          }
+
+          // PowerShell scopes a variable with a colon: `$env:PATH`, `$script:x`.
+          if (this.isPowerShell && line.charCodeAt(offset) === 58) { // :
+            offset++
+            while (offset < line.length && (CHAR_TYPE[line.charCodeAt(offset)]! & (LETTER | DIGIT))) {
+              offset++
+            }
+          }
+        }
+
+        // A bare `$` with nothing after it is a dollar sign - the end of a
+        // regex, a price, a prompt - and not a variable with an empty name.
+        if (offset > start + 1) {
+          tokens.push({ type: 'variable', content: line.slice(start, offset) })
+          continue
+        }
+
+        offset = start
       }
 
       // Comments (JS/TS/CSS)
