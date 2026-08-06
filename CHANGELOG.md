@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.12...v0.2.13)
+
+## 🐛 Bug Fixes
+
+- **tokenizer**: a URL is not a comment, and a heading is not plain text ([58ab532](https://github.com/stacksjs/ts-syntax-highlighter/commit/58ab532)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.13 ([0f5402e](https://github.com/stacksjs/ts-syntax-highlighter/commit/0f5402e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.11...v0.2.12)
 
 ## 🚀 Features
