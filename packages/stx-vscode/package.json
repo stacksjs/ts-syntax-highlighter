@@ -3,7 +3,7 @@
   "private": true,
   "displayName": "STX",
   "description": "Syntax highlighting for STX - a modern frontend framework rivaling Vue and React",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "publisher": "stacksjs",
   "license": "MIT",
   "sideEffects": false,

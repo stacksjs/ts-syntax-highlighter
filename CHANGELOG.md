@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.13...v0.2.14)
+
+## 🐛 Bug Fixes
+
+- **markdown**: let the grammar's own patterns run ([5e3445d](https://github.com/stacksjs/ts-syntax-highlighter/commit/5e3445d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.14 ([03f19a8](https://github.com/stacksjs/ts-syntax-highlighter/commit/03f19a8)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.12...v0.2.13)
 
 ## 🐛 Bug Fixes
