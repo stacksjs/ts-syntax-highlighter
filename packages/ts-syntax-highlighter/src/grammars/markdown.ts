@@ -4,6 +4,18 @@ export const markdownGrammar: Grammar = {
   name: 'Markdown',
   scopeName: 'text.html.markdown',
   keywords: {},
+  /**
+   * Patterns first. In markdown the punctuation *is* the syntax.
+   *
+   * The tokenizer's root fast paths claim a digit as a number, a backtick as a
+   * template string, `//` as a comment and a bracket as bare punctuation before
+   * any grammar pattern is tried. Every one of those is wrong here: `1.` opens
+   * an ordered list, a backtick opens a code span, `[` opens a link, and `//`
+   * is the middle of the URL inside it. With them on, four of this grammar's
+   * patterns could never match - a README rendered its links as plain text, its
+   * inline code as a string, and every URL as a comment.
+   */
+  fastPaths: false,
   patterns: [
     { include: '#heading' },
     { include: '#code-block' },

@@ -168,7 +168,7 @@ export function unpackLines(flat: FlatTokenLines): FlatToken[][] {
 export const TOKENIZE_CEILING_CHARS = 100_000
 
 /** Whether a source is over the ceiling and should render plain. */
-export function overTokenizeCeiling(source: string | readonly string[], ceiling = TOKENIZE_CEILING_CHARS): boolean {
+export function overTokenizeCeiling(source: string | readonly string[], ceiling: number = TOKENIZE_CEILING_CHARS): boolean {
   if (typeof source === 'string')
     return source.length > ceiling
 

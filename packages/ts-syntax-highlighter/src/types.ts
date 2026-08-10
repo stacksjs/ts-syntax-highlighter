@@ -48,6 +48,22 @@ export interface Grammar {
   repository?: Record<string, GrammarRule>
   injections?: Record<string, GrammarRule>
   keywords?: KeywordTable
+  /**
+   * Whether the tokenizer's root-level character fast paths may run.
+   *
+   * On by default, and right for every source language: at the top level of C
+   * or TypeScript, a digit begins a number, a backtick begins a template, `//`
+   * begins a comment, and a bracket is punctuation with no further meaning. The
+   * fast paths answer those without touching the pattern list, which is most of
+   * why this tokenizer is quick.
+   *
+   * Markup languages invert that. In markdown a digit begins an ordered list, a
+   * backtick begins a code span, a bracket begins a link, and `//` is the middle
+   * of a URL - so the fast paths answer first and answer wrongly, and the
+   * grammar's own patterns never get to run. Set this false and the patterns
+   * come first.
+   */
+  fastPaths?: boolean
 }
 
 export interface KeywordTable {

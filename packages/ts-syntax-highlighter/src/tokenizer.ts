@@ -134,6 +134,7 @@ export class Tokenizer {
   private pathsByPattern: Map<GrammarPattern, string> = new Map()
   private numberRegex: RegExp
   private isJsOrTs: boolean
+  private useFastPaths: boolean
   // Pre-computed scope arrays for common tokens (Option 3)
   private rootScopes: string[]
   private numericScopes: string[]
@@ -169,6 +170,8 @@ export class Tokenizer {
     this.numberRegex = /^(0x[0-9a-f]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?(e[+-]?\d+)?)/i
     // Check if this is JS/TS for safe fast paths
     this.isJsOrTs = grammar.scopeName === 'source.js' || grammar.scopeName === 'source.ts'
+    // A markup grammar turns these off; see `Grammar.fastPaths`.
+    this.useFastPaths = grammar.fastPaths !== false
 
     // Pre-compute scope arrays (Option 3)
     const langSuffix = this.grammar.scopeName.split('.')[1] || 'js'
@@ -204,10 +207,39 @@ export class Tokenizer {
     const tokens: Token[] = []
     let offset = 0
 
+    // Where the current run of unmatched characters began, if one is open.
+    //
+    // Unmatched characters used to be emitted one token each, which is an
+    // object, a shape and - once packed for a worker - an entry in three typed
+    // arrays, per character. On a language whose fast paths are off that is
+    // most of a document: a line of README prose came out as forty tokens
+    // carrying one letter each. Coalescing them costs nothing, because the
+    // matching work per character is the same either way; only the token count
+    // changes.
+    let runStart: number | null = null
+
+    const flushRun = (end: number): void => {
+      if (runStart === null)
+        return
+
+      tokens.push({
+        type: Tokenizer.TYPE_TEXT,
+        content: line.slice(runStart, end),
+        scopes: this.scopeStack[this.scopeStack.length - 1].scopes,
+        line: lineNumber,
+        offset: runStart,
+      })
+      runStart = null
+    }
+
     while (offset < line.length) {
       const result = this.matchNextToken(line, offset, lineNumber)
 
       if (result) {
+        // Closed before the matched token is pushed, so the tokens stay in the
+        // order the line reads.
+        flushRun(offset)
+
         // Handle multiple tokens from capture groups
         if (result.tokens) {
           tokens.push(...result.tokens)
@@ -218,18 +250,15 @@ export class Tokenizer {
         offset = result.offset
       }
       else {
-        // No match found, consume one character as plain text
-        const currentScope = this.scopeStack[this.scopeStack.length - 1]
-        tokens.push({
-          type: Tokenizer.TYPE_TEXT,
-          content: line[offset],
-          scopes: currentScope.scopes, // Reuse - no copy needed
-          line: lineNumber,
-          offset,
-        })
+        // No match found. Opens a run rather than emitting a token, so a
+        // stretch of ordinary text is one token instead of one per character.
+        if (runStart === null)
+          runStart = offset
         offset++
       }
     }
+
+    flushRun(offset)
 
     return { tokens, line: lineNumber }
   }
@@ -313,8 +342,10 @@ export class Tokenizer {
       }
     }
 
-    // Ultra-fast character dispatch with pre-computed scopes - only at root level
-    if (currentScope.rule === null && !currentScope.raw) {
+    // Ultra-fast character dispatch with pre-computed scopes - only at root
+    // level, and only where the language's own syntax does not begin with the
+    // characters these claim. See `Grammar.fastPaths`.
+    if (currentScope.rule === null && !currentScope.raw && this.useFastPaths) {
       const code = line.charCodeAt(offset)
       const charType = CHAR_TYPE[code]
 
