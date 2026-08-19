@@ -1,12 +1,14 @@
-import type { BunpressConfig } from 'bunpress'
+import type { BunPressConfig } from '@stacksjs/bunpress'
 
-const config: BunpressConfig = {
-  name: 'ts-syntax-highlighter',
+const config: BunPressConfig = {
+  title: 'ts-syntax-highlighter',
   description: 'A blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar support',
   url: 'https://ts-syntax-highlighter.netlify.app',
 
-  theme: {
-    primaryColor: '#3178c6',
+  themeConfig: {
+    colors: {
+      primary: '#3178c6',
+    },
   },
 
   sidebar: [
@@ -41,7 +43,7 @@ const config: BunpressConfig = {
     { text: 'Languages', link: '/languages' },
   ],
 
-  navbar: [
+  nav: [
     { text: 'Guide', link: '/guide/getting-started' },
     { text: 'API', link: '/api' },
     { text: 'Languages', link: '/languages' },
