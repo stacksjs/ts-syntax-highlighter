@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.14...v0.2.15)
+
+## 🐛 Bug Fixes
+
+- **build**: build the CLI the bin field points at ([74c654f](https://github.com/stacksjs/ts-syntax-highlighter/commit/74c654f)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.15 ([ed471f6](https://github.com/stacksjs/ts-syntax-highlighter/commit/ed471f6)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.13...v0.2.14)
 
 ## 🐛 Bug Fixes
