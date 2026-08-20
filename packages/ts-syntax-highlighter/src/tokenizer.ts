@@ -79,6 +79,212 @@ export function classifyScope(scopeName: string): string {
 const BLOCK_COMMENT_END = '\\*/'
 
 // Character type lookup tables for ultra-fast dispatch
+/**
+ * The characters a pattern can begin with, or null when that cannot be decided.
+ *
+ * The tokenizer used to try **every** pattern at **every** offset: twelve
+ * regular expressions per character for CSS, each carrying a long alternation.
+ * That is why `Tokenizer` ran at 4.4 MB/s on CSS and 69 on TypeScript - not a
+ * backtracking pattern, as the roadmap guessed, but a linear scan over the
+ * whole rule set repeated once per character. TypeScript escaped it because its
+ * identifiers, numbers and whitespace are caught by the character fast paths
+ * before the loop is reached; CSS spends most of its bytes on punctuation and
+ * selectors, which fall straight through to it.
+ *
+ * So each pattern is asked, once, which characters it could possibly start
+ * with, and at each offset only the patterns that claim the current character
+ * are tried. **Null is the safe answer**: a pattern whose opening cannot be
+ * read is tried at every position, exactly as before. Being wrong in the other
+ * direction would silently stop matching something, which is a colour that
+ * quietly disappears rather than a test that fails.
+ *
+ * Only the shapes these grammars actually use are decided - a literal, an
+ * escaped literal, a character class, an alternation of any of those, with an
+ * optional `\b` in front. Anything cleverer answers null.
+ */
+export function patternFirstChars(source: string): Set<number> | null {
+  const found = new Set<number>()
+
+  const readBranch = (branch: string): boolean => {
+    let index = 0
+
+    // A word boundary or an anchor consumes nothing, so the first character is
+    // whatever follows it.
+    while (branch.startsWith('\\b', index) || branch.startsWith('^', index))
+      index += branch.startsWith('^', index) ? 1 : 2
+
+    if (index >= branch.length)
+      return false
+
+    const character = branch[index]!
+
+    if (character === '\\') {
+      const escaped = branch[index + 1]
+
+      if (!escaped)
+        return false
+
+      // A class escape covers too much to enumerate usefully, except the ones
+      // that are worth it. `\d` is ten characters; `\w` and `\s` are answered
+      // by the fast paths long before a pattern sees them.
+      if (escaped === 'd') {
+        for (let code = 48; code <= 57; code++)
+          found.add(code)
+
+        return true
+      }
+
+      if (/[a-zA-Z]/.test(escaped))
+        return false
+
+      found.add(escaped.charCodeAt(0))
+
+      return true
+    }
+
+    if (character === '[') {
+      const close = branch.indexOf(']', index + 1)
+
+      if (close === -1)
+        return false
+
+      const body = branch.slice(index + 1, close)
+
+      // A negated class is everything except a few characters, which is not a
+      // set worth building.
+      if (body.startsWith('^'))
+        return false
+
+      for (let cursor = 0; cursor < body.length; cursor++) {
+        if (body[cursor] === '\\') {
+          const escaped = body[cursor + 1]
+
+          if (!escaped)
+            return false
+
+          if (/[a-zA-Z]/.test(escaped))
+            return false
+
+          found.add(escaped.charCodeAt(0))
+          cursor++
+          continue
+        }
+
+        // A range, `a-z`, is every code between its ends.
+        if (body[cursor + 1] === '-' && body[cursor + 2] && body[cursor + 2] !== ']') {
+          const from = body.charCodeAt(cursor)
+          const to = body.charCodeAt(cursor + 2)
+
+          if (to < from || to - from > 128)
+            return false
+
+          for (let code = from; code <= to; code++)
+            found.add(code)
+
+          cursor += 2
+          continue
+        }
+
+        found.add(body.charCodeAt(cursor))
+      }
+
+      return true
+    }
+
+    // A group at the front is an alternation to walk into, but only when it is
+    // the whole of what comes first.
+    if (character === '(') {
+      const close = matchingParen(branch, index)
+
+      if (close === -1)
+        return false
+
+      let inner = branch.slice(index + 1, close)
+
+      if (inner.startsWith('?:'))
+        inner = inner.slice(2)
+      else if (inner.startsWith('?'))
+        return false
+
+      return splitAlternatives(inner).every(readBranch)
+    }
+
+    // Anything with its own quantifier could match nothing and let the next
+    // thing be first, which is more analysis than this is worth.
+    if ('*?+{'.includes(branch[index + 1] ?? ''))
+      return false
+
+    if ('.$|)'.includes(character))
+      return false
+
+    found.add(character.charCodeAt(0))
+
+    return true
+  }
+
+  const decided = splitAlternatives(source).every(readBranch)
+
+  return decided && found.size > 0 ? found : null
+}
+
+/** The index of the `)` closing the `(` at `from`, or -1. */
+function matchingParen(source: string, from: number): number {
+  let depth = 0
+
+  for (let index = from; index < source.length; index++) {
+    if (source[index] === '\\') {
+      index++
+      continue
+    }
+
+    if (source[index] === '(')
+      depth++
+    else if (source[index] === ')' && --depth === 0)
+      return index
+  }
+
+  return -1
+}
+
+/** Top-level `|` branches, ignoring the ones inside groups or classes. */
+function splitAlternatives(source: string): string[] {
+  const branches: string[] = []
+  let depth = 0
+  let inClass = false
+  let start = 0
+
+  for (let index = 0; index < source.length; index++) {
+    const character = source[index]
+
+    if (character === '\\') {
+      index++
+      continue
+    }
+
+    if (inClass) {
+      if (character === ']')
+        inClass = false
+
+      continue
+    }
+
+    if (character === '[')
+      inClass = true
+    else if (character === '(')
+      depth++
+    else if (character === ')')
+      depth--
+    else if (character === '|' && depth === 0) {
+      branches.push(source.slice(start, index))
+      start = index + 1
+    }
+  }
+
+  branches.push(source.slice(start))
+
+  return branches
+}
+
 const CHAR_TYPE = new Uint8Array(256)
 const LETTER = 1
 const DIGIT = 2
@@ -128,6 +334,14 @@ export class Tokenizer {
   private scopeStack: ScopeStack[] = []
   private regexCache: Map<string, RegExp> = new Map()
   private compiledPatterns: CompiledPattern[]
+  /**
+   * For each byte, the root patterns that could start with it, in grammar order.
+   *
+   * Order is preserved because first match wins: a table that reordered them
+   * would change which rule claims a character, which is a colour changing
+   * rather than a speed changing. Built once, per rule set.
+   */
+  private rootByFirstChar: Array<CompiledPattern[]> | null = null
   /** Compiled pattern by its path in the grammar, e.g. `"3.1.0"`. */
   private patternsByPath: Map<string, CompiledPattern> = new Map()
   /** The same relation the other way, for writing a state out. */
@@ -166,6 +380,7 @@ export class Tokenizer {
     // Index every compiled pattern by its position in the grammar, so a scope
     // stack can be written down as paths and read back. See getState().
     this.indexPatterns(this.compiledPatterns, '')
+    this.rootByFirstChar = Tokenizer.tableFor(grammar, this.compiledPatterns)
     // Pre-compile number regex for fast path
     this.numberRegex = /^(0x[0-9a-f]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?(e[+-]?\d+)?)/i
     // Check if this is JS/TS for safe fast paths
@@ -673,8 +888,17 @@ export class Tokenizer {
       }
     }
 
-    // Try to match patterns - inline getActivePatterns() to reduce call overhead
-    const patterns = currentScope.rule?.patterns || this.compiledPatterns
+    /*
+     * Only the patterns that could begin with this character.
+     *
+     * The root set is the hot one - a line spends most of its offsets there -
+     * and it is the one with a table. Inside a rule the candidate set is
+     * already small, so it is walked whole rather than carrying a table per
+     * rule for a saving that would not show.
+     */
+    const code = line.charCodeAt(offset)
+    const patterns = currentScope.rule?.patterns
+      ?? (this.rootByFirstChar !== null && code < 256 ? this.rootByFirstChar[code]! : this.compiledPatterns)
 
     for (const pattern of patterns) {
       const result = this.matchPattern(pattern, line, offset, lineNumber)
@@ -1128,6 +1352,130 @@ export class Tokenizer {
    * The path is only meaningful against the grammar that produced it, which is
    * why a state carries its scope name.
    */
+  /**
+   * The first-character table for a rule set.
+   *
+   * A pattern whose opening cannot be decided goes into every bucket, so the
+   * table can only ever try *fewer* patterns than the old loop, never different
+   * ones. 256 buckets covers ASCII; anything above it falls back to the whole
+   * list, which is the right trade - a grammar keyed on ideographs would gain
+   * nothing from a table of bytes.
+   */
+  /**
+   * The characters a pattern - or anything nested inside it - can begin with.
+   *
+   * Most top-level entries in these grammars are **containers**: a name and a
+   * list of children, with no `match` of their own. Reading only `match` and
+   * `begin` therefore decided nothing for any grammar here, put every pattern
+   * in every bucket, and made the table an exact copy of the loop it replaced
+   * with an extra lookup in front. A container's set is the union of its
+   * children's, and unknown anywhere means unknown for the whole thing.
+   */
+  private static startsOf(
+    pattern: CompiledPattern,
+    repository: Record<string, any> | undefined,
+    seen = new Set<string>(),
+  ): Set<number> | null {
+    const source = pattern.match ?? pattern.begin
+
+    if (source)
+      return patternFirstChars(source)
+
+    /*
+     * An `include` is a reference into the grammar's repository, and it is what
+     * nearly every top-level entry in these grammars is. Following it is the
+     * difference between a table that decides something and one that puts every
+     * pattern in every bucket - which is what the first version did, making it
+     * the same loop with a lookup in front of it.
+     *
+     * `seen` guards a repository that refers to itself, directly or in a ring.
+     * Without it a self-recursive rule is a stack overflow at construction.
+     */
+    const include = (pattern as { include?: string }).include
+
+    if (include) {
+      if (!include.startsWith('#') || !repository)
+        return null
+
+      const name = include.slice(1)
+
+      if (seen.has(name))
+        return null
+
+      seen.add(name)
+
+      const rule = repository[name]
+
+      return rule ? Tokenizer.startsOf(rule as CompiledPattern, repository, seen) : null
+    }
+
+    const children = pattern.patterns as CompiledPattern[] | undefined
+
+    if (!children || children.length === 0)
+      return null
+
+    const union = new Set<number>()
+
+    for (const child of children) {
+      const starts = Tokenizer.startsOf(child, repository, seen)
+
+      if (!starts)
+        return null
+
+      for (const code of starts)
+        union.add(code)
+    }
+
+    return union.size > 0 ? union : null
+  }
+
+  /**
+   * The table for a grammar, built once per grammar rather than per tokenizer.
+   *
+   * Building it walks every pattern and every include, which is cheap beside
+   * tokenizing a file and expensive beside tokenizing one line - and a
+   * `Tokenizer` is constructed per file in some callers. Measured: charging
+   * construction to every run cost TypeScript 23%, wiping out the gain the
+   * table exists for. Keyed weakly on the grammar object, which is the thing
+   * the table actually describes and is shared by every tokenizer over that
+   * language.
+   */
+  private static tables = new WeakMap<object, Array<CompiledPattern[]>>()
+
+  private static tableFor(grammar: Grammar, patterns: CompiledPattern[]): Array<CompiledPattern[]> {
+    const held = Tokenizer.tables.get(grammar as unknown as object)
+
+    if (held)
+      return held
+
+    const table = Tokenizer.dispatchTable(patterns, grammar.repository as Record<string, any> | undefined)
+    Tokenizer.tables.set(grammar as unknown as object, table)
+
+    return table
+  }
+
+  private static dispatchTable(patterns: CompiledPattern[], repository?: Record<string, any>): Array<CompiledPattern[]> {
+    const table: Array<CompiledPattern[]> = Array.from({ length: 256 }, () => [])
+
+    for (const pattern of patterns) {
+      const starts = Tokenizer.startsOf(pattern, repository)
+
+      if (!starts) {
+        for (let code = 0; code < 256; code++)
+          table[code]!.push(pattern)
+
+        continue
+      }
+
+      for (const code of starts) {
+        if (code < 256)
+          table[code]!.push(pattern)
+      }
+    }
+
+    return table
+  }
+
   private indexPatterns(patterns: CompiledPattern[], prefix: string): void {
     for (let index = 0; index < patterns.length; index++) {
       const pattern = patterns[index]!
