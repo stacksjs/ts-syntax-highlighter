@@ -20,6 +20,17 @@ export class Highlighter implements IHighlighter {
   private languages: Map<string, Language> = new Map()
   private themes: Map<string, Theme> = new Map()
   private cache: Map<string, CacheEntry> = new Map()
+  /** Theme name to the theme it names, so the lookup runs once per name. */
+  private resolvedThemes: Map<string, Theme> = new Map()
+  /**
+   * One renderer per theme, rather than one per call.
+   *
+   * A `Renderer` holds the theme's colour lookup, and building it per
+   * `highlight` call rebuilt that lookup for every snippet on a page. Keyed by
+   * the theme object, so a caller passing a theme inline gets a renderer per
+   * distinct theme rather than one that never matches.
+   */
+  private renderers: WeakMap<Theme, Renderer> = new WeakMap()
   private plugins: Plugin[] = []
 
   constructor(config: SyntaxHighlighterConfig) {
@@ -31,20 +42,21 @@ export class Highlighter implements IHighlighter {
    * Initialize default languages and themes
    */
   private initializeDefaults(): void {
-    // Load default languages
-    for (const lang of languages) {
-      this.languages.set(lang.id, lang)
-      if (lang.aliases) {
-        for (const alias of lang.aliases) {
-          this.languages.set(alias, lang)
-        }
-      }
-    }
-
-    // Load default themes
-    for (const theme of themes) {
-      this.themes.set(theme.name.toLowerCase(), theme)
-    }
+    /*
+     * The built-in languages and themes are **not** copied in here.
+     *
+     * They used to be: every construction walked all forty-eight grammars and
+     * every theme, inserting each under its id and each of its aliases. That is
+     * a few hundred map writes per highlighter, and worse, it pulled the whole
+     * catalogue into memory to answer questions most callers never ask - a
+     * worker that highlights TypeScript loaded Fortran to do it.
+     *
+     * `getLanguageById` and `resolveTheme` already fall back to the catalogue
+     * lookups, so the maps are needed only for what a *plugin* registers. What
+     * they hold now is the difference between this instance and the defaults,
+     * which is also what makes `loadTheme` and `loadPlugin` meaningful rather
+     * than redundant.
+     */
 
     // Load plugins
     if (this.config.plugins) {
@@ -89,9 +101,7 @@ export class Highlighter implements IHighlighter {
     if (this.config.cache) {
       const cached = this.cache.get(cacheKey)
       if (cached) {
-        const theme = this.resolveTheme(options.theme)
-        const renderer = new Renderer(theme)
-        return renderer.render(cached.tokens, options)
+        return this.rendererFor(this.resolveTheme(options.theme)).render(cached.tokens, options)
       }
     }
 
@@ -118,10 +128,7 @@ export class Highlighter implements IHighlighter {
     }
 
     // Render
-    const theme = this.resolveTheme(options.theme)
-    const renderer = new Renderer(theme)
-
-    return renderer.render(tokens, options)
+    return this.rendererFor(this.resolveTheme(options.theme)).render(tokens, options)
   }
 
   /**
@@ -163,26 +170,35 @@ export class Highlighter implements IHighlighter {
    */
   async loadTheme(theme: Theme): Promise<void> {
     this.themes.set(theme.name.toLowerCase(), theme)
+    // A name may now resolve differently, so what was resolved before it is no
+    // longer an answer this instance may reuse.
+    this.resolvedThemes.clear()
   }
 
   /**
    * Get supported languages
    */
   getSupportedLanguages(): string[] {
-    const uniqueLanguages = new Set<string>()
-    for (const [key, lang] of this.languages.entries()) {
-      if (key === lang.id) {
-        uniqueLanguages.add(lang.id)
-      }
+    // The built-ins plus whatever a plugin added. Read from the catalogue
+    // rather than from the map, because the map no longer mirrors it.
+    const unique = new Set<string>(languages.map(language => language.id))
+
+    for (const [key, language] of this.languages.entries()) {
+      if (key === language.id)
+        unique.add(language.id)
     }
-    return Array.from(uniqueLanguages)
+
+    return Array.from(unique)
   }
 
   /**
    * Get supported themes
    */
   getSupportedThemes(): string[] {
-    return Array.from(this.themes.keys())
+    return Array.from(new Set([
+      ...themes.map(theme => theme.name.toLowerCase()),
+      ...this.themes.keys(),
+    ]))
   }
 
   /**
@@ -201,6 +217,14 @@ export class Highlighter implements IHighlighter {
     }
 
     if (typeof themeOption === 'string') {
+      // Resolved once per name. Every `highlight` call asks for this, and the
+      // answer cannot change for a name the instance already knows: a theme is
+      // registered by `loadTheme`, which clears this.
+      const resolved = this.resolvedThemes.get(themeOption)
+
+      if (resolved)
+        return resolved
+
       // Try exact match first
       let theme = this.themes.get(themeOption.toLowerCase())
 
@@ -218,10 +242,26 @@ export class Highlighter implements IHighlighter {
       if (!theme) {
         throw new Error(`Theme "${themeOption}" not found. Available themes: ${this.getSupportedThemes().join(', ')}`)
       }
+
+      this.resolvedThemes.set(themeOption, theme)
+
       return theme
     }
 
     return themeOption
+  }
+
+  /** The renderer for a theme, built once. */
+  private rendererFor(theme: Theme): Renderer {
+    const held = this.renderers.get(theme)
+
+    if (held)
+      return held
+
+    const renderer = new Renderer(theme)
+    this.renderers.set(theme, renderer)
+
+    return renderer
   }
 
   /**
