@@ -223,9 +223,19 @@ export function patternFirstChars(source: string): Set<number> | null {
       return splitAlternatives(inner).every(readBranch)
     }
 
-    // Anything with its own quantifier could match nothing and let the next
-    // thing be first, which is more analysis than this is worth.
-    if ('*?+{'.includes(branch[index + 1] ?? ''))
+    /*
+     * Anything with its own quantifier could match nothing and let the next
+     * thing be first, which is more analysis than this is worth.
+     *
+     * The empty check is load-bearing: `'*?+{'.includes('')` is true, so a
+     * one-character branch - `"` for a string, `'` for the other kind - read as
+     * "quantified" and was answered unknown. Those went into every bucket, and
+     * a megabyte of CSS containing no strings at all still ran the string rule
+     * 22,000 times.
+     */
+    const next = branch[index + 1]
+
+    if (next !== undefined && '*?+{'.includes(next))
       return false
 
     if ('.$|)'.includes(character))
