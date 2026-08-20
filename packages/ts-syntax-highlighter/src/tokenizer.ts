@@ -20,6 +20,20 @@ interface CompiledPattern extends GrammarPattern {
   _compiledMatch?: RegExp
   _compiledBegin?: RegExp
   _compiledEnd?: RegExp
+  /**
+   * The words a `\b(one|two|three)\b` pattern accepts, when it is only that.
+   *
+   * Such a pattern is a set membership test written as a regular expression,
+   * and the engine cannot know that: it walks the alternatives. CSS's selector
+   * rule lists about sixty HTML tag names, and profiling the tokenizer over a
+   * megabyte of CSS put 33ms of 45ms in the pattern loop inside that one rule -
+   * 40,000 executions to produce 10,000 matches, the other 30,000 walking every
+   * branch only to fail.
+   *
+   * With the words in a `Set`, the same question is a hash lookup over an
+   * identifier the character table already knows how to read.
+   */
+  _words?: Set<string>
 }
 
 /**
@@ -227,6 +241,34 @@ export function patternFirstChars(source: string): Set<number> | null {
   return decided && found.size > 0 ? found : null
 }
 
+/**
+ * The word list of a `\b(one|two)\b` pattern, when that is all it is.
+ *
+ * Deliberately narrow. Every alternative has to be plain word characters, so
+ * the set can be looked up against an identifier read with the character table
+ * and mean exactly what `\b` meant. A hyphenated alternative - `font-family` -
+ * disqualifies the whole pattern, because `\b` does not treat a hyphen as part
+ * of a word and a set keyed on `font` would match the wrong thing.
+ */
+export function patternWordSet(source: string): Set<string> | null {
+  const shape = /^\\b\(([^()]+)\)\\b$/.exec(source)
+
+  if (!shape)
+    return null
+
+  const words = shape[1]!.split('|')
+
+  if (words.length < 2)
+    return null
+
+  for (const word of words) {
+    if (!/^\w+$/.test(word))
+      return null
+  }
+
+  return new Set(words)
+}
+
 /** The index of the `)` closing the `(` at `from`, or -1. */
 function matchingParen(source: string, from: number): number {
   let depth = 0
@@ -342,6 +384,17 @@ export class Tokenizer {
    * rather than a speed changing. Built once, per rule set.
    */
   private rootByFirstChar: Array<CompiledPattern[]> | null = null
+  /**
+   * The repository's rules, compiled.
+   *
+   * They were not, and that is where CSS spends its time: an `include` looked
+   * the rule up in the raw grammar and matched its children directly, so every
+   * child fell back to the regex cache and none of them carried a word set or a
+   * precompiled expression. Profiling a megabyte of CSS put 33ms of the 45ms in
+   * the pattern loop inside `#selectors` alone - 40,000 executions of a
+   * sixty-branch alternation to produce 10,000 matches.
+   */
+  private compiledRepository: Map<string, CompiledPattern[]> = new Map()
   /** Compiled pattern by its path in the grammar, e.g. `"3.1.0"`. */
   private patternsByPath: Map<string, CompiledPattern> = new Map()
   /** The same relation the other way, for writing a state out. */
@@ -381,6 +434,13 @@ export class Tokenizer {
     // stack can be written down as paths and read back. See getState().
     this.indexPatterns(this.compiledPatterns, '')
     this.rootByFirstChar = Tokenizer.tableFor(grammar, this.compiledPatterns)
+
+    for (const [name, rule] of Object.entries(grammar.repository ?? {})) {
+      const patterns = (rule as { patterns?: GrammarPattern[] }).patterns
+
+      if (patterns)
+        this.compiledRepository.set(name, this.precompilePatterns(patterns))
+    }
     // Pre-compile number regex for fast path
     this.numberRegex = /^(0x[0-9a-f]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?(e[+-]?\d+)?)/i
     // Check if this is JS/TS for safe fast paths
@@ -920,6 +980,7 @@ export class Tokenizer {
 
       if (pattern.match) {
         compiled._compiledMatch = new RegExp(pattern.match, 'g')
+        compiled._words = patternWordSet(pattern.match) ?? undefined
       }
       if (pattern.begin) {
         compiled._compiledBegin = new RegExp(pattern.begin, 'g')
@@ -1016,6 +1077,50 @@ export class Tokenizer {
           },
           offset: offset + content.length,
         }
+      }
+    }
+
+    /*
+     * A word-set pattern, answered without the engine.
+     *
+     * Same semantics as the `\b(one|two)\b` it replaces: a word character
+     * before this offset means `\b` does not hold here, and the word runs to
+     * the next non-word character. Only the identifier is read - no
+     * alternatives are walked - so a rule listing sixty tag names costs what a
+     * rule listing two does.
+     */
+    if (compiled._words) {
+      const before = offset > 0 ? line.charCodeAt(offset - 1) : 0
+
+      if (offset > 0 && (CHAR_TYPE[before]! & (LETTER | DIGIT)))
+        return null
+
+      let end = offset
+
+      while (end < line.length && (CHAR_TYPE[line.charCodeAt(end)]! & (LETTER | DIGIT)))
+        end++
+
+      if (end === offset)
+        return null
+
+      const word = line.slice(offset, end)
+
+      if (!compiled._words.has(word))
+        return null
+
+      const scopes = pattern.name
+        ? [...this.scopeStack[this.scopeStack.length - 1]!.scopes, pattern.name]
+        : this.scopeStack[this.scopeStack.length - 1]!.scopes
+
+      return {
+        token: {
+          type: pattern.name && typeof pattern.name === 'string' ? classifyScope(pattern.name) : Tokenizer.TYPE_TEXT,
+          content: word,
+          scopes,
+          line: lineNumber,
+          offset,
+        },
+        offset: end,
       }
     }
 
@@ -1171,7 +1276,18 @@ export class Tokenizer {
     // Handle repository references
     if (include.startsWith('#')) {
       const ruleName = include.slice(1)
+      const compiled = this.compiledRepository.get(ruleName)
       const rule = this.grammar.repository?.[ruleName]
+
+      if (compiled) {
+        for (const pattern of compiled) {
+          const result = this.matchPattern(pattern, line, offset, lineNumber)
+          if (result)
+            return result
+        }
+
+        return null
+      }
 
       if (rule && rule.patterns) {
         for (const pattern of rule.patterns) {
