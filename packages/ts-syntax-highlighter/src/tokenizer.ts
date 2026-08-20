@@ -34,6 +34,16 @@ interface CompiledPattern extends GrammarPattern {
    * identifier the character table already knows how to read.
    */
   _words?: Set<string>
+  /**
+   * An `include`'s rule, resolved once and hung on the pattern that names it.
+   *
+   * Keeping this in a map keyed by rule name cost more than it saved: the
+   * lookup runs at every offset the include is reached, and a string-keyed
+   * `Map.get` per byte turned a 66 MB/s grammar into a 38 MB/s one. The pattern
+   * object is already in hand at that point, so the answer belongs on it.
+   */
+  _includePatterns?: CompiledPattern[]
+  _includeTable?: Array<CompiledPattern[]>
 }
 
 /**
@@ -405,6 +415,18 @@ export class Tokenizer {
    * sixty-branch alternation to produce 10,000 matches.
    */
   private compiledRepository: Map<string, CompiledPattern[]> = new Map()
+  /**
+   * And the same first-character table, per repository rule.
+   *
+   * The root had one and an `include` did not, so a rule's children were walked
+   * whole at every offset the include was reached. Profiling CSS after the root
+   * table landed put the remaining cost exactly there: `#selectors` tried its
+   * pseudo-class rule 32,000 times for 4,000 matches, its class rule 24,000 for
+   * 4,000, and its tag rule 24,000 times to match nothing at all - four rules
+   * that begin with `:`, `.`, `#` and a letter respectively, each tried on all
+   * four.
+   */
+  private repositoryByFirstChar: Map<string, Array<CompiledPattern[]>> = new Map()
   /** Compiled pattern by its path in the grammar, e.g. `"3.1.0"`. */
   private patternsByPath: Map<string, CompiledPattern> = new Map()
   /** The same relation the other way, for writing a state out. */
@@ -448,8 +470,12 @@ export class Tokenizer {
     for (const [name, rule] of Object.entries(grammar.repository ?? {})) {
       const patterns = (rule as { patterns?: GrammarPattern[] }).patterns
 
-      if (patterns)
-        this.compiledRepository.set(name, this.precompilePatterns(patterns))
+      if (patterns) {
+        const compiled = this.precompilePatterns(patterns)
+
+        this.compiledRepository.set(name, compiled)
+        this.repositoryByFirstChar.set(name, Tokenizer.dispatchTable(compiled, grammar.repository as Record<string, any> | undefined))
+      }
     }
     // Pre-compile number regex for fast path
     this.numberRegex = /^(0x[0-9a-f]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?(e[+-]?\d+)?)/i
@@ -1028,12 +1054,12 @@ export class Tokenizer {
     offset: number,
     lineNumber: number,
   ): { token: Token | null, offset: number, tokens?: Token[] } | null {
+    const compiled = pattern as CompiledPattern
+
     // Handle include references
     if (pattern.include) {
-      return this.handleInclude(pattern.include, line, offset, lineNumber)
+      return this.handleInclude(pattern.include, line, offset, lineNumber, compiled)
     }
-
-    const compiled = pattern as CompiledPattern
 
     // Handle begin/end patterns - use exec() with lastIndex
     if (pattern.begin) {
@@ -1272,6 +1298,7 @@ export class Tokenizer {
     line: string,
     offset: number,
     lineNumber: number,
+    source?: CompiledPattern,
   ): { token: Token | null, offset: number, tokens?: Token[] } | null {
     // Handle $self reference
     if (include === '$self') {
@@ -1286,11 +1313,25 @@ export class Tokenizer {
     // Handle repository references
     if (include.startsWith('#')) {
       const ruleName = include.slice(1)
-      const compiled = this.compiledRepository.get(ruleName)
+      // Resolved once onto the pattern that names it: the map lookup this
+      // replaces ran at every offset the include was reached.
+      if (source && !source._includePatterns) {
+        source._includePatterns = this.compiledRepository.get(ruleName)
+        source._includeTable = this.repositoryByFirstChar.get(ruleName)
+      }
+
+      const compiled = source?._includePatterns ?? this.compiledRepository.get(ruleName)
       const rule = this.grammar.repository?.[ruleName]
 
       if (compiled) {
-        for (const pattern of compiled) {
+        // Only the children that can begin with this character, exactly as the
+        // root does. A rule whose opening cannot be read is in every bucket, so
+        // this tries fewer patterns and never different ones.
+        const table = source?._includeTable
+        const code = line.charCodeAt(offset)
+        const candidates = table && code < 256 ? table[code]! : compiled
+
+        for (const pattern of candidates) {
           const result = this.matchPattern(pattern, line, offset, lineNumber)
           if (result)
             return result
