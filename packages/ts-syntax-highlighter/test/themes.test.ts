@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'bun:test'
-import { getTheme, themes } from '../src/themes'
+import { accessibleThemes, getTheme, themes } from '../src/themes'
 
 describe('Themes', () => {
-  it('should export all themes', () => {
+  it('should export ten ordinary themes and six built for colour-vision deficiency', () => {
     expect(themes).toBeDefined()
-    expect(themes.length).toBe(3) // github-dark, github-light, nord
+    expect(themes.length).toBe(16)
+    expect(accessibleThemes.length).toBe(6)
+    expect(accessibleThemes.every(theme => themes.includes(theme))).toBe(true)
   })
 
   it('should get theme by name', () => {

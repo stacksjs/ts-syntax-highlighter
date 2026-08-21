@@ -165,6 +165,14 @@ export interface Theme {
   type: 'light' | 'dark'
   colors: ThemeColors
   tokenColors: TokenColor[]
+  /**
+   * What this theme is for, in one line.
+   *
+   * A theme picker with ten entries needs to say more than ten names, and the
+   * colour-vision-deficiency variants need it most: "Deuteranopia Dark" tells a
+   * reader nothing about whether it is the one they want.
+   */
+  description?: string
 }
 
 export interface ThemeColors {
