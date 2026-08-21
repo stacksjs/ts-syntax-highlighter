@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.16...v0.2.17)
+
+## 🐛 Bug Fixes
+
+- **tokenizer**: a saved state has to name the rule that opened the frame ([7a155b4](https://github.com/stacksjs/ts-syntax-highlighter/commit/7a155b4)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.17 ([9f7e3a9](https://github.com/stacksjs/ts-syntax-highlighter/commit/9f7e3a9)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.15...v0.2.16)
 
 ## 🚀 Features
