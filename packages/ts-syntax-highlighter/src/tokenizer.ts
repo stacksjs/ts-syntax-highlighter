@@ -490,6 +490,22 @@ export class Tokenizer {
         const compiled = this.precompilePatterns(patterns)
 
         this.compiledRepository.set(name, compiled)
+        /*
+         * Indexed too, and this is not tidiness.
+         *
+         * `getState` writes a frame down as a path into the pattern tree, and
+         * only the root patterns were in that tree - so a frame opened by a
+         * repository rule, which is nearly every begin/end rule in every
+         * grammar here, serialised as `pattern: null`. Restoring it produced a
+         * frame with a scope, no rule and no closing pattern: a template
+         * literal that could never end, with the code inside it tokenized as
+         * code and the code after it swallowed.
+         *
+         * Block comments hid it, because the fast path opens those as raw
+         * frames that carry their own marker - so the one case anybody tested
+         * was the one case that did not go through here.
+         */
+        this.indexPatterns(compiled, `#${name}`)
         this.repositoryByFirstChar.set(name, Tokenizer.dispatchTable(compiled, grammar.repository as Record<string, any> | undefined))
       }
     }
@@ -578,10 +594,24 @@ export class Tokenizer {
       if (runStart === null)
         return
 
+      const scopes = this.scopeStack[this.scopeStack.length - 1].scopes
+
       tokens.push({
-        type: Tokenizer.TYPE_TEXT,
+        /*
+         * Typed from the frame it sits in, not as plain text.
+         *
+         * A run of characters no pattern claimed is ordinary text at the top
+         * level, and it is the *contents* inside a frame: the body of a
+         * template literal, the middle of a string, the prose in a block
+         * comment. Typing all of it `text` was invisible while every frame was
+         * opened and closed on one line - the fast paths answer those - and
+         * became visible the moment a frame could be resumed across lines, when
+         * the body of a multi-line template came back uncoloured on a page
+         * where every other string was green.
+         */
+        type: scopes.length > 1 ? classifyScope(scopes[scopes.length - 1]!) : Tokenizer.TYPE_TEXT,
         content: line.slice(runStart, end),
-        scopes: this.scopeStack[this.scopeStack.length - 1].scopes,
+        scopes,
         line: lineNumber,
         offset: runStart,
       })
@@ -659,6 +689,14 @@ export class Tokenizer {
         this.scopeStack.pop() // Close the scope
 
         /*
+         * The closing marker belongs to what it closes: the backtick that ends
+         * a template is part of the string, not punctuation beside it. Named
+         * from the frame's own scope, so a grammar that called the frame a
+         * string gets a string and one that called it a comment gets a comment.
+         */
+        const closingType = scopes.length > 1 ? classifyScope(scopes[scopes.length - 1]!) : Tokenizer.TYPE_PUNCTUATION
+
+        /*
          * `endCaptures` was read by nothing, so a closing marker took the
          * frame's scopes and the name the grammar gave it was dropped - the
          * mirror of the `beginCaptures` case above, and wrong in the same way:
@@ -678,7 +716,7 @@ export class Tokenizer {
 
         return {
           token: {
-            type: Tokenizer.TYPE_PUNCTUATION,
+            type: closingType,
             content,
             scopes,
             line: lineNumber,

@@ -222,3 +222,57 @@ describe('line numbers are absolute', () => {
     expect(typesOf(tokenizer, insideBlockComment, 5)).toEqual(typesOf(tokenizer, insideBlockComment, 5))
   })
 })
+
+/**
+ * A frame opened by a repository rule has to survive being written down.
+ *
+ * `getState` records a frame as a path into the pattern tree, and only the
+ * *root* patterns were in that tree. Nearly every begin/end rule in every
+ * grammar here lives in the repository, so nearly every frame serialised as
+ * `pattern: null` and came back with a scope, no rule and no closing pattern -
+ * a template literal that could never end, its contents tokenized as code and
+ * the code after it swallowed.
+ *
+ * Block comments hid it for as long as it existed, because the fast path opens
+ * those as raw frames carrying their own marker, so the one case anybody
+ * checked was the one case that did not go through the pattern tree at all.
+ */
+describe('a frame from the repository survives a round trip', () => {
+  const tokenizer = new Tokenizer(typescript.grammar)
+
+  test('records the rule that opened it', () => {
+    const state = tokenizer.tokenizeLinesFrom(['const html = `', '  <div>']).endState
+    const frame = state.frames[state.frames.length - 1]!
+
+    expect(frame.scopes).toContain('string.template.ts')
+    expect(frame.pattern).not.toBeNull()
+  })
+
+  test('resumes inside the template, closes it, and returns to code', () => {
+    const opened = tokenizer.tokenizeLinesFrom(['const html = `', '  <div>']).endState
+    const { lines } = tokenizer.tokenizeLinesFrom(['  return null', '`', 'const after = 2'], opened)
+
+    const types = lines.map(line => line.tokens.map(token => token.type))
+
+    // Inside the template, `return` is not a keyword.
+    expect(types[0]).toEqual(['string'])
+    // The backtick belongs to the string it closes.
+    expect(types[1]).toEqual(['string'])
+    // And the line after it is code again, which is what proves the frame
+    // closed rather than simply never opening.
+    expect(types[2]).toContain('keyword')
+  })
+
+  test('is the same answer as tokenizing the whole thing in one pass', () => {
+    const whole = 'const html = `\n  <div>\n  return null\n`\nconst after = 2'
+    const inOnePass = new Tokenizer(typescript.grammar).tokenize(whole)
+      .map(line => line.tokens.map(token => `${token.type}:${token.content}`))
+
+    const first = tokenizer.tokenizeLinesFrom(['const html = `', '  <div>'])
+    const rest = tokenizer.tokenizeLinesFrom(['  return null', '`', 'const after = 2'], first.endState)
+    const resumed = [...first.lines, ...rest.lines]
+      .map(line => line.tokens.map(token => `${token.type}:${token.content}`))
+
+    expect(resumed).toEqual(inOnePass)
+  })
+})
