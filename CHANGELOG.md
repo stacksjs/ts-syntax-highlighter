@@ -1,3 +1,32 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.15...v0.2.16)
+
+## 🚀 Features
+
+- **themes**: sixteen first-party themes, six of them for readers colour cannot serve ([817b558](https://github.com/stacksjs/ts-syntax-highlighter/commit/817b558)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **benchmarks**: throughput in MB/s per language, both tokenizers side by side ([68bf612](https://github.com/stacksjs/ts-syntax-highlighter/commit/68bf612)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🐛 Bug Fixes
+
+- **tokenizer**: a fast path that answers first must not answer for the grammar ([0522692](https://github.com/stacksjs/ts-syntax-highlighter/commit/0522692)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **docs**: use the config keys bunpress actually has ([288432e](https://github.com/stacksjs/ts-syntax-highlighter/commit/288432e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## ⚡ Performance Improvements
+
+- **worker**: resolve one grammar, not forty-eight ([feb5dac](https://github.com/stacksjs/ts-syntax-highlighter/commit/feb5dac)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **tokenizer**: the first-character table reaches inside includes too ([c5e95f2](https://github.com/stacksjs/ts-syntax-highlighter/commit/c5e95f2)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **tokenizer**: a one-character pattern is decidable, and 'includes("")' is true ([fb14a64](https://github.com/stacksjs/ts-syntax-highlighter/commit/fb14a64)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **tokenizer**: compile the repository, and answer word lists with a set ([3392151](https://github.com/stacksjs/ts-syntax-highlighter/commit/3392151)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **tokenizer**: try only the patterns that can start with this character ([acb52a5](https://github.com/stacksjs/ts-syntax-highlighter/commit/acb52a5)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **highlighter**: resolve languages and themes lazily, and keep the renderer ([36b7b7c](https://github.com/stacksjs/ts-syntax-highlighter/commit/36b7b7c)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.16 ([95874df](https://github.com/stacksjs/ts-syntax-highlighter/commit/95874df)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.14...v0.2.15)
 
 ## 🐛 Bug Fixes
