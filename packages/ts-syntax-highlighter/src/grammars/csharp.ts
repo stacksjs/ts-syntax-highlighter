@@ -100,6 +100,12 @@ export const csharpGrammar: Grammar = {
     nameof: 'keyword.operator.cs',
     when: 'keyword.control.cs',
   },
+  /*
+   * `[` opens an attribute here, and the punctuation fast path answered it
+   * first for as long as the `attributes` rule below has existed - so
+   * `[Serializable]` was three plain tokens and the rule never ran.
+   */
+  reservedPunctuation: '[',
   patterns: [
     { include: '#comments' },
     { include: '#strings' },
@@ -195,6 +201,8 @@ export const csharpGrammar: Grammar = {
               name: 'entity.name.type.attribute.cs',
               match: '[A-Z][a-zA-Z0-9]*',
             },
+            { include: '#strings' },
+            { include: '#numbers' },
           ],
         },
       ],

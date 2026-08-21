@@ -3,6 +3,22 @@ import type { Grammar } from '../types'
 export const rustGrammar: Grammar = {
   name: 'Rust',
   scopeName: 'source.rust',
+  /*
+   * `println!` is one token and the `!` is what says so, but the identifier
+   * fast path has already read `println` and answered by the time any pattern
+   * runs. `#macros` below still covers the case the fast path does not reach.
+   *
+   * `!=` is not a macro, which is what `unless` is for.
+   */
+  /*
+   * No single quote: in Rust it opens a char literal or a lifetime, both of
+   * which `#strings` and `#lifetimes` below read properly, and neither of which
+   * survives being read as a string that runs to the next quote.
+   */
+  stringQuotes: '"',
+  wordSuffixes: [
+    { follows: '!', scope: 'entity.name.function.macro.rust', unless: '=', consume: true },
+  ],
   keywords: {
     // Control flow
     if: 'keyword.control.rust',
@@ -70,8 +86,8 @@ export const rustGrammar: Grammar = {
   patterns: [
     { include: '#comments' },
     { include: '#attributes' },
-    { include: '#strings' },
     { include: '#lifetimes' },
+    { include: '#strings' },
     { include: '#macros' },
     { include: '#keywords' },
     { include: '#numbers' },
@@ -134,24 +150,32 @@ export const rustGrammar: Grammar = {
             },
           ],
         },
+        /*
+         * A char literal, not a string. Rust has no single-quoted string, and
+         * reading one is what hid every lifetime in the language: `'a` opened a
+         * quote that never closed, so `fn longest<'a>(x: &'a str)` came back as
+         * one unterminated string and the lifetime rule below never ran.
+         *
+         * Matching the whole literal at once is what makes the difference -
+         * `'a'` is a char and `'a` is not, and only a rule that requires the
+         * closing quote can tell them apart.
+         */
         {
           name: 'string.quoted.single.rust',
-          begin: '\'',
-          end: '\'',
-          patterns: [
-            {
-              name: 'constant.character.escape.rust',
-              match: '\\\\.',
-            },
-          ],
+          match: 'b?\'(?:\\\\.|[^\\\\\'])\'',
         },
       ],
     },
     lifetimes: {
       patterns: [
+        /*
+         * Tried before the char literal, and therefore required not to look
+         * like one: `'a'` is the character a and `'a` is the lifetime a, and
+         * the only thing that separates them is the quote that does not come.
+         */
         {
           name: 'entity.name.lifetime.rust',
-          match: '\'[a-zA-Z_][a-zA-Z0-9_]*\\b',
+          match: '\'[a-zA-Z_][a-zA-Z0-9_]*(?!\')\\b',
         },
       ],
     },

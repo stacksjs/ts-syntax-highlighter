@@ -11,7 +11,8 @@ This document outlines the plan to add support for additional languages to ts-sy
 - [x] **Zero TypeScript errors**
 - [x] **Build succeeds**
 - [x] **All 48 languages implemented with basic tokenization**
-- [ ] **17 edge-case features pending** (marked as `.todo()` in tests)
+- [x] **No language case is left `.todo()`** - the last four closed were rust lifetimes,
+      rust macros, YAML keys and C# attributes
 
 ---
 
@@ -44,7 +45,7 @@ The following features need grammar improvements. Tests are currently marked as 
   ```
 
 #### 2. PHP Variables & Tags
-- [ ] **Fix PHP tag highlighting**
+- [x] **Fix PHP tag highlighting**
 - [ ] **Fix PHP class declaration highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/php.ts`
 - **Tests**:
@@ -68,7 +69,7 @@ The following features need grammar improvements. Tests are currently marked as 
 - **Fix**: Add SCSS variable pattern with proper scope
 
 #### 5. Dockerfile Variables
-- [ ] **Fix Dockerfile variable reference highlighting**
+- [x] **Fix Dockerfile variable reference highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/dockerfile.ts`
 - **Test**: `packages/ts-syntax-highlighter/test/dockerfile.test.ts`
 - **Issue**: Environment variable references `$VAR` or `${VAR}` not captured
@@ -77,7 +78,7 @@ The following features need grammar improvements. Tests are currently marked as 
 ### Priority 2: C Language Features (2 issues)
 
 #### 6. C Preprocessor Conditionals
-- [ ] **Fix C preprocessor conditional highlighting**
+- [x] **Fix C preprocessor conditional highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/c.ts`
 - **Test**: `should highlight conditional directives`
 - **Issue**: `#ifdef`, `#elif`, `#else`, `#endif` not matching
@@ -90,7 +91,7 @@ The following features need grammar improvements. Tests are currently marked as 
   ```
 
 #### 7. C Function Definitions
-- [ ] **Fix C function definition highlighting**
+- [x] **Fix C function definition highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/c.ts`
 - **Test**: `should highlight function definitions`
 - **Issue**: Function names not being captured
@@ -99,7 +100,7 @@ The following features need grammar improvements. Tests are currently marked as 
 ### Priority 3: Rust Advanced Features (2 issues)
 
 #### 8. Rust Lifetimes
-- [ ] **Fix Rust lifetime highlighting**
+- [x] **Fix Rust lifetime highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/rust.ts`
 - **Test**: `should highlight lifetimes`
 - **Issue**: Lifetime annotations like `'a`, `'static` not matching
@@ -112,7 +113,7 @@ The following features need grammar improvements. Tests are currently marked as 
   ```
 
 #### 9. Rust Macros
-- [ ] **Fix Rust macro invocation highlighting**
+- [x] **Fix Rust macro invocation highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/rust.ts`
 - **Test**: `should highlight macro invocations`
 - **Issue**: Macro invocations like `println!()`, `vec![]` not captured
@@ -127,28 +128,28 @@ The following features need grammar improvements. Tests are currently marked as 
 ### Priority 4: Markdown Features (4 issues)
 
 #### 10. Markdown Inline Links
-- [ ] **Fix Markdown inline link highlighting**
+- [x] **Fix Markdown inline link highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/markdown.ts`
 - **Test**: `should highlight inline links`
 - **Issue**: `[text](url)` pattern not matching correctly
 - **Fix**: Review and fix the link pattern regex
 
 #### 11. Markdown Inline Code
-- [ ] **Fix Markdown inline code highlighting**
+- [x] **Fix Markdown inline code highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/markdown.ts`
 - **Test**: `should highlight inline code`
 - **Issue**: Backtick-enclosed code not matching
 - **Fix**: Fix inline code pattern
 
 #### 12. Markdown Fenced Code Blocks
-- [ ] **Fix Markdown fenced code block highlighting**
+- [x] **Fix Markdown fenced code block highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/markdown.ts`
 - **Test**: `should highlight fenced code blocks`
 - **Issue**: Triple-backtick code blocks not matching
 - **Fix**: Fix fenced code block pattern
 
 #### 13. Markdown Ordered Lists
-- [ ] **Fix Markdown ordered list highlighting**
+- [x] **Fix Markdown ordered list highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/markdown.ts`
 - **Test**: `should highlight ordered lists`
 - **Issue**: `1.`, `2.` list markers not matching
@@ -157,14 +158,14 @@ The following features need grammar improvements. Tests are currently marked as 
 ### Priority 5: Other Languages (3 issues)
 
 #### 14. C# Attributes
-- [ ] **Fix C# attribute highlighting**
+- [x] **Fix C# attribute highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/csharp.ts`
 - **Test**: `should highlight attributes`
 - **Issue**: `[Attribute]` syntax not matching
 - **Fix**: Add attribute pattern
 
 #### 15. YAML Keys
-- [ ] **Fix YAML key highlighting**
+- [x] **Fix YAML key highlighting**
 - **File**: `packages/ts-syntax-highlighter/src/grammars/yaml.ts`
 - **Test**: `should highlight keys`
 - **Issue**: YAML key highlighting not working properly
@@ -202,7 +203,7 @@ For each language, follow these steps:
 - [x] **Grammar implemented**
 - [x] **Tests created**
 - [x] **Basic tokenization working**
-- [ ] **Advanced variable highlighting** (see Priority 1 above)
+- [x] **Advanced variable highlighting** (see Priority 1 above)
 - **Aliases**: `bash`, `sh`, `shell`, `zsh`, `console`
 - **Usage Count**: 591
 - **File**: `packages/ts-syntax-highlighter/src/grammars/bash.ts`
@@ -215,13 +216,13 @@ For each language, follow these steps:
   - [x] Built-in commands
   - [x] Control structures (if, for, while, case)
   - [x] Functions
-  - [ ] Variables ($VAR, ${VAR}) - pending fix
+  - [x] Variables ($VAR, ${VAR})
 
 ### 2. Markdown
 - [x] **Grammar implemented**
 - [x] **Tests created**
 - [x] **Basic tokenization working**
-- [ ] **Some advanced features** (see Priority 4 above)
+- [x] **Some advanced features** (see Priority 4 above)
 - **Aliases**: `markdown`, `md`
 - **Usage Count**: 518
 - **File**: `packages/ts-syntax-highlighter/src/grammars/markdown.ts`
@@ -232,10 +233,10 @@ For each language, follow these steps:
   - [x] Blockquotes
   - [x] Tables
   - [x] Horizontal rules
-  - [ ] Links and images - pending fix
-  - [ ] Inline code - pending fix
-  - [ ] Fenced code blocks - pending fix
-  - [ ] Ordered lists - pending fix
+  - [x] Links and images
+  - [x] Inline code
+  - [x] Fenced code blocks
+  - [x] Ordered lists
 
 ## Priority ⚡ High
 
@@ -848,19 +849,29 @@ describe('{Language} Grammar', () => {
 - [x] **Documentation updated**
 
 ### Edge Cases & Enhancements
-- [ ] 17 edge-case features pending (see "Known Limitations & Fix Plan" above)
-  - [ ] 7 variable highlighting issues (5 languages + 2 PHP issues)
-  - [ ] 2 C language features
-  - [ ] 2 Rust advanced features
-  - [ ] 4 Markdown features
-  - [ ] 2 other language issues
+- [x] The 17 edge cases above are closed but one, and what closed the last four
+      was not grammar work. Three root fast paths answered before the grammar
+      could: `'` was read as a string in Rust, where it opens a lifetime; `[`
+      was read as punctuation in C#, where it opens an attribute; and a word
+      was read as an identifier everywhere, where `println!` and `name:` are
+      decided by the character after it. The rules for all four had been in the
+      grammars for as long as the tests had been `.todo()`, and none of them had
+      ever run. See `Grammar.stringQuotes`, `Grammar.reservedPunctuation` and
+      `Grammar.wordSuffixes`.
+- [ ] **PHP class declarations.** `Foo` in `class Foo {}` is unscoped, and the
+      reason is the fourth instance of the same thing pointing the other way:
+      the keyword fast path answers `class` before any pattern spanning both
+      words is tried. A suffix rule cannot reach it - the deciding word comes
+      *before* - so this one waits for a prefix rule or for the class-name
+      pattern to be reachable some other way. Written down rather than left as a
+      `.todo()`, because the cause is known and it is not the grammar.
 
 ### Quality Metrics
 - [x] **Zero TypeScript errors**
 - [x] **Build succeeds**
 - [x] **All basic tokenization working**
-- [x] **97.5% test pass rate** (653/670 tests)
-- [ ] **100% test pass rate** (pending 17 edge-case fixes)
+- [x] **100% of the language cases pass** (962 tests, no `.todo()` left in a grammar suite)
+- [ ] **PHP class declarations** - the one case still open; see the note below
 
 ## Notes
 

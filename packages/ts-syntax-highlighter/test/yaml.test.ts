@@ -18,7 +18,7 @@ number: 42`
   })
 
   describe('Keys and Values', () => {
-    it.todo('should highlight keys', async () => {
+    it('should highlight keys', async () => {
       const code = `name: John
 age: 30`
       const tokens = tokenizer.tokenize(code)

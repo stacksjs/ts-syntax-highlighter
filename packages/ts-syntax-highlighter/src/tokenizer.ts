@@ -457,6 +457,22 @@ export class Tokenizer {
   // Pre-computed keyword lookups for O(1) access
   private keywordSet: Set<string> | null = null
   private keywordMap: Map<string, { scopes: string[], type: string }> = new Map()
+  /**
+   * The word-suffix rules, keyed by the character that triggers them, with the
+   * scope array built once. Null when the grammar declares none, so the fast
+   * path pays one null check rather than a lookup. See `Grammar.wordSuffixes`.
+   */
+  private wordSuffixes: Array<{ scopes: string[], type: string, unless: string, consume: boolean } | undefined> | null = null
+  /**
+   * The characters each root fast path may answer, as tables rather than
+   * strings: this is read once per character of every file, and
+   * `'"\'`'.includes(line[offset])` allocates a one-character string to do it.
+   *
+   * See `Grammar.stringQuotes` and `Grammar.reservedPunctuation` for what a
+   * grammar is saying when it narrows them.
+   */
+  private quoteAllowed: boolean[]
+  private punctuationAllowed: boolean[]
 
   constructor(grammar: Grammar) {
     this.grammar = grammar
@@ -483,6 +499,19 @@ export class Tokenizer {
     this.isJsOrTs = grammar.scopeName === 'source.js' || grammar.scopeName === 'source.ts'
     // A markup grammar turns these off; see `Grammar.fastPaths`.
     this.useFastPaths = grammar.fastPaths !== false
+    /*
+     * The defaults are what the fast paths assumed before a grammar could say
+     * otherwise: every quote is a string, every bracket is punctuation. Nearly
+     * every grammar takes them, and they are shared rather than rebuilt so that
+     * a `Tokenizer` per file - which is what some callers do - does not pay for
+     * two 256-entry arrays it did not change.
+     */
+    this.quoteAllowed = grammar.stringQuotes === undefined
+      ? Tokenizer.DEFAULT_QUOTES
+      : Tokenizer.allowTable(grammar.stringQuotes, true)
+    this.punctuationAllowed = grammar.reservedPunctuation === undefined
+      ? Tokenizer.DEFAULT_PUNCTUATION
+      : Tokenizer.allowTable(grammar.reservedPunctuation, false)
 
     // Pre-compute scope arrays (Option 3)
     const langSuffix = this.grammar.scopeName.split('.')[1] || 'js'
@@ -494,6 +523,22 @@ export class Tokenizer {
     this.stringScopes = [this.grammar.scopeName, `string.quoted.double.${langSuffix}`]
     this.templateScopes = [this.grammar.scopeName, `string.template.${langSuffix}`]
     this.functionScopes = [this.grammar.scopeName, `entity.name.function.${langSuffix}`]
+
+    if (this.grammar.wordSuffixes?.length) {
+      // Indexed by character code rather than a `Map`, because this is read
+      // once per identifier in the file and a lookup that misses has to cost
+      // nothing: an array load and a null check, not a hash.
+      this.wordSuffixes = Array.from({ length: 256 }, () => undefined)
+
+      for (const rule of this.grammar.wordSuffixes) {
+        this.wordSuffixes[rule.follows.charCodeAt(0)] = {
+          scopes: [this.grammar.scopeName, rule.scope],
+          type: classifyScope(rule.scope),
+          unless: rule.unless ?? '',
+          consume: rule.consume ?? false,
+        }
+      }
+    }
 
     // Pre-compute keyword lookups with scopes and types
     if (this.grammar.keywords) {
@@ -609,8 +654,27 @@ export class Tokenizer {
       if (endMatch && endMatch.index === offset) {
         const content = endMatch[0]
         const scopes = currentScope.scopes // Reuse - no copy needed
+        const closing = (currentScope.rule as GrammarPattern | null)?.endCaptures
 
         this.scopeStack.pop() // Close the scope
+
+        /*
+         * `endCaptures` was read by nothing, so a closing marker took the
+         * frame's scopes and the name the grammar gave it was dropped - the
+         * mirror of the `beginCaptures` case above, and wrong in the same way:
+         * `?>` closing a PHP block is punctuation the grammar has named.
+         */
+        if (closing) {
+          const tokens = this.applyCaptureGroups(endMatch, closing, scopes, lineNumber, offset)
+
+          if (tokens && tokens.length > 0) {
+            return {
+              token: null,
+              tokens,
+              offset: offset + content.length,
+            }
+          }
+        }
 
         return {
           token: {
@@ -686,8 +750,23 @@ export class Tokenizer {
         }
       }
 
-      // Fast path: Punctuation
-      if (charType & PUNCTUATION) {
+      /*
+       * Fast path: Punctuation
+       *
+       * Unless the grammar has said it wants this character. `[` is punctuation
+       * in every language and the opening of an attribute in C#, and the fast
+       * path answered first for every one of them - so `[Serializable]` came
+       * back as three plain tokens and the `attributes` rule that had been in
+       * the grammar all along never ran once.
+       *
+       * Only a pattern whose opening could actually be *read* claims a
+       * character. A pattern that answered "cannot tell" is tried everywhere
+       * and was already losing to this fast path today, so leaving it to lose
+       * changes nothing; turning the fast path off for it would turn it off for
+       * every character in most grammars, which is the whole cost this table
+       * exists to avoid.
+       */
+      if ((charType & PUNCTUATION) && this.punctuationAllowed[code]!) {
         return {
           token: {
             type: Tokenizer.TYPE_PUNCTUATION,
@@ -836,8 +915,17 @@ export class Tokenizer {
         }
       }
 
-      // Fast path: Strings (simple implementation - good enough for most cases)
-      if (charType & QUOTE) {
+      /*
+       * Fast path: Strings (simple implementation - good enough for most cases)
+       *
+       * `quoteChars` is what keeps "most cases" from including Rust, where a
+       * single quote opens a char literal or a lifetime and never a string.
+       * The fast path read `'a` in `fn longest<'a>(x: &'a str)` as a string
+       * that ran to the next quote several tokens later, and scoped it
+       * `string.quoted.double` while it did - so every lifetime in the language
+       * was invisible and the code after it was the inside of a string.
+       */
+      if ((charType & QUOTE) && this.quoteAllowed[code]!) {
         const quoteCode = code
         let endIndex = offset + 1
         let escaped = false
@@ -899,6 +987,35 @@ export class Tokenizer {
               offset,
             },
             offset: wordEnd,
+          }
+        }
+
+        /*
+         * A word the grammar has claimed by what follows it: `println!`,
+         * `name:`. Asked before the function-call check, because `vec![` and
+         * `foo!(` are macros rather than calls and the call check would answer
+         * the second of those first.
+         */
+        if (this.wordSuffixes !== null) {
+          const suffix = this.wordSuffixes[line.charCodeAt(wordEnd)]
+
+          if (suffix) {
+            const after = line[wordEnd + 1]
+
+            if (!after || !suffix.unless.includes(after)) {
+              const end = suffix.consume ? wordEnd + 1 : wordEnd
+
+              return {
+                token: {
+                  type: suffix.type,
+                  content: line.slice(offset, end),
+                  scopes: suffix.scopes,
+                  line: lineNumber,
+                  offset,
+                },
+                offset: end,
+              }
+            }
           }
         }
 
@@ -1224,6 +1341,21 @@ export class Tokenizer {
     const tokens: Token[] = []
     let currentOffset = 0
 
+    /*
+     * Group 0 is the whole match, and naming it is how a TextMate grammar says
+     * "this scope covers all of it" - which is what a rule with nothing to
+     * subdivide writes. It was skipped, and skipping it did not fall back to
+     * the pattern's own name: the loop ended with nothing, the tail below
+     * emitted the match as plain text under the *outer* scopes, and that was
+     * the token the reader got. `<?php` came back with `source.php` and
+     * nothing else, in a grammar that names it twice.
+     *
+     * So it is the base every token here sits on, and any deeper capture nests
+     * inside it, which is the order TextMate reads them in.
+     */
+    const whole = captures['0']
+    const base = whole?.name ? [...baseScopes, whole.name] : baseScopes
+
     // Process each capture group
     for (let i = 0; i < match.length; i++) {
       const captured = match[i]
@@ -1233,10 +1365,8 @@ export class Tokenizer {
       const captureKey = i.toString()
       const capture = captures[captureKey]
 
-      if (i === 0) {
-        // Group 0 is the full match - split it by capture groups
+      if (i === 0)
         continue
-      }
 
       // Find where this capture starts in the full match
       const captureStart = match[0].indexOf(captured, currentOffset)
@@ -1249,7 +1379,7 @@ export class Tokenizer {
         tokens.push({
           type: Tokenizer.TYPE_TEXT,
           content: beforeText,
-          scopes: baseScopes,
+          scopes: base,
           line: lineNumber,
           offset: baseOffset + currentOffset,
         })
@@ -1257,12 +1387,12 @@ export class Tokenizer {
 
       // Add the captured group with its specific scope
       const scopes = capture && capture.name
-        ? [...baseScopes, capture.name]
-        : baseScopes
+        ? [...base, capture.name]
+        : base
 
       const type = capture && capture.name
         ? classifyScope(capture.name)
-        : Tokenizer.TYPE_TEXT
+        : (whole?.name ? classifyScope(whole.name) : Tokenizer.TYPE_TEXT)
 
       tokens.push({
         type,
@@ -1279,9 +1409,9 @@ export class Tokenizer {
     if (currentOffset < match[0].length) {
       const afterText = match[0].substring(currentOffset)
       tokens.push({
-        type: Tokenizer.TYPE_TEXT,
+        type: whole?.name ? classifyScope(whole.name) : Tokenizer.TYPE_TEXT,
         content: afterText,
-        scopes: baseScopes,
+        scopes: base,
         line: lineNumber,
         offset: baseOffset + currentOffset,
       })
@@ -1617,6 +1747,30 @@ export class Tokenizer {
 
     const table = Tokenizer.dispatchTable(patterns, grammar.repository as Record<string, any> | undefined)
     Tokenizer.tables.set(grammar as unknown as object, table)
+
+    return table
+  }
+
+  /**
+   * A 256-entry yes/no table over the characters in `chars`.
+   *
+   * `listed` says which way round it is: a quote is allowed when it is listed,
+   * and a punctuation character is allowed when it is *not* - because a grammar
+   * naming punctuation is naming the exceptions it wants back, and a grammar
+   * naming quotes is naming the whole set it still wants answered.
+   */
+  private static readonly DEFAULT_QUOTES: boolean[] = Tokenizer.allowTable('"\'`', true)
+  private static readonly DEFAULT_PUNCTUATION: boolean[] = Tokenizer.allowTable('', false)
+
+  private static allowTable(chars: string, listed: boolean): boolean[] {
+    const table: boolean[] = Array.from({ length: 256 }, () => !listed)
+
+    for (const character of chars) {
+      const code = character.charCodeAt(0)
+
+      if (code < 256)
+        table[code] = listed
+    }
 
     return table
   }

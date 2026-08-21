@@ -20,6 +20,18 @@ export const yamlGrammar: Grammar = {
     on: 'constant.language.boolean.yaml',
     off: 'constant.language.boolean.yaml',
   },
+  /*
+   * A key is an ordinary word and a `:` after it, which means the identifier
+   * fast path reads the word and answers plain text before `#keys` below is
+   * ever consulted. That rule is still right for a quoted key; this is what
+   * covers the unquoted one, which is nearly all of them.
+   *
+   * `unless: '/'` is the URL case: `image: docker.io/library/redis` has a
+   * `http:` in it often enough, and a scheme is not a key.
+   */
+  wordSuffixes: [
+    { follows: ':', scope: 'entity.name.tag.yaml', unless: '/' },
+  ],
   patterns: [
     { include: '#comments' },
     { include: '#document-markers' },

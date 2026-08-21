@@ -64,6 +64,70 @@ export interface Grammar {
    * come first.
    */
   fastPaths?: boolean
+  /**
+   * Words the identifier fast path must not answer alone, decided by the one
+   * character that follows them.
+   *
+   * The fast path reads a word, asks the keyword table about it, asks whether a
+   * `(` comes next, and otherwise calls it plain text. That is right for a
+   * language whose identifiers mean nothing until they are used, and wrong for
+   * two shapes that are common enough to matter: `println!` in Rust is a macro
+   * and `name:` in YAML is a key, and in both the word is ordinary and the
+   * character after it carries the whole meaning. A grammar pattern cannot say
+   * so, because the fast path has already answered and returned.
+   *
+   * So a grammar declares the suffix instead. It stays O(1) - one character
+   * read, one map lookup - which is the property the fast path exists for; a
+   * grammar that declares none pays a single undefined check.
+   */
+  wordSuffixes?: WordSuffixRule[]
+  /**
+   * The characters the string fast path may treat as opening a string.
+   *
+   * Defaults to `"`, `'` and a backtick, which is right for most languages and
+   * wrong for the ones where a single quote means something else. In Rust `'a`
+   * is a lifetime and `'a'` is a char literal, and the fast path read the first
+   * of those as a string running to the next quote several tokens away - so
+   * every lifetime in the language was swallowed along with the code beside it.
+   *
+   * Narrowing this hands those characters back to the grammar's own patterns,
+   * which is where a language with its own rule about them wants them.
+   */
+  stringQuotes?: string
+  /**
+   * Punctuation characters this grammar's own patterns must be asked about.
+   *
+   * `{ } ( ) [ ] ; ,` are punctuation in every language and the fast path
+   * answers them without consulting a pattern, which is right nearly always and
+   * wrong where a language gives one of them a meaning. C# opens an attribute
+   * with `[`, so `[Serializable]` came back as three plain tokens while the
+   * `attributes` rule sat in the grammar unreachable.
+   *
+   * Named as exceptions rather than as a whole set, because the whole set is
+   * what the fast path is for: CSS spends most of its bytes on `{`, `}`, `;`
+   * and `,`, and handing those to the pattern loop costs a fifth of its
+   * throughput to answer them the same way.
+   */
+  reservedPunctuation?: string
+}
+
+/**
+ * A word renamed by the character after it. See `Grammar.wordSuffixes`.
+ */
+export interface WordSuffixRule {
+  /** The single character that must directly follow the word, with no space. */
+  follows: string
+  /** The scope the word takes when it does. */
+  scope: string
+  /**
+   * Characters that cancel the rule when they come after `follows`.
+   *
+   * `a != b` is not a macro call and `http://x` is not a key, and both are the
+   * same mistake: the suffix character is real and belongs to something longer.
+   */
+  unless?: string
+  /** Whether the suffix character joins the word rather than standing alone. */
+  consume?: boolean
 }
 
 export interface KeywordTable {
