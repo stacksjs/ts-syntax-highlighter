@@ -24,8 +24,9 @@
  */
 
 import type { FlatTokenLines } from './flat-tokens'
-import { createHighlighter } from './highlighter'
+import { FastTokenizer } from './fast-tokenizer'
 import { overTokenizeCeiling, packLines, transferable } from './flat-tokens'
+import { resolveGrammar } from './lazy'
 
 export interface TokenizeRequest {
   id: number
@@ -60,8 +61,12 @@ export async function handleTokenize(request: TokenizeRequest): Promise<WorkerRe
     return { id: request.id, type: 'plain' }
 
   try {
-    const highlighter = await sharedHighlighter()
-    const tokenized = highlighter.highlightFast(request.lines.join('\n'), request.language)
+    const grammar = await grammarFor(request.language)
+
+    if (!grammar)
+      return { id: request.id, type: 'plain' }
+
+    const tokenized = new FastTokenizer(grammar).tokenize(request.lines.join('\n'))
 
     // A tokenizer that returns a different number of lines would shift every
     // line number the consumer anchors on, so the plain answer is the safe one.
@@ -81,19 +86,26 @@ export async function handleTokenize(request: TokenizeRequest): Promise<WorkerRe
 }
 
 /**
- * One highlighter per worker, built on the first request.
+ * One grammar per language, loaded on the first request that needs it.
  *
- * Built lazily rather than at startup so a worker that is never given work
- * never parses a grammar, and shared rather than per request because building
- * it per file is the mistake this exists to avoid.
+ * This used to build a `Highlighter`, which imports the eager grammar barrel -
+ * so a worker asked for TypeScript downloaded all forty-eight grammars to
+ * answer, and every consumer bundling this entry shipped them. Measured with
+ * `packages/benchmarks/src/bundle-size.ts`, which exists because that number is
+ * what decides whether the browser path is worth having at all.
+ *
+ * `resolveGrammar` reads the generated catalogue and dynamically imports one
+ * grammar, which every bundler splits into its own chunk. Its own cache makes a
+ * second request for the same language free, and two requests arriving together
+ * share one import rather than racing.
+ *
+ * A language with no grammar answers `undefined`, and the caller sends `plain`.
+ * That is the same answer a file over the ceiling gets, and it is the right one:
+ * the reader gets the code, uncoloured, rather than an error where a diff
+ * should be.
  */
-let highlighterPromise: ReturnType<typeof createHighlighter> | null = null
-
-function sharedHighlighter(): ReturnType<typeof createHighlighter> {
-  if (highlighterPromise == null)
-    highlighterPromise = createHighlighter({})
-
-  return highlighterPromise
+function grammarFor(language: string): ReturnType<typeof resolveGrammar> {
+  return resolveGrammar(language)
 }
 
 /**
