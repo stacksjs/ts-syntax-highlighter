@@ -1,5 +1,4 @@
 import type { SyntaxHighlighterConfig } from './types'
-import { loadConfig } from 'bunfig'
 
 export const defaultConfig: SyntaxHighlighterConfig = {
   verbose: false,
@@ -14,6 +13,13 @@ let _config: SyntaxHighlighterConfig | null = null
 
 export async function loadSyntaxHighlighterConfig(): Promise<SyntaxHighlighterConfig> {
   if (!_config) {
+    // `bunfig` reads config files from disk and is Node/Bun-only, so it is
+    // imported dynamically here rather than at module scope. A static
+    // top-level import would drag its own eager, unguarded `process.env`
+    // access into every consumer's bundle purely by importing this
+    // package's index, crashing immediately in a browser even for callers
+    // who never touch config loading.
+    const { loadConfig } = await import('bunfig')
     _config = await loadConfig({
       name: 'syntax',
       defaultConfig,
