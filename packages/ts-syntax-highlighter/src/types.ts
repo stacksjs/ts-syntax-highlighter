@@ -271,6 +271,13 @@ export interface RenderOptions {
   showCopyButton?: boolean
   lineTransformers?: LineTransformer[]
   tokensTransformers?: TokenTransformer[]
+  /**
+   * Emit token colors as `.token.<scope-class>` CSS rules instead of an
+   * inline `style="color: ..."` per span. Used by `renderDualTheme`, which
+   * needs a light and a dark stylesheet to select between at the same
+   * markup - not possible if the color is baked into the HTML itself.
+   */
+  colorViaClass?: boolean
 }
 
 export interface RenderedCode {

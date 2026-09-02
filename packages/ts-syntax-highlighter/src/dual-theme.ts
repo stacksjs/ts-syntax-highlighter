@@ -9,33 +9,36 @@ export interface DualThemeOptions extends RenderOptions {
 
 /**
  * Render code with dual theme support (light and dark)
+ *
+ * The two themes render the same markup - same tokens, same scopes, same
+ * classes - so the light pass's `html` describes both. What differs is which
+ * stylesheet is active: both renders run in `colorViaClass` mode so neither
+ * bakes a color into `style="..."` (which no later selector could override),
+ * then the dark stylesheet is rescoped under `selector` and left to override
+ * the light one, which stays the page's unscoped default.
  */
 export function renderDualTheme(
   tokens: TokenLine[],
   options: DualThemeOptions,
 ): RenderedCode {
   const { lightTheme, darkTheme, selector = 'html', ...renderOptions } = options
+  const colorViaClassOptions = { ...renderOptions, colorViaClass: true }
 
-  // Render with both themes
   const lightRenderer = new Renderer(lightTheme)
   const darkRenderer = new Renderer(darkTheme)
 
-  const lightResult = lightRenderer.render(tokens, renderOptions)
-  const darkResult = darkRenderer.render(tokens, renderOptions)
+  const lightResult = lightRenderer.render(tokens, colorViaClassOptions)
+  const darkResult = darkRenderer.render(tokens, colorViaClassOptions)
 
-  // Combine CSS with media query
+  const darkPrefixes = [`${selector}.dark`, `${selector}[data-theme="dark"]`]
+  const scopedDarkRules = darkResult.css ? scopeCssRules(darkResult.css, darkPrefixes) : ''
+
   const combinedCSS = `
 /* Light theme (default) */
 ${lightResult.css}
 
 /* Dark theme */
-${selector}.dark .syntax,
-${selector}[data-theme="dark"] .syntax,
-@media (prefers-color-scheme: dark) {
-  ${selector}:not(.light) .syntax {
-    ${darkResult.css?.split('\n').filter(line => line.includes(':')).join('\n    ')}
-  }
-}
+${scopedDarkRules}
 `.trim()
 
   return {
@@ -44,6 +47,32 @@ ${selector}[data-theme="dark"] .syntax,
     tokens,
     ansi: lightResult.ansi,
   }
+}
+
+/**
+ * Prepend each of `prefixes` to every selector in a flat stylesheet (no
+ * nested at-rules - `generateCSS`'s output never has any, so a rule is just
+ * whatever sits between one `{...}` pair, comma-separated selectors and all).
+ */
+function scopeCssRules(css: string, prefixes: string[]): string {
+  return css
+    .split('}')
+    .map(chunk => chunk.trim())
+    .filter(chunk => chunk.length > 0)
+    .map((chunk) => {
+      const braceIndex = chunk.indexOf('{')
+      if (braceIndex === -1) {
+        return null
+      }
+      const selectors = chunk.slice(0, braceIndex).trim().split(',').map(s => s.trim())
+      const body = chunk.slice(braceIndex)
+      const scopedSelector = prefixes
+        .flatMap(prefix => selectors.map(sel => `${prefix} ${sel}`))
+        .join(',\n')
+      return `${scopedSelector} ${body}\n}`
+    })
+    .filter((rule): rule is string => rule !== null)
+    .join('\n\n')
 }
 
 /**

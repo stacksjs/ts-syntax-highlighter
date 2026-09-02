@@ -4,6 +4,7 @@ export class Renderer {
   private theme: Theme
   private colorCache: Map<string, TokenSettings> = new Map()
   private cssCache: string | null = null
+  private scopeColorRules: Map<string, TokenSettings> = new Map()
 
   constructor(theme: Theme) {
     this.theme = theme
@@ -13,7 +14,10 @@ export class Renderer {
    * Render tokens to HTML
    */
   render(tokens: TokenLine[], options: RenderOptions = {}): RenderedCode {
-    const { inline = false, showCopyButton = false } = options
+    const { inline = false, showCopyButton = false, colorViaClass = false } = options
+    if (colorViaClass) {
+      this.scopeColorRules.clear()
+    }
     const lines = this.renderLineSpans(tokens, options)
 
     const copyButton = showCopyButton
@@ -24,7 +28,10 @@ export class Renderer {
       ? `<code class="syntax-inline">${lines.join('')}</code>`
       : `<div class="syntax-wrapper">${copyButton}<pre class="syntax"><code>${lines.join('\n')}</code></pre></div>`
 
-    const css = this.generateCSS(options)
+    let css = this.generateCSS(options)
+    if (colorViaClass) {
+      css = `${css}\n\n${this.generateTokenColorCSS()}`.trim()
+    }
     const ansi = this.renderAnsi(tokens)
 
     return {
@@ -65,6 +72,7 @@ export class Renderer {
       addedLines = [],
       removedLines = [],
       annotations = [],
+      colorViaClass = false,
     } = options
 
     return tokens.map((tokenLine, index) => {
@@ -79,7 +87,7 @@ export class Renderer {
         removedLines,
       })
 
-      const lineContent = this.renderLine(tokenLine, inline)
+      const lineContent = this.renderLine(tokenLine, inline, colorViaClass)
 
       if (inline) {
         return lineContent
@@ -154,23 +162,35 @@ export class Renderer {
   /**
    * Render a single line of tokens
    */
-  private renderLine(tokenLine: TokenLine, _inline: boolean): string {
+  private renderLine(tokenLine: TokenLine, _inline: boolean, colorViaClass = false): string {
     return tokenLine.tokens
-      .map(token => this.renderToken(token))
+      .map(token => this.renderToken(token, colorViaClass))
       .join('')
   }
 
   /**
    * Render a single token
    */
-  private renderToken(token: Token): string {
+  private renderToken(token: Token, colorViaClass = false): string {
     const color = this.getColorForScopes(token.scopes)
     const escapedContent = this.escapeHtml(token.content)
     const classes = [this.getScopeClass(token.scopes)]
     const styles: string[] = []
 
-    // Apply base color
-    if (color.foreground || color.fontStyle) {
+    // Apply base color. In `colorViaClass` mode the color is recorded as a
+    // CSS rule instead of inlined, so a caller rendering the same tokens
+    // under two themes (see `renderDualTheme`) can select between the two
+    // resulting stylesheets - an inline `style` attribute would always win
+    // over either one.
+    if (colorViaClass) {
+      if (color.foreground || color.background) {
+        this.scopeColorRules.set(classes[0]!, color)
+      }
+      if (color.fontStyle) {
+        styles.push(this.buildFontStyleOnly(color))
+      }
+    }
+    else if (color.foreground || color.fontStyle) {
       styles.push(this.buildStyle(color))
     }
 
@@ -283,6 +303,24 @@ export class Renderer {
       styles.push(`background-color: ${settings.background}`)
     }
 
+    styles.push(...this.fontStyleDeclarations(settings))
+
+    return styles.join('; ')
+  }
+
+  /**
+   * Inline style string for the typographic part of a token's settings only
+   * (italic/bold/underline) - no color. Used in `colorViaClass` mode, where
+   * color moves to a CSS rule but weight/slant/decoration are the same in
+   * every theme and can stay inline.
+   */
+  private buildFontStyleOnly(settings: TokenSettings): string {
+    return this.fontStyleDeclarations(settings).join('; ')
+  }
+
+  private fontStyleDeclarations(settings: TokenSettings): string[] {
+    const styles: string[] = []
+
     if (settings.fontStyle) {
       if (settings.fontStyle.includes('italic')) {
         styles.push('font-style: italic')
@@ -295,7 +333,7 @@ export class Renderer {
       }
     }
 
-    return styles.join('; ')
+    return styles
   }
 
   /**
@@ -511,6 +549,33 @@ export class Renderer {
   }
 
   /**
+   * CSS rules for every scope class seen since the last `colorViaClass`
+   * render, one per distinct scope actually present in that render rather
+   * than the theme's full scope list - a file only ever touches a slice of
+   * a grammar's scopes.
+   */
+  private generateTokenColorCSS(): string {
+    const rules: string[] = []
+
+    for (const [className, settings] of this.scopeColorRules) {
+      const declarations: string[] = []
+      if (settings.foreground) {
+        declarations.push(`color: ${settings.foreground}`)
+      }
+      if (settings.background) {
+        declarations.push(`background-color: ${settings.background}`)
+      }
+      if (declarations.length === 0) {
+        continue
+      }
+      const selector = `.${className.split(' ').join('.')}`
+      rules.push(`${selector} { ${declarations.join('; ')}; }`)
+    }
+
+    return rules.join('\n')
+  }
+
+  /**
    * Render tokens to ANSI terminal output
    */
   private renderAnsi(tokens: TokenLine[]): string {
@@ -544,5 +609,6 @@ export class Renderer {
     // Clear caches when theme changes
     this.colorCache.clear()
     this.cssCache = null
+    this.scopeColorRules.clear()
   }
 }
