@@ -69,8 +69,8 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "@stacksjs/clapp": "^0.2.12",
-    "bunfig": "^0.15.6"
+    "@stacksjs/clapp": "^0.2.15",
+    "bunfig": "^0.15.19"
   },
   "lint-staged": {
     "*.{js,ts}": "pickier run --mode lint --fix"
