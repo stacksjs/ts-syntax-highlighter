@@ -15,8 +15,8 @@
     "ts-syntax-highlighter": "workspace:*"
   },
   "devDependencies": {
-    "highlight.js": "^11.11.1",
+    "highlight.js": "^11.12.0",
     "mitata": "^1.0.34",
-    "shiki": "^4.0.2"
+    "shiki": "^4.4.3"
   }
 }
