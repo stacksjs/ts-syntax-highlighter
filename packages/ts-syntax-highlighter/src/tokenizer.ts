@@ -734,8 +734,10 @@ export class Tokenizer {
       let end = line.length
 
       if (currentScope.endPattern) {
-        currentScope.endPattern.lastIndex = offset
-        const closing = currentScope.endPattern.exec(line)
+        // Raw content skips ahead to its closing marker; token rules never do.
+        const searchEnd = this.getRegex(currentScope.endPattern.source, true)
+        searchEnd.lastIndex = offset
+        const closing = searchEnd.exec(line)
         // A match at `offset` was already handled above, so this one is later.
         if (closing)
           end = closing.index
@@ -1163,21 +1165,23 @@ export class Tokenizer {
 
   /**
    * Pre-compile all regex patterns for maximum performance
-   * Uses 'g' flag for lastIndex-based matching
+   * A global expression searches the remaining line at every offset and then
+   * throws away a later match. Inside a long string this makes escape and end
+   * patterns quadratic. Sticky expressions answer the actual question directly.
    */
   private precompilePatterns(patterns: GrammarPattern[]): CompiledPattern[] {
     return patterns.map((pattern) => {
       const compiled: CompiledPattern = { ...pattern }
 
       if (pattern.match) {
-        compiled._compiledMatch = new RegExp(pattern.match, 'g')
+        compiled._compiledMatch = new RegExp(pattern.match, 'y')
         compiled._words = patternWordSet(pattern.match) ?? undefined
       }
       if (pattern.begin) {
-        compiled._compiledBegin = new RegExp(pattern.begin, 'g')
+        compiled._compiledBegin = new RegExp(pattern.begin, 'y')
       }
       if (pattern.end) {
-        compiled._compiledEnd = new RegExp(pattern.end, 'g')
+        compiled._compiledEnd = new RegExp(pattern.end, 'y')
       }
       if (pattern.patterns) {
         compiled.patterns = this.precompilePatterns(pattern.patterns)
@@ -1189,13 +1193,14 @@ export class Tokenizer {
 
   /**
    * Get or create cached regex (fallback for dynamic patterns)
-   * Uses 'g' flag for lastIndex-based matching
+   * Uses sticky matching: a token must begin at lastIndex
    */
-  private getRegex(pattern: string): RegExp {
-    let regex = this.regexCache.get(pattern)
+  private getRegex(pattern: string, search = false): RegExp {
+    const key = `${search ? 'g' : 'y'}:${pattern}`
+    let regex = this.regexCache.get(key)
     if (!regex) {
-      regex = new RegExp(pattern, 'g')
-      this.regexCache.set(pattern, regex)
+      regex = new RegExp(pattern, search ? 'g' : 'y')
+      this.regexCache.set(key, regex)
     }
     return regex
   }
