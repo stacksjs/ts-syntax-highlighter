@@ -1,3 +1,19 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.17...v0.2.18)
+
+## 🐛 Bug Fixes
+
+- match tokenizer rules only at the current position ([72dc642](https://github.com/stacksjs/ts-syntax-highlighter/commit/72dc642)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.2.18 ([96f7568](https://github.com/stacksjs/ts-syntax-highlighter/commit/96f7568)) _(by Chris <chrisbreuer93@gmail.com>)_
+- run @stacksjs/logsmith, not the unrelated npm 'logsmith' ([3322ea4](https://github.com/stacksjs/ts-syntax-highlighter/commit/3322ea4)) _(by Chris <chrisbreuer93@gmail.com>)_
+- release through @stacksjs/bumpx, not the unrelated npm 'bumpx' ([507d55e](https://github.com/stacksjs/ts-syntax-highlighter/commit/507d55e)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.16...v0.2.17)
 
 ## 🐛 Bug Fixes
