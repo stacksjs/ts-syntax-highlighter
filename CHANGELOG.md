@@ -1,3 +1,13 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.19...v0.2.20)
+
+## ✨ Features
+
+- add a browser entry and token classes as CSS ([cf04a45](https://github.com/stacksjs/ts-syntax-highlighter/commit/cf04a45)) _(by Chris)_
+
+## Contributors
+
+- _Chris_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.18...v0.2.19)
 
 ## 🐛 Bug Fixes

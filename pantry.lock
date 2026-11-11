@@ -13,7 +13,7 @@
     },
     "packages/benchmarks": {
       "name": "benchmarks",
-      "version": "0.2.19",
+      "version": "0.2.20",
       "dependencies": {
         "ts-syntax-highlighter": "workspace:*"
       },
@@ -25,14 +25,14 @@
     },
     "packages/stx-vscode": {
       "name": "stx",
-      "version": "0.2.19",
+      "version": "0.2.20",
       "devDependencies": {
         "@vscode/vsce": "^3.7.2-12"
       }
     },
     "packages/ts-syntax-highlighter": {
       "name": "ts-syntax-highlighter",
-      "version": "0.2.19",
+      "version": "0.2.20",
       "dependencies": {
         "bunfig": "^0.15.6"
       },
