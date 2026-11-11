@@ -24,7 +24,7 @@ CMD ["node", "server.js"]`
   describe('Instruction Support', () => {
     it('should highlight FROM instructions', async () => {
       const code = `FROM node:18
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:26.10 AS builder
 FROM scratch`
       const tokens = tokenizer.tokenize(code)
 
