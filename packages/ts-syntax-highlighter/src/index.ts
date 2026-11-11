@@ -33,6 +33,8 @@ export * from './renderer'
 
 export * from './streaming'
 export * from './themes'
+// Token classes as CSS: the half of rendering an editor or a themed page needs.
+export * from './token-css'
 export * from './tokenizer'
 // Advanced features
 export * from './transformers'

@@ -111,6 +111,33 @@ syntax info typescript
 syntax theme-info nord
 ```
 
+## In the browser
+
+The root entry reads a config file from disk, so a browser bundle cannot
+include it. `ts-syntax-highlighter/browser` is the same tokenizer, grammars,
+themes and worker protocol with nothing that needs a filesystem:
+
+```ts
+import { resolveGrammar, tokenClass, Tokenizer } from 'ts-syntax-highlighter/browser'
+
+const grammar = await resolveGrammar('typescript') // loads one grammar, not all 48
+const tokenizer = new Tokenizer(grammar!)
+
+// Resumable: hand back the state a run ended in to continue from there.
+const first = tokenizer.tokenizeLinesFrom(['/* a comment that', 'keeps going */'])
+const next = tokenizer.tokenizeLinesFrom(['const a = 1'], first.endState, 3)
+
+for (const token of next.lines[0]!.tokens)
+  console.log(tokenClass(token.type), token.content) // 'keyword' 'const', ...
+```
+
+`tokenClass` folds the tokenizer's token types into the twelve classes a
+stylesheet colours, and `themeTokenCss(theme)` builds that stylesheet as custom
+properties, so an editor can write `<span class="tok-keyword">` and switch
+palettes with a media query. `serveTokenizer(self)` is the worker side of the
+same thing. Each grammar is its own file under `dist/grammars/`, loaded on
+demand, and importable by name when you want exactly one.
+
 ## Configuration
 
 Create a `syntax.config.ts` file in your project root:
