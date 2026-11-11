@@ -83,6 +83,12 @@ jobs:
       - name: Unit Test
         run: bun test
 
+      - name: Build actual package and host CLI
+        run: bun run build
+
+      - name: Verify strict installed generator and CLI contracts
+        run: bun run test:package
+
   publish-commit:
     needs: [lint, typecheck, test]
     runs-on: ubuntu-latest

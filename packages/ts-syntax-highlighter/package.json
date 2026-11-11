@@ -64,13 +64,17 @@
     "format:check": "pickier run --mode format --check",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "changelog": "bunx changelogen --output CHANGELOG.md",
-    "prepublishOnly": "bun --bun run build && bun run compile:all && bun run zip",
+    "prepublishOnly": "bun --bun run build && bun run compile:all && bun run zip && bun run test:package",
+    "test:package": "bun test ./test/package.acceptance.ts",
     "release": "bun run changelog && bunx bumpp package.json --all",
     "test": "bun test"
   },
-  "devDependencies": {
-    "@stacksjs/clapp": "^0.2.12",
+  "dependencies": {
     "bunfig": "^0.15.6"
+  },
+  "devDependencies": {
+    "@dtsx/bun": "^0.11.47",
+    "@stacksjs/clapp": "^0.2.12"
   },
   "lint-staged": {
     "*.{js,ts}": "pickier run --mode lint --fix"

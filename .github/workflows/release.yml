@@ -20,24 +20,43 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Pantry
-        uses: home-lang/pantry/packages/action@v0.9.18
+        uses: pantry-pm/pantry/packages/action@27848deafe626b280ed329bf98eff2f01631a764
+        with:
+          version: 0.11.196
+          install: false
 
       - name: Install Dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
+
+      - name: Build and qualify all release artifacts
+        run: bun run --cwd packages/ts-syntax-highlighter prepublishOnly
+
+      - name: Publish verified package to Pantry
+        run: pantry publish --verify-existing
+        env:
+          PANTRY_REGISTRY_TOKEN: ${{ secrets.PANTRY_TOKEN }}
 
       - name: Publish
-        run: pantry publish --npm --access public
+        run: pantry publish --npm --access public --ignore-scripts
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Checksum the native CLI archives
+        working-directory: packages/ts-syntax-highlighter/bin
+        run: |
+          test "$(find . -maxdepth 1 -name 'syntax-*.zip' | wc -l)" -eq 5
+          sha256sum syntax-*.zip > checksums.txt
+          sha256sum --check checksums.txt
 
       - name: Create GitHub Release
         uses: stacksjs/action-releaser@v1.2.9
         with:
           files: |
-            packages/ts-syntax-highlighter/bin/ts-syntax-highlighter-linux-x64.zip
-            packages/ts-syntax-highlighter/bin/ts-syntax-highlighter-linux-arm64.zip
-            packages/ts-syntax-highlighter/bin/ts-syntax-highlighter-windows-x64.zip
-            packages/ts-syntax-highlighter/bin/ts-syntax-highlighter-darwin-x64.zip
-            packages/ts-syntax-highlighter/bin/ts-syntax-highlighter-darwin-arm64.zip
+            packages/ts-syntax-highlighter/bin/syntax-linux-x64.zip
+            packages/ts-syntax-highlighter/bin/syntax-linux-arm64.zip
+            packages/ts-syntax-highlighter/bin/syntax-windows-x64.zip
+            packages/ts-syntax-highlighter/bin/syntax-darwin-x64.zip
+            packages/ts-syntax-highlighter/bin/syntax-darwin-arm64.zip
+            packages/ts-syntax-highlighter/bin/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

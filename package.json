@@ -23,6 +23,7 @@
     "build": "cd packages/ts-syntax-highlighter && bun run build",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "test": "bun test",
+    "test:package": "bun run --cwd packages/ts-syntax-highlighter test:package",
     "bench:throughput": "bun packages/benchmarks/src/throughput.ts",
     "bench:bundle": "bun packages/benchmarks/src/bundle-size.ts",
     "lint": "bunx --bun pickier .",
@@ -40,9 +41,7 @@
     "release:patch": "bunx --bun @stacksjs/bumpx patch --recursive --commit --tag --push --yes"
   },
   "devDependencies": {
-    "@stacksjs/bunpress": "^0.2.11",
-    "better-dx": "^0.2.15",
-    "typescript": "^7.0.2"
+    "better-dx": "^0.2.38"
   },
   "git-hooks": {
     "pre-commit": {
@@ -57,8 +56,5 @@
   ],
   "overrides": {
     "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "pickier": "^0.1.48"
   }
 }
