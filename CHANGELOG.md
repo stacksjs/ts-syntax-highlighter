@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.18...v0.2.19)
+
+## 🐛 Bug Fixes
+
+- publish precise async generator declarations ([e2184cf](https://github.com/stacksjs/ts-syntax-highlighter/commit/e2184cf)) _(by Chris)_ ([#484](https://github.com/stacksjs/ts-syntax-highlighter/issues/484))
+
+## 🔧 Chores
+
+- **release**: publish checked artifacts with Pantry controls ([f34bc05](https://github.com/stacksjs/ts-syntax-highlighter/commit/f34bc05)) _(by Chris)_
+
+## Contributors
+
+- _Chris_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.17...v0.2.18)
 
 ## 🐛 Bug Fixes
