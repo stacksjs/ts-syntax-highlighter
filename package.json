@@ -41,7 +41,7 @@
     "release:patch": "bunx --bun @stacksjs/bumpx patch --recursive --commit --tag --push --yes"
   },
   "devDependencies": {
-    "better-dx": "^0.2.38"
+    "better-dx": "^0.2.40"
   },
   "git-hooks": {
     "pre-commit": {
