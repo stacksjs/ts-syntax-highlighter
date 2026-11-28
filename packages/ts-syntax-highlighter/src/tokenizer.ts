@@ -589,12 +589,11 @@ export class Tokenizer {
     // matching work per character is the same either way; only the token count
     // changes.
     let runStart: number | null = null
+    let runScopes: string[] = this.scopeStack[0]!.scopes
 
     const flushRun = (end: number): void => {
       if (runStart === null)
         return
-
-      const scopes = this.scopeStack[this.scopeStack.length - 1].scopes
 
       tokens.push({
         /*
@@ -609,9 +608,9 @@ export class Tokenizer {
          * the body of a multi-line template came back uncoloured on a page
          * where every other string was green.
          */
-        type: scopes.length > 1 ? classifyScope(scopes[scopes.length - 1]!) : Tokenizer.TYPE_TEXT,
+        type: runScopes.length > 1 ? classifyScope(runScopes[runScopes.length - 1]!) : Tokenizer.TYPE_TEXT,
         content: line.slice(runStart, end),
-        scopes,
+        scopes: runScopes,
         line: lineNumber,
         offset: runStart,
       })
@@ -638,8 +637,11 @@ export class Tokenizer {
       else {
         // No match found. Opens a run rather than emitting a token, so a
         // stretch of ordinary text is one token instead of one per character.
-        if (runStart === null)
+        if (runStart === null) {
           runStart = offset
+          // Matching a closing marker pops the frame before flushing this run.
+          runScopes = this.scopeStack[this.scopeStack.length - 1]!.scopes
+        }
         offset++
       }
     }

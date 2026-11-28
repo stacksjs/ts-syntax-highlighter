@@ -1,10 +1,10 @@
 # ts-syntax-highlighter
 
-A performant and production-ready syntax highlighter with **48 languages**, zero dependencies, and 100% test coverage. Built with TypeScript for speed and reliability.
+A performant and production-ready syntax highlighter with **49 languages**, zero dependencies, and 100% test coverage. Built with TypeScript for speed and reliability.
 
 ## ⭐ Highlights
 
-- 🎨 **48 Languages** - Comprehensive support for web, system, and specialized languages
+- 🎨 **49 Languages** - Comprehensive support for web, system, and specialized languages
 - ⚡ **661 Passing Tests** - 100% pass rate with zero failures
 - 🚀 **Fast-Path Optimization** - Zero-copy tokenization with O(1) character classification
 - 📦 **Zero Dependencies** - ~50KB bundle size
@@ -20,7 +20,7 @@ A performant and production-ready syntax highlighter with **48 languages**, zero
 - 🔧 **Extensible** - Plugin system for custom languages, themes, and transformers
 - 📦 **Zero Dependencies** - Minimal footprint, built for Bun
 - 🎯 **Type-Safe** - Full TypeScript support with no any types
-- 🌐 **48 Languages** - Web, system, programming, data, and specialized languages
+- 🌐 **49 Languages** - Web, system, programming, data, and specialized languages
 - 💻 **CLI & Library** - Use as a library or command-line tool
 
 ### Advanced Features (Competitive with Shiki & Torchlight)
@@ -120,7 +120,7 @@ themes and worker protocol with nothing that needs a filesystem:
 ```ts
 import { resolveGrammar, tokenClass, Tokenizer } from 'ts-syntax-highlighter/browser'
 
-const grammar = await resolveGrammar('typescript') // loads one grammar, not all 48
+const grammar = await resolveGrammar('typescript') // loads one grammar, not all 49
 const tokenizer = new Tokenizer(grammar!)
 
 // Resumable: hand back the state a run ended in to continue from there.

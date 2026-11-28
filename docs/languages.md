@@ -1,6 +1,6 @@
 # Language Support
 
-We support **48 languages** out of the box, each with comprehensive grammar definitions and battle-tested tokenization. Whether you're building a code editor, documentation site, or developer tool, we've got the languages you need.
+We support **49 languages** out of the box, each with comprehensive grammar definitions and battle-tested tokenization. Whether you're building a code editor, documentation site, or developer tool, we've got the languages you need.
 
 ## 🌐 Web & Frontend (10 Languages)
 
@@ -174,6 +174,12 @@ Configuration files:
 - **Anchors**: `&anchor` and `*reference`
 - **Multi-line**: `|` and `>` for long strings
 - **Comments**: `#` comments
+
+### Dotenv
+
+Use `dotenv` (alias `env`) for environment assignments, quoted strings,
+interpolation, and comments. Filename detection includes `.env`,
+`.env.local`, and `.env.production`.
 
 ### TOML
 **Aliases**: `toml`
@@ -547,7 +553,7 @@ Not sure which grammar to use? Here's a quick reference:
 
 **Extensible** - Need a custom language? You can define your own grammar using the same TextMate format we use internally.
 
-**Performance** - All 48 languages use the same optimized tokenization engine. No language is a "second-class citizen".
+**Performance** - All 49 languages use the same optimized tokenization engine. No language is a "second-class citizen".
 
 ## 🚀 What's Next?
 

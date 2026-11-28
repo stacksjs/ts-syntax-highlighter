@@ -13,7 +13,7 @@ A blazing-fast, TypeScript-native syntax highlighter with comprehensive grammar 
 ## Features
 
 - ⚡ **Blazing Fast** - Highly optimized tokenization with async and sync modes for maximum performance
-- 🎨 **48 Languages** - Comprehensive support for web, system, and specialized languages
+- 🎨 **49 Languages** - Comprehensive support for web, system, and specialized languages
 - 🔥 **Modern Syntax** - Full support for ES2024+, BigInt, numeric separators, optional chaining, and more
 - ⚛️ **JSX/TSX Support** - Complete React and TypeScript JSX highlighting
 - 🎯 **CSS4 Features** - Modern color functions _(hwb, lab, lch, oklab, oklch)_, container queries, CSS layers
@@ -61,7 +61,7 @@ themes and worker protocol with nothing that needs a filesystem:
 ```ts
 import { resolveGrammar, tokenClass, Tokenizer } from 'ts-syntax-highlighter/browser'
 
-const grammar = await resolveGrammar('typescript') // loads one grammar, not all 48
+const grammar = await resolveGrammar('typescript') // loads one grammar, not all 49
 const tokenizer = new Tokenizer(grammar!)
 
 // Resumable: hand back the state a run ended in to continue from there.
@@ -81,7 +81,7 @@ demand, and importable by name when you want exactly one.
 
 ## Supported Languages
 
-ts-syntax-highlighter supports **48 languages** across web development, systems programming, data formats, and specialized domains:
+ts-syntax-highlighter supports **49 languages** across web development, systems programming, data formats, and specialized domains:
 
 ### Web & Frontend (10 languages)
 - **JavaScript/JSX** - ES2024+, async/await, template literals, JSX
@@ -119,6 +119,7 @@ ts-syntax-highlighter supports **48 languages** across web development, systems 
 - **JSON5** - Unquoted keys, trailing commas, comments
 - **YAML** - Keys, nested structures, anchors
 - **TOML** - Tables, arrays, data types
+- **Dotenv** - Environment assignments, quoted values, interpolation, and comments
 - **CSV** - Comma-separated values
 - **IDL** - Interface definitions
 - **Protobuf** - Messages, services, enums
@@ -192,8 +193,8 @@ bun run bench
 ```typescript
 import { Tokenizer } from 'ts-syntax-highlighter'
 
-// Create tokenizer for a specific language (48 languages supported)
-const tokenizer = new Tokenizer('javascript') // or any of the 48 supported languages
+// Create tokenizer for a specific language (49 languages supported)
+const tokenizer = new Tokenizer('javascript') // or any of the 49 supported languages
 
 // Async tokenization (faster, recommended)
 const tokens = await tokenizer.tokenizeAsync(code: string)

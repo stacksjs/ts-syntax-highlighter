@@ -11,6 +11,7 @@ import { csvGrammar } from './csv'
 import { dartGrammar } from './dart'
 import { diffGrammar } from './diff'
 import { dockerfileGrammar } from './dockerfile'
+import { dotenvGrammar } from './dotenv'
 import { goGrammar } from './go'
 import { graphqlGrammar } from './graphql'
 import { htmlGrammar } from './html'
@@ -97,6 +98,13 @@ export const languages: Language[] = [
     aliases: ['sh', 'shell', 'zsh', 'console'],
     extensions: ['.sh', '.bash', '.zsh'],
     grammar: bashGrammar,
+  },
+  {
+    id: 'dotenv',
+    name: 'Dotenv',
+    aliases: ['env'],
+    extensions: ['.env'],
+    grammar: dotenvGrammar,
   },
   {
     id: 'markdown',

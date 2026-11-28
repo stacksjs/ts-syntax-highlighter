@@ -2,7 +2,7 @@
 //
 // Language metadata with no grammar attached, and one dynamic import each. A
 // consumer that only needs to know which language a file is, or that needs one
-// grammar, pays for one grammar rather than for all 48.
+// grammar, pays for one grammar rather than for all 49.
 //
 // `test/catalog.test.ts` asserts this agrees with the eager `languages`
 // array in both directions, so regenerating is enforced rather than remembered.
@@ -65,6 +65,14 @@ export const catalog: LanguageDescriptor[] = [
     extensions: ['.sh', '.bash', '.zsh'],
     scopeName: 'source.bash',
     load: async () => (await import('./bash')).bashGrammar,
+  },
+  {
+    id: 'dotenv',
+    name: 'Dotenv',
+    aliases: ['env'],
+    extensions: ['.env'],
+    scopeName: 'source.dotenv',
+    load: async () => (await import('./dotenv')).dotenvGrammar,
   },
   {
     id: 'markdown',

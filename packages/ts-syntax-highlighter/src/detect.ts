@@ -1,4 +1,5 @@
 import type { Language } from './types'
+import { basenameForLanguage, isDotenvFilename } from './filename'
 import { languages } from './grammars'
 
 /**
@@ -73,7 +74,8 @@ export function detectLanguage(code: string): Language | undefined {
  * Detect language from file extension
  */
 export function detectLanguageFromExtension(filename: string): Language | undefined {
-  const ext = filename.includes('.') ? `.${filename.split('.').pop()}` : filename
+  const name = basenameForLanguage(filename)
+  const ext = isDotenvFilename(name) ? '.env' : name.includes('.') ? `.${name.split('.').pop()}` : name
 
   return languages.find(lang =>
     lang.extensions?.some(e =>

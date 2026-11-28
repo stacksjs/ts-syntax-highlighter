@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "ts-syntax-highlighter"
   text: "Production-Ready Syntax Highlighting"
-  tagline: "48 languages, 661 passing tests, zero dependencies. The most comprehensive TypeScript-native syntax highlighter built for speed and reliability."
+  tagline: "49 languages, 661 passing tests, zero dependencies. The most comprehensive TypeScript-native syntax highlighter built for speed and reliability."
   image: /images/logo-white.png
   actions:
     - theme: brand
@@ -19,7 +19,7 @@ hero:
       link: https://github.com/stacksjs/ts-syntax-highlighter
 
 features:
-  - title: "🎨 48 Languages"
+  - title: "🎨 49 Languages"
     icon: "🎨"
     details: "Comprehensive support for web, system, programming, and specialized languages. From JavaScript to Rust, Bash to YAML, we've got you covered with battle-tested grammars."
     link: /grammars
@@ -184,7 +184,7 @@ TypeScript-first design for the best DX:
 - **Simple** and intuitive API
 - **Flexible** configuration options
 
-## 48 Languages, Ready to Go
+## 49 Languages, Ready to Go
 
 We support everything from web development to systems programming. Each language is thoroughly tested and production-ready:
 
@@ -194,7 +194,7 @@ We support everything from web development to systems programming. Each language
 Modern features you expect: ES2024+, optional chaining, BigInt, template literals, async/await, decorators, and more.
 
 ### Systems & DevOps (7 Languages)
-**Bash** • **PowerShell** • **Dockerfile** • **YAML** • **TOML** • **Makefile** • **CMD**
+**Bash** • **PowerShell** • **Dockerfile** • **YAML** • **TOML** • **Dotenv** • **Makefile** • **CMD**
 
 Full support for variables (`$VAR`, `${VAR}`), pipes, control flow, and all the shell scripting features you use daily.
 
@@ -214,7 +214,7 @@ Configuration files, data formats, and domain-specific languages all work seamle
 
 **Accurate Tokenization** - We don't just highlight keywords. Capture groups and scope hierarchies ensure precise token classification.
 
-**Consistent API** - All 48 languages use the exact same API. Learn once, use everywhere.
+**Consistent API** - All 49 languages use the exact same API. Learn once, use everywhere.
 
 **No Surprises** - Variables in Bash? Function calls in C? Lifetimes in Rust? We handle the tricky stuff so you don't have to think about it.
 

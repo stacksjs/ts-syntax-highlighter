@@ -16,6 +16,7 @@
  */
 
 import type { Grammar, LanguageDescriptor } from './types'
+import { basenameForLanguage, isDotenvFilename } from './filename'
 import { catalog } from './grammars/catalog'
 
 export { catalog }
@@ -59,9 +60,12 @@ export function findLanguage(idOrAlias: string): LanguageDescriptor | undefined 
  * matching extension, so `.d.ts` beats `.ts` when a grammar claims it.
  */
 export function findLanguageForFilename(filename: string): LanguageDescriptor | undefined {
-  const name = filename.split('/').pop()?.trim().toLowerCase() ?? ''
+  const name = basenameForLanguage(filename)
   if (name === '')
     return undefined
+
+  if (isDotenvFilename(name))
+    return byKey.get('dotenv')
 
   const exact = byKey.get(name) ?? byExtension.get(name)
   if (exact)
