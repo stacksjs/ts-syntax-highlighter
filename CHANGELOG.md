@@ -1,3 +1,18 @@
+[Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.20...v0.2.21)
+
+## ✨ Features
+
+- highlight dotenv files and preserve closing string scopes ([a2bf6ae](https://github.com/stacksjs/ts-syntax-highlighter/commit/a2bf6ae)) _(by Chris Breuer)_
+
+## 💚 Continuous Integration
+
+- name the Pantry publish token PANTRY_TOKEN ([fd9e077](https://github.com/stacksjs/ts-syntax-highlighter/commit/fd9e077)) _(by Chris)_
+
+## Contributors
+
+- _Chris_
+- _Chris Breuer_
+
 [Compare changes](https://github.com/stacksjs/ts-syntax-highlighter/compare/v0.2.19...v0.2.20)
 
 ## ✨ Features
